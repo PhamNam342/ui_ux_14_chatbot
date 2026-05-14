@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import {
   BarChart3,
@@ -59,12 +59,33 @@ export function Sidebar({ items, legacy = false }) {
 
 export function TopBar({ legacy = false }) {
   const [open, setOpen] = useState(false)
+  const [noticeOpen, setNoticeOpen] = useState(false)
   const [tab, setTab] = useState('profile')
+  const navigate = useNavigate()
 
   return (
     <header className={clsx('topbar', legacy && 'legacy-topbar')}>
       <button className="icon-btn"><Search size={17} /></button>
-      <button className="icon-btn"><Bell size={17} /></button>
+      <div className="relative">
+        <button className="icon-btn" onClick={() => setNoticeOpen((value) => !value)}><Bell size={17} /></button>
+        {noticeOpen && (
+          <div className="notification-menu">
+            <h3>Thông báo</h3>
+            <div className="notification-item">
+              <b>Lịch khám sắp bắt đầu</b>
+              <p>Ca khám với Trần Thị Mai lúc 08:00 tại Phòng 102.</p>
+            </div>
+            <div className="notification-item">
+              <b>Cập nhật hồ sơ</b>
+              <p>Thông tin bác sĩ đã được đồng bộ thành công.</p>
+            </div>
+            <div className="notification-item">
+              <b>Nhắc kê đơn</b>
+              <p>Vui lòng hoàn tất đơn thuốc cho ca tư vấn CA250501-001.</p>
+            </div>
+          </div>
+        )}
+      </div>
       <div className="relative">
       <button className="pill-avatar" onClick={() => setOpen((value) => !value)}>
         <span className="avatar-ring">A</span>
@@ -93,7 +114,7 @@ export function TopBar({ legacy = false }) {
           ) : (
             <div className="profile-menu-body">
               <p className="text-sm text-slate-500">Bạn có muốn đăng xuất khỏi phiên làm việc hiện tại?</p>
-              <button className="btn btn-dark mt-4 w-full"><LogOut size={16} /> Đăng xuất</button>
+              <button className="btn btn-dark mt-4 w-full" onClick={() => navigate('/')}><LogOut size={16} /> Đăng xuất</button>
             </div>
           )}
         </div>
@@ -114,12 +135,10 @@ export function AppShell({ role, children, legacy = false }) {
     ],
     doctor: [
       { to: '/doctor', label: 'Dashboard', icon: <BarChart3 size={18} />, end: true },
-      { to: '/doctor/cases', label: 'Ca bệnh', icon: <ClipboardList size={18} /> },
       { to: '/doctor/consult', label: 'Tư vấn trực tuyến', icon: <Video size={18} /> },
       { to: '/doctor/schedule', label: 'Lịch khám', icon: <CalendarDays size={18} /> },
+      { to: '/doctor/history', label: 'Lịch sử tư vấn', icon: <ClipboardList size={18} /> },
       { to: '/doctor/medicine', label: 'Kết luận tư vấn', icon: <MessageSquareText size={18} /> },
-      { to: '/doctor/quality', label: 'Thông báo', icon: <Bell size={18} /> },
-      { to: '/doctor/report', label: 'Báo cáo', icon: <FileBarChart size={18} /> },
       { to: '/doctor/settings', label: 'Cài đặt', icon: <Settings size={18} /> },
     ],
     advisor: [

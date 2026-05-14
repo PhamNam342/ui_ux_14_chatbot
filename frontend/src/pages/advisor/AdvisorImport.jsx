@@ -1,26 +1,59 @@
-import { Link } from 'react-router-dom'
-import { AppShell, Button, Card, DataTable, PageHeader } from '../../components/ui.jsx'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { CheckCircle2, FilePenLine, Upload } from 'lucide-react'
+import { AppShell, Badge, Button, Card, DataTable, PageHeader, TopBar } from '../../components/ui.jsx'
 import { medicalData } from '../../data/mock.js'
 
 export function AdvisorImport() {
+  const navigate = useNavigate()
+  const [preview, setPreview] = useState(false)
   const columns = [
-    { key: 'symptom', label: 'Triệu chứng' },
-    { key: 'diagnosis', label: 'Chẩn đoán' },
-    { key: 'level', label: 'Mức độ' },
-    { key: 'action', label: 'Hướng xử lý' },
+    { key: 'id', label: 'ID' },
+    { key: 'symptom', label: 'TRIỆU CHỨNG', render: (row) => <b>{row.symptom}</b> },
+    { key: 'diagnosis', label: 'CHẨN ĐOÁN' },
+    { key: 'level', label: 'MỨC ĐỘ', render: (row) => <Badge tone={row.level === 'Nghiêm trọng' ? 'red' : row.level === 'Nhẹ' ? 'blue' : 'yellow'}>{row.level}</Badge> },
+    { key: 'action', label: 'HƯỚNG XỬ LÝ' },
   ]
+
+  if (preview) {
+    return (
+      <AppShell role="advisor">
+        <TopBar />
+        <div className="content-advisor">
+          <Card className="advisor-preview-panel p-0">
+            <div className="advisor-preview-head">
+              <div><h1><FilePenLine size={24} /> Preview dữ liệu</h1><p>Xem lại dữ liệu từ tệp CSV của bạn trước khi xác nhận lưu vào hệ thống.</p></div>
+              <Badge tone="green"><CheckCircle2 size={13} /> Đã tải lên: data_import_01.csv</Badge>
+            </div>
+            <div className="p-6"><DataTable columns={columns} rows={medicalData.slice(0, 5)} footer={false} /></div>
+            <div className="advisor-preview-foot">
+              <span><FilePenLine size={18} /> Vui lòng kiểm tra kỹ trước khi hoàn tất.</span>
+              <div className="flex gap-3"><Button variant="ghost" onClick={() => setPreview(false)}>Hủy</Button><Button onClick={() => navigate('/advisor/data')}><Upload size={16} /> Xác nhận</Button></div>
+            </div>
+          </Card>
+        </div>
+      </AppShell>
+    )
+  }
+
   return (
     <AppShell role="advisor">
-      <div className="content-advisor">
-        <PageHeader title="Nhập dữ liệu tu CSV" subtitle="Tải tệp lên, xem trước dữ liệu và xác nhận trước khi lưu vào hệ thống." />
-        <Card className="mb-7 border-dashed text-center">
-          <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-teal-50 text-2xl text-teal-600">↑</div>
-          <h2 className="mt-4 text-xl font-black">Kéo thả file CSV vào đây</h2>
-          <p className="mt-2 text-slate-500">Hỗ trợ .csv tối đa 10MB</p>
-          <Button className="mt-5">Chọn tệp</Button>
+      <TopBar />
+      <div className="content-form">
+        <PageHeader title="Upload CSV" />
+        <Card className="advisor-upload-card">
+          <div className="advisor-dropzone">
+            <Upload size={58} />
+            <p>Kéo thả file CSV vào đây hoặc <button onClick={() => setPreview(true)}>chọn từ máy tính</button></p>
+            <small>Dung lượng tối đa: 20MB</small>
+          </div>
+          <div className="advisor-csv-note">
+            <b>Định dạng CSV yêu cầu:</b>
+            <p>Triệu chứng, Chẩn đoán, Mức độ nghiêm trọng, Hướng xử lý</p>
+            <small>Hỗ trợ định dạng .csv</small>
+          </div>
+          <div className="mt-8 flex justify-end gap-3"><Link to="/advisor/input"><Button variant="ghost">Hủy</Button></Link><Button onClick={() => setPreview(true)}>Xác nhận</Button></div>
         </Card>
-        <DataTable columns={columns} rows={medicalData.slice(0, 4)} footer={false} />
-        <div className="mt-6 flex justify-end gap-3"><Link to="/advisor/input"><Button variant="ghost">Quay lại</Button></Link><Button>Nhập 4 bản ghi</Button></div>
       </div>
     </AppShell>
   )

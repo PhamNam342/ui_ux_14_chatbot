@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AppShell, Avatar, Badge, Button, Card, DataTable, SearchBar, StatCard, TopBar } from '../../components/ui.jsx'
-import { cases } from '../../data/mock.js'
+import { cases, consultationHistory } from '../../data/mock.js'
 
 const statusTabs = ['Tất cả', 'Mới', 'Đang chờ tư vấn', 'Đang tư vấn', 'Hoàn tất']
 
@@ -32,6 +32,15 @@ export function DoctorDashboard() {
     { key: 'level', label: 'MỨC ĐỘ', render: (r) => <Badge tone={levelTone(r.level)}>{r.level}</Badge> },
     { key: 'symptoms', label: 'TRIỆU CHỨNG' },
     { key: 'action', label: 'HÀNH ĐỘNG', render: (r) => <Link className="mini-btn teal" to={`/doctor/cases/${r.code}`}>Xem ca</Link> },
+  ]
+
+  const historyColumns = [
+    { key: 'code', label: 'MÃ TƯ VẤN', render: (r) => <span className="font-bold text-teal-600">{r.code}</span> },
+    { key: 'patient', label: 'TÊN BỆNH NHÂN', render: (r) => <div className="flex items-center gap-3"><Avatar>{r.initials}</Avatar><b>{r.patient}</b></div> },
+    { key: 'symptoms', label: 'TRIỆU CHỨNG' },
+    { key: 'time', label: 'THỜI GIAN' },
+    { key: 'rating', label: 'ĐÁNH GIÁ', render: (r) => <Stars value={r.rating} /> },
+    { key: 'action', label: 'CHI TIẾT', render: (r) => <Link className="mini-btn teal" to={`/doctor/cases/${r.code}`}>Chi tiết</Link> },
   ]
 
   return (
@@ -75,8 +84,21 @@ export function DoctorDashboard() {
             <div className="pagination"><button>‹</button><button className="active">1</button><button>2</button><button>3</button><button>›</button></div>
           </div>
         </div>
+
+        <div className="mt-7">
+          <h2 className="section-title mb-4">Lịch sử tư vấn</h2>
+          <DataTable columns={historyColumns} rows={consultationHistory} footer={false} />
+        </div>
       </div>
     </AppShell>
+  )
+}
+
+function Stars({ value }) {
+  return (
+    <span className="review-stars" aria-label={`${value} trên 5 sao`}>
+      {Array.from({ length: 5 }, (_, index) => <span key={index}>{index < value ? '★' : '☆'}</span>)}
+    </span>
   )
 }
 

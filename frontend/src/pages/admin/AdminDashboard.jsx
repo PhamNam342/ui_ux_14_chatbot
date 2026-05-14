@@ -41,6 +41,9 @@ export function AdminDashboard() {
       {
         id: `D-${String(current.length + 1).padStart(3, '0')}`,
         name,
+        dob: form.get('dob') || '01/01/1990',
+        hometown: form.get('hometown') || 'Hà Nội',
+        identity: form.get('identity') || '000000000000',
         spec,
         room: roomValue,
         phone: form.get('phone') || '0900 000 000',
@@ -54,11 +57,11 @@ export function AdminDashboard() {
   }
 
   const columns = [
-    { key: 'id', label: 'ID' },
     { key: 'name', label: 'Tên bác sĩ ↑↓', render: (row) => <div className="flex items-center gap-3"><Avatar tone={row.color}>{row.initials}</Avatar><b>{row.name}</b></div> },
-    { key: 'spec', label: 'Chuyên khoa ↑↓' },
-    { key: 'room', label: 'Phòng khám ↑↓', render: (row) => <Badge>{row.room}</Badge> },
-    { key: 'phone', label: 'Số điện thoại' },
+    { key: 'dob', label: 'Ngày sinh' },
+    { key: 'hometown', label: 'Quê quán' },
+    { key: 'identity', label: 'Số CCCD' },
+    { key: 'spec', label: 'Chuyên khoa ↑↓', render: (row) => <Badge>{row.spec}</Badge> },
     { key: 'action', label: 'Thao tác', render: (row) => <Link to={`/admin/doctors/${row.id}`} className="mini-btn">Chi tiết</Link> },
   ]
 
@@ -82,8 +85,8 @@ export function AdminDashboard() {
         <div className="table-footer"><span>Hiển thị {filteredDoctors.length} trong tổng số {doctors.length} bác sĩ</span></div>
         <div className="mt-7 grid gap-5 md:grid-cols-3">
           <StatCard label="Tổng bác sĩ" value={doctors.length} icon={<CheckCircle2 size={20} />} />
-          <StatCard label="Đang làm việc" value="18" tone="blue" icon={<CheckCircle2 size={20} />} />
-          <StatCard label="Lịch hôm nay" value="142" tone="violet" icon={<CheckCircle2 size={20} />} />
+          <StatCard label="Đang làm việc" value="4" tone="blue" icon={<CheckCircle2 size={20} />} />
+          <StatCard label="Lịch hôm nay" value="34" tone="violet" icon={<CheckCircle2 size={20} />} />
         </div>
       </div>
 
@@ -97,6 +100,7 @@ export function AdminDashboard() {
                 <input className="input" name="dob" type="date" required />
                 <input className="input" name="identity" placeholder="Số căn cước" required />
               </div>
+              <input className="input" name="hometown" placeholder="Quê quán" required />
               <div className="grid gap-4 sm:grid-cols-2">
                 <input className="input" name="phone" placeholder="Số điện thoại" />
                 <select className="input" name="spec">{specialties.slice(1).map((item) => <option key={item}>{item}</option>)}</select>
