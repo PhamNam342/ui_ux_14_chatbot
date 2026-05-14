@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Mic, MicOff, PhoneOff, Search, Send, Video, VideoOff } from 'lucide-react'
 import { AppShell, Avatar, Badge, Button, Card } from '../../components/ui.jsx'
 
 const initialMessages = [
@@ -42,10 +43,10 @@ export function DoctorConsult() {
             <div className="patient-chip"><span /> Bệnh nhân: Trần Thị Mai</div>
             <div className="doctor-cam">{cameraOn ? 'Bạn (Bác sĩ)' : 'Camera tắt'}</div>
             <div className="call-controls">
-              <button aria-label="Tìm kiếm">⌕</button>
-              <button className={!micOn ? 'off' : ''} onClick={() => setMicOn((value) => !value)}>{micOn ? '●' : '○'}</button>
-              <button className="danger" onClick={() => navigate('/doctor/medicine')}>×</button>
-              <button className={!cameraOn ? 'off' : ''} onClick={() => setCameraOn((value) => !value)}>□</button>
+              <button aria-label="Tìm kiếm"><Search size={19} /></button>
+              <button aria-label={micOn ? 'Tắt mic' : 'Bật mic'} className={!micOn ? 'off' : ''} onClick={() => setMicOn((value) => !value)}>{micOn ? <Mic size={19} /> : <MicOff size={19} />}</button>
+              <button aria-label="Kết thúc tư vấn" className="danger" onClick={() => navigate('/doctor/medicine')}><PhoneOff size={19} /></button>
+              <button aria-label={cameraOn ? 'Tắt camera' : 'Bật camera'} className={!cameraOn ? 'off' : ''} onClick={() => setCameraOn((value) => !value)}>{cameraOn ? <Video size={19} /> : <VideoOff size={19} />}</button>
             </div>
           </div>
 
@@ -59,7 +60,7 @@ export function DoctorConsult() {
             <form className="chat-input" onSubmit={sendMessage}>
               <button type="button">+</button>
               <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Nhập tin nhắn..." />
-              <Button type="submit">↗</Button>
+              <Button type="submit"><Send size={16} /></Button>
             </form>
           </Card>
         </section>
@@ -95,12 +96,9 @@ export function DoctorConsult() {
             <Link to="/doctor/cases/CA250501-001"><Button variant="outline" className="mt-5 w-full justify-center">Xem chi tiết ca bệnh</Button></Link>
           </Card>
 
-          <Card>
-            <div className="grid grid-cols-2 gap-3">
-              <Button variant={micOn ? 'outline' : 'ghost'} onClick={() => setMicOn((value) => !value)}>Mic {micOn ? 'bật' : 'tắt'}</Button>
-              <Button variant={cameraOn ? 'outline' : 'ghost'} onClick={() => setCameraOn((value) => !value)}>Camera {cameraOn ? 'bật' : 'tắt'}</Button>
-            </div>
-            <Button variant="blue" className="mt-3 w-full justify-center" onClick={() => navigate('/doctor/medicine')}>
+          <Card className="consult-end-card">
+            <Button className="w-full justify-center" onClick={() => navigate('/doctor/medicine')}>
+              <PhoneOff size={16} />
               Kết thúc tư vấn và nhập kết luận
             </Button>
           </Card>

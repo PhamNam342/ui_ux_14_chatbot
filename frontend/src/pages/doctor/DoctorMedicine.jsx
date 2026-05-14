@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { CheckCircle2 } from 'lucide-react'
 import { AppShell, Badge, Button, Card } from '../../components/ui.jsx'
 
 const initialMedicines = [
@@ -8,13 +9,26 @@ const initialMedicines = [
 ]
 
 export function DoctorMedicine() {
+  const navigate = useNavigate()
   const [medicines, setMedicines] = useState(initialMedicines)
+  const [toast, setToast] = useState('')
 
   function addMedicine() {
     setMedicines((current) => [
       ...current,
-      { name: 'Thuốc mới', dose: 'Nhập liều lượng', note: 'Ghi chú sử dụng' },
+      { name: '', dose: '', note: '' },
     ])
+  }
+
+  function updateMedicine(index, field, value) {
+    setMedicines((current) => current.map((medicine, medicineIndex) => (
+      medicineIndex === index ? { ...medicine, [field]: value } : medicine
+    )))
+  }
+
+  function completeCase() {
+    setToast('Đã lưu ca bệnh và gửi kết quả')
+    window.setTimeout(() => navigate('/doctor'), 900)
   }
 
   return (
@@ -68,9 +82,9 @@ export function DoctorMedicine() {
                 <div className="medicine-row medicine-row-head"><b>Tên thuốc</b><b>Liều lượng</b><b>Ghi chú</b><b /></div>
                 {medicines.map((medicine, index) => (
                   <div className="medicine-row" key={`${medicine.name}-${index}`}>
-                    <span>{medicine.name}</span>
-                    <span>{medicine.dose}</span>
-                    <span>{medicine.note}</span>
+                    <input className="medicine-input" value={medicine.name} placeholder="Tên thuốc" onChange={(event) => updateMedicine(index, 'name', event.target.value)} />
+                    <input className="medicine-input" value={medicine.dose} placeholder="Liều lượng" onChange={(event) => updateMedicine(index, 'dose', event.target.value)} />
+                    <input className="medicine-input" value={medicine.note} placeholder="Lưu ý" onChange={(event) => updateMedicine(index, 'note', event.target.value)} />
                     <button onClick={() => setMedicines((current) => current.filter((_, i) => i !== index))}>×</button>
                   </div>
                 ))}
@@ -95,11 +109,12 @@ export function DoctorMedicine() {
             <div className="medicine-actions">
               <Button variant="ghost">In kết luận</Button>
               <Button variant="outline">Lưu tạm</Button>
-              <Button>Hoàn tất & Gửi kết quả</Button>
+              <Button onClick={completeCase}>Hoàn tất & Gửi kết quả</Button>
             </div>
           </Card>
         </div>
       </div>
+      {toast && <div className="toast"><CheckCircle2 size={18} /> {toast}</div>}
     </AppShell>
   )
 }

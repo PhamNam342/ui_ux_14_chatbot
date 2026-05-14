@@ -5,12 +5,22 @@ import { scheduleRows } from '../../data/mock.js'
 
 export function AdminSchedule({ showModal = false }) {
   const [open, setOpen] = useState(showModal)
+  const statusTone = {
+    'Đang tiến hành': 'blue',
+    Chờ: 'yellow',
+    Huỷ: 'red',
+  }
+  const statusClass = {
+    'Đang tiến hành': 'is-active',
+    Chờ: 'is-waiting',
+    Huỷ: 'is-cancelled',
+  }
   const columns = [
-    { key: 'time', label: 'Thời gian' },
+    { key: 'time', label: 'Thời gian', render: (r) => `${r.time} - ${r.endTime}` },
     { key: 'doctor', label: 'Bác sĩ' },
     { key: 'room', label: 'Phòng' },
     { key: 'patient', label: 'Bệnh nhân' },
-    { key: 'status', label: 'Trạng thái', render: (r) => <Badge tone={r.status === 'Đang khám' ? 'blue' : 'green'}>{r.status}</Badge> },
+    { key: 'status', label: 'Trạng thái', render: (r) => <Badge tone={statusTone[r.status]}>{r.status}</Badge> },
     { key: 'action', label: 'Thao tác', render: () => <button className="mini-btn">Sửa</button> },
   ]
   return (
@@ -23,10 +33,10 @@ export function AdminSchedule({ showModal = false }) {
           <h2 className="section-title">Lịch khám trong ngày</h2>
           <div className="admin-calendar">
             {scheduleRows.map((item) => (
-              <div className="admin-calendar-event" key={`${item.time}-${item.patient}`}>
-                <time>{item.time}</time>
+              <div className={`admin-calendar-event ${statusClass[item.status]}`} key={`${item.time}-${item.patient}`}>
+                <time>{item.time}<span>{item.endTime}</span></time>
                 <div><b>{item.patient}</b><p>{item.doctor} · {item.room}</p></div>
-                <Badge tone={item.status === 'Đang khám' ? 'blue' : 'green'}>{item.status}</Badge>
+                <Badge tone={statusTone[item.status]}>{item.status}</Badge>
               </div>
             ))}
           </div>
