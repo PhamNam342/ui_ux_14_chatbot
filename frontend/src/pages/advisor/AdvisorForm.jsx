@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { FilePlus2, FileText, Info, Upload } from 'lucide-react'
+import { FilePlus2, FileText, Info, Upload, CheckCircle2 } from 'lucide-react'
 import { AppShell, Button, Card, PageHeader, TopBar } from '../../components/ui.jsx'
 
 export function AdvisorForm() {
+  const [showHelp, setShowHelp] = useState(false)
+
   return (
     <AppShell role="advisor">
       <TopBar />
@@ -26,19 +29,44 @@ export function AdvisorForm() {
             <h3>Bạn cần hỗ trợ?</h3>
             <p>Xem tài liệu hướng dẫn hoặc liên hệ đội ngũ kỹ thuật để được hỗ trợ định dạng dữ liệu chuẩn y khoa.</p>
           </div>
-          <Button variant="ghost">Xem hướng dẫn</Button>
+          <Button variant="ghost" onClick={() => setShowHelp(true)}>Xem hướng dẫn</Button>
         </Card>
       </div>
+
+      {showHelp && (
+        <div className="modal-backdrop">
+          <Card className="modal">
+            <h2 className="text-2xl font-black">Hướng dẫn nhập dữ liệu</h2>
+            <div className="mt-4 space-y-4 text-slate-600">
+              <p>Để đảm bảo chất lượng phản hồi của Chatbot, dữ liệu y khoa cần tuân thủ định dạng sau:</p>
+              <ul className="list-inside list-disc space-y-2">
+                <li><b>Triệu chứng:</b> Mô tả chi tiết các biểu hiện lâm sàng.</li>
+                <li><b>Chẩn đoán:</b> Tên bệnh hoặc tình trạng y tế cụ thể.</li>
+                <li><b>Mức độ:</b> Phân loại theo Nhẹ, Trung bình, hoặc Nghiêm trọng.</li>
+                <li><b>Hướng xử lý:</b> Các bước sơ cứu hoặc điều trị ban đầu.</li>
+              </ul>
+              <div className="rounded-lg bg-amber-50 p-4 text-amber-800">
+                <b>Lưu ý:</b> Đối với file CSV, hãy đảm bảo các cột được sắp xếp đúng thứ tự như trên và sử dụng bảng mã UTF-8 để tránh lỗi font.
+              </div>
+            </div>
+            <div className="mt-8 flex justify-end">
+              <Button onClick={() => setShowHelp(false)}>Đã hiểu</Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </AppShell>
   )
 }
 
 export function AdvisorManualForm() {
   const navigate = useNavigate()
+  const [toast, setToast] = useState('')
 
   function saveData(event) {
     event.preventDefault()
-    navigate('/advisor/data')
+    setToast('Đã lưu dữ liệu y khoa thành công')
+    window.setTimeout(() => navigate('/advisor/data'), 1800)
   }
 
   return (
@@ -58,6 +86,8 @@ export function AdvisorManualForm() {
           </form>
         </Card>
       </div>
+
+      {toast && <div className="toast"><CheckCircle2 size={18} /> {toast}</div>}
     </AppShell>
   )
 }
