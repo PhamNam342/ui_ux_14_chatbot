@@ -15,6 +15,13 @@ import { AdvisorForm } from './pages/advisor/AdvisorForm.jsx'
 import { AdvisorChatbot } from './pages/advisor/AdvisorChatbot.jsx'
 import { AdvisorConversation } from './pages/advisor/AdvisorConversation.jsx'
 import { AdvisorImport } from './pages/advisor/AdvisorImport.jsx'
+import { PatientDashboard } from './pages/patient/PatientDashboard.jsx'
+import { PatientBooking } from './pages/patient/PatientBooking.jsx'
+import { PatientConsult } from './pages/patient/PatientConsult.jsx'
+import { PatientRecords } from './pages/patient/PatientRecords.jsx'
+import { PatientHistory } from './pages/patient/PatientHistory.jsx'
+import { PatientSettings } from './pages/patient/PatientSettings.jsx'
+import { DoctorSettings } from './pages/doctor/DoctorSettings.jsx'
 
 export default function App() {
   return (
@@ -35,6 +42,7 @@ export default function App() {
       <Route path="/doctor/consult" element={<DoctorConsult />} />
       <Route path="/doctor/medicine" element={<DoctorMedicine />} />
       <Route path="/doctor/schedule" element={<DoctorSchedule />} />
+      <Route path="/doctor/settings" element={<DoctorSettings />} />
 
       <Route path="/advisor" element={<AdvisorDataList />} />
       <Route path="/advisor/data" element={<AdvisorDataList />} />
@@ -42,6 +50,13 @@ export default function App() {
       <Route path="/advisor/import" element={<AdvisorImport />} />
       <Route path="/advisor/chatbot" element={<AdvisorChatbot />} />
       <Route path="/advisor/conversation" element={<AdvisorConversation />} />
+
+      <Route path="/patient" element={<PatientDashboard />} />
+      <Route path="/patient/booking" element={<PatientBooking />} />
+      <Route path="/patient/consult" element={<PatientConsult />} />
+      <Route path="/patient/records" element={<PatientRecords />} />
+      <Route path="/patient/history" element={<PatientHistory />} />
+      <Route path="/patient/settings" element={<PatientSettings />} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

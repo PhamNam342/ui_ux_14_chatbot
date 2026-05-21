@@ -3,14 +3,26 @@ import { CalendarPlus } from 'lucide-react'
 import { AppShell, Badge, Button, Card, DataTable, PageHeader, TopBar } from '../../components/ui.jsx'
 import { scheduleRows } from '../../data/mock.js'
 
+function statusTone(status) {
+  if (status === 'Đang tiến hành') return 'blue'
+  if (status === 'Hủy') return 'red'
+  return 'yellow'
+}
+
+function statusClass(status) {
+  if (status === 'Đang tiến hành') return 'status-card status-blue'
+  if (status === 'Hủy') return 'status-card status-red'
+  return 'status-card status-yellow'
+}
+
 export function AdminSchedule({ showModal = false }) {
   const [open, setOpen] = useState(showModal)
   const columns = [
-    { key: 'time', label: 'Thời gian' },
+    { key: 'time', label: 'Thời gian', render: (r) => `${r.time} - ${r.endTime}` },
     { key: 'doctor', label: 'Bác sĩ' },
     { key: 'room', label: 'Phòng' },
     { key: 'patient', label: 'Bệnh nhân' },
-    { key: 'status', label: 'Trạng thái', render: (r) => <Badge tone={r.status === 'Đang khám' ? 'blue' : 'green'}>{r.status}</Badge> },
+    { key: 'status', label: 'Trạng thái', render: (r) => <Badge tone={statusTone(r.status)}>{r.status}</Badge> },
     { key: 'action', label: 'Thao tác', render: () => <button className="mini-btn">Sửa</button> },
   ]
   return (
@@ -23,10 +35,14 @@ export function AdminSchedule({ showModal = false }) {
           <h2 className="section-title">Lịch khám trong ngày</h2>
           <div className="admin-calendar">
             {scheduleRows.map((item) => (
-              <div className="admin-calendar-event" key={`${item.time}-${item.patient}`}>
+              <div className={statusClass(item.status)} key={`${item.time}-${item.patient}`}>
                 <time>{item.time}</time>
-                <div><b>{item.patient}</b><p>{item.doctor} · {item.room}</p></div>
-                <Badge tone={item.status === 'Đang khám' ? 'blue' : 'green'}>{item.status}</Badge>
+                <div>
+                  <b>{item.patient}</b>
+                  <p>{item.doctor} · {item.room}</p>
+                  <small>Kết thúc lúc {item.endTime}</small>
+                </div>
+                <Badge tone={statusTone(item.status)}>{item.status}</Badge>
               </div>
             ))}
           </div>

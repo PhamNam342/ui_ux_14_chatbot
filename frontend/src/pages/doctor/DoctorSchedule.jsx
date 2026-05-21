@@ -1,9 +1,16 @@
-import { useState } from 'react'
-import { AppShell, Badge, Button, Card, DataTable, PageHeader, TopBar } from '../../components/ui.jsx'
+import { useMemo, useState } from 'react'
+import { AppShell, Badge, Card, DataTable, PageHeader, TopBar } from '../../components/ui.jsx'
 import { doctorSchedule } from '../../data/mock.js'
+
+const hours = Array.from({ length: 24 }, (_, index) => `${String(index).padStart(2, '0')}:00`)
+
+function statusTone(status) {
+  return status === 'Dự kiến' ? 'yellow' : 'green'
+}
 
 export function DoctorSchedule() {
   const [view, setView] = useState('chart')
+  const timelineDays = useMemo(() => doctorSchedule.map((item, index) => ({ ...item, column: index + 2 })), [])
   const columns = [
     { key: 'day', label: 'NGÀY', render: (row) => <div><b>{row.day}</b><p className="text-sm text-slate-500">{row.date}</p></div> },
     { key: 'shift', label: 'CA TRỰC' },
@@ -11,7 +18,7 @@ export function DoctorSchedule() {
     { key: 'room', label: 'PHÒNG / KÊNH' },
     { key: 'type', label: 'HÌNH THỨC' },
     { key: 'patients', label: 'DỰ KIẾN', render: (row) => `${row.patients} bệnh nhân` },
-    { key: 'status', label: 'TRẠNG THÁI', render: (row) => <Badge tone={row.status === 'Dự kiến' ? 'yellow' : 'green'}>{row.status}</Badge> },
+    { key: 'status', label: 'TRẠNG THÁI', render: (row) => <Badge tone={statusTone(row.status)}>{row.status}</Badge> },
   ]
 
   return (
@@ -30,30 +37,48 @@ export function DoctorSchedule() {
         />
 
         <div className="grid gap-5 md:grid-cols-3">
-          <Card><p className="text-sm text-slate-500">Tổng ca trực tuần này</p><strong className="mt-2 block text-3xl font-black">5</strong></Card>
-          <Card><p className="text-sm text-slate-500">Bệnh nhân dự kiến</p><strong className="mt-2 block text-3xl font-black">45</strong></Card>
-          <Card><p className="text-sm text-slate-500">Tư vấn online</p><strong className="mt-2 block text-3xl font-black">14</strong></Card>
+          <Card><p className="text-sm text-slate-500">Tổng ca trực tuần này</p><strong className="mt-2 block text-3xl font-black">7</strong></Card>
+          <Card><p className="text-sm text-slate-500">Bệnh nhân dự kiến</p><strong className="mt-2 block text-3xl font-black">57</strong></Card>
+          <Card><p className="text-sm text-slate-500">Tư vấn online</p><strong className="mt-2 block text-3xl font-black">19</strong></Card>
         </div>
 
         {view === 'chart' ? (
           <Card className="mt-7">
             <h2 className="section-title">Timeline lịch trực tuần</h2>
-            <div className="week-timeline">
-              <div className="timeline-hours">
-                {['GMT+07', '8 AM', '10 AM', '12 PM', '2 PM', '4 PM', '6 PM', '8 PM'].map((hour) => <span key={hour}>{hour}</span>)}
-              </div>
-              {doctorSchedule.map((item, index) => (
-                <div className="timeline-day" key={item.day}>
-                  <div className={`timeline-date ${index === 2 ? 'active' : ''}`}><span>{item.day}</span><b>{item.date.split('/')[0]}</b></div>
-                  <div className="timeline-column">
-                    <div className="timeline-event" style={{ top: `${80 + index * 34}px` }}>
+            <div className="doctor-timeline-wrap">
+              <div className="doctor-timeline">
+                <div className="timeline-head timeline-zone">GMT+07</div>
+                {timelineDays.map((item, index) => (
+                  <div key={item.day} className={`timeline-head ${index === 2 ? 'active' : ''}`}>
+                    <span>{item.day}</span>
+                    <strong>{item.date.split('/')[0]}</strong>
+                  </div>
+                ))}
+
+                {hours.map((hour) => (
+                  <div className="timeline-row" key={hour}>
+                    <div className="timeline-hour">{hour}</div>
+                    {timelineDays.map((item) => <div key={`${item.day}-${hour}`} className="timeline-slot" />)}
+                  </div>
+                ))}
+
+                {timelineDays.map((item) => (
+                  <div
+                    key={`${item.day}-${item.time}`}
+                    className="timeline-event-layer"
+                    style={{
+                      gridColumn: item.column,
+                      gridRow: `${item.startHour + 2} / span ${Math.max(item.endHour - item.startHour, 1)}`,
+                    }}
+                  >
+                    <div className="timeline-event-card">
                       <b>{item.type}</b>
                       <span>{item.time}</span>
                       <small>{item.room} · {item.patients} ca</small>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </Card>
         ) : (

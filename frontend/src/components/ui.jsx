@@ -1,6 +1,7 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import {
+  CircleUserRound,
   BarChart3,
   Bell,
   Bot,
@@ -9,6 +10,10 @@ import {
   Database,
   FileBarChart,
   Home,
+  Hospital,
+  LayoutDashboard,
+  MapPinned,
+  NotebookPen,
   LogOut,
   MessageSquareText,
   Plus,
@@ -58,13 +63,33 @@ export function Sidebar({ items, legacy = false }) {
 }
 
 export function TopBar({ legacy = false }) {
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState('profile')
+  const [notifyOpen, setNotifyOpen] = useState(false)
+  const notifications = [
+    'Có 1 lịch tư vấn mới lúc 14:00.',
+    'Bệnh án của Trần Thị Mai vừa được cập nhật.',
+    'Nhắc lịch tái khám ngày 22/05/2026.',
+  ]
 
   return (
     <header className={clsx('topbar', legacy && 'legacy-topbar')}>
       <button className="icon-btn"><Search size={17} /></button>
-      <button className="icon-btn"><Bell size={17} /></button>
+      <div className="relative">
+        <button className="icon-btn" onClick={() => setNotifyOpen((value) => !value)}><Bell size={17} /></button>
+        {notifyOpen && (
+          <div className="notify-menu">
+            <h3>Thông báo</h3>
+            {notifications.map((item, index) => (
+              <div key={item} className="notify-item">
+                <span className="notify-dot">{index + 1}</span>
+                <div>{item}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       <div className="relative">
       <button className="pill-avatar" onClick={() => setOpen((value) => !value)}>
         <span className="avatar-ring">A</span>
@@ -93,7 +118,7 @@ export function TopBar({ legacy = false }) {
           ) : (
             <div className="profile-menu-body">
               <p className="text-sm text-slate-500">Bạn có muốn đăng xuất khỏi phiên làm việc hiện tại?</p>
-              <button className="btn btn-dark mt-4 w-full"><LogOut size={16} /> Đăng xuất</button>
+              <button className="btn btn-dark mt-4 w-full" onClick={() => navigate('/')}><LogOut size={16} /> Đăng xuất</button>
             </div>
           )}
         </div>
@@ -106,20 +131,17 @@ export function TopBar({ legacy = false }) {
 export function AppShell({ role, children, legacy = false }) {
   const items = {
     admin: [
-      { to: '/admin', label: 'Quản lí phòng khám', icon: <Home size={18} />, end: true },
+      { to: '/admin', label: 'Quản lí phòng khám', icon: <Hospital size={18} />, end: true },
       { to: '/admin/doctors', label: 'Quản lí bác sĩ', icon: <Users size={18} /> },
       { to: '/admin/schedule', label: 'Quản lí ca khám', icon: <CalendarDays size={18} /> },
       { to: '/admin/revenue', label: 'Báo cáo doanh thu', icon: <BarChart3 size={18} /> },
       { to: '/admin/quality', label: 'Báo cáo ca khám', icon: <FileBarChart size={18} /> },
     ],
     doctor: [
-      { to: '/doctor', label: 'Dashboard', icon: <BarChart3 size={18} />, end: true },
-      { to: '/doctor/cases', label: 'Ca bệnh', icon: <ClipboardList size={18} /> },
+      { to: '/doctor', label: 'Dashboard', icon: <LayoutDashboard size={18} />, end: true },
       { to: '/doctor/consult', label: 'Tư vấn trực tuyến', icon: <Video size={18} /> },
       { to: '/doctor/schedule', label: 'Lịch khám', icon: <CalendarDays size={18} /> },
       { to: '/doctor/medicine', label: 'Kết luận tư vấn', icon: <MessageSquareText size={18} /> },
-      { to: '/doctor/quality', label: 'Thông báo', icon: <Bell size={18} /> },
-      { to: '/doctor/report', label: 'Báo cáo', icon: <FileBarChart size={18} /> },
       { to: '/doctor/settings', label: 'Cài đặt', icon: <Settings size={18} /> },
     ],
     advisor: [
@@ -128,6 +150,14 @@ export function AppShell({ role, children, legacy = false }) {
       { to: '/advisor/chatbot', label: 'Kiểm thử chatbot', icon: <Bot size={18} /> },
       { to: '/advisor/notice', label: 'Thông báo', icon: <Bell size={18} /> },
       { to: '/advisor/settings', label: 'Cài đặt', icon: <Settings size={18} /> },
+    ],
+    patient: [
+      { to: '/patient', label: 'Dashboard', icon: <LayoutDashboard size={18} />, end: true },
+      { to: '/patient/booking', label: 'Đặt lịch khám', icon: <MapPinned size={18} /> },
+      { to: '/patient/consult', label: 'Tư vấn trực tuyến', icon: <Video size={18} /> },
+      { to: '/patient/records', label: 'Hồ sơ bệnh án', icon: <NotebookPen size={18} /> },
+      { to: '/patient/history', label: 'Lịch sử khám bệnh', icon: <ClipboardList size={18} /> },
+      { to: '/patient/settings', label: 'Cài đặt', icon: <CircleUserRound size={18} /> },
     ],
   }
 

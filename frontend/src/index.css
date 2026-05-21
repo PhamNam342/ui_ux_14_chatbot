@@ -180,6 +180,55 @@ select {
   padding: 16px;
 }
 
+.notify-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 12px);
+  z-index: 60;
+  width: 320px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  padding: 14px;
+  box-shadow: 0 18px 45px rgb(15 23 42 / .14);
+}
+
+.notify-menu h3 {
+  margin: 2px 0 12px;
+  color: #111827;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.notify-item {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 12px;
+  align-items: start;
+  border-top: 1px solid #edf1f6;
+  padding: 12px 0;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.notify-item:first-of-type {
+  border-top: 0;
+  padding-top: 4px;
+}
+
+.notify-dot {
+  display: grid;
+  height: 28px;
+  width: 28px;
+  place-items: center;
+  border-radius: 999px;
+  background: #dcf7ef;
+  color: #08ad8c;
+  font-size: 12px;
+  font-weight: 900;
+}
+
 .content-narrow {
   max-width: 980px;
 }
@@ -653,7 +702,8 @@ textarea.input {
   margin-top: 20px;
 }
 
-.admin-calendar-event {
+.admin-calendar-event,
+.status-card {
   display: grid;
   grid-template-columns: 92px 1fr auto;
   gap: 16px;
@@ -664,16 +714,40 @@ textarea.input {
   padding: 16px;
 }
 
-.admin-calendar-event time {
+.admin-calendar-event time,
+.status-card time {
   color: #08ad8c;
   font-size: 20px;
   font-weight: 900;
 }
 
-.admin-calendar-event p {
+.admin-calendar-event p,
+.status-card p {
   margin-top: 4px;
   color: #64748b;
   font-size: 13px;
+}
+
+.status-card small {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.status-blue {
+  border-color: #d5e5ff;
+  background: linear-gradient(180deg, #f7fbff 0%, #eef5ff 100%);
+}
+
+.status-yellow {
+  border-color: #fbe8b0;
+  background: linear-gradient(180deg, #fffcf2 0%, #fff7dd 100%);
+}
+
+.status-red {
+  border-color: #fecdd3;
+  background: linear-gradient(180deg, #fff7f7 0%, #fff1f2 100%);
 }
 
 .consult-grid {
@@ -969,100 +1043,386 @@ textarea.input {
   padding-top: 28px;
 }
 
-.week-timeline {
-  display: grid;
-  grid-template-columns: 72px repeat(5, minmax(150px, 1fr));
-  gap: 0;
+.doctor-timeline-wrap {
   margin-top: 24px;
-  overflow-x: auto;
+  overflow: auto;
   border: 1px solid #e5e7eb;
   border-radius: 14px;
   background: #fff;
+  max-height: 860px;
 }
 
-.timeline-hours {
+.doctor-timeline {
   display: grid;
-  grid-template-rows: 88px repeat(7, 72px);
+  grid-template-columns: 92px repeat(7, minmax(180px, 1fr));
+  min-width: 1360px;
+}
+
+.timeline-row {
+  display: contents;
+}
+
+.timeline-head,
+.timeline-hour,
+.timeline-slot {
+  min-height: 64px;
   border-right: 1px solid #dbe3ec;
-  color: #475569;
-  font-weight: 800;
+  border-bottom: 1px solid #e8edf4;
 }
 
-.timeline-hours span {
-  border-bottom: 1px solid #e5e7eb;
-  padding: 12px;
-}
-
-.timeline-day {
-  min-width: 170px;
-  border-right: 1px solid #dbe3ec;
-}
-
-.timeline-day:last-child {
-  border-right: 0;
-}
-
-.timeline-date {
+.timeline-head {
+  position: sticky;
+  top: 0;
+  z-index: 4;
   display: grid;
-  height: 88px;
+  min-height: 116px;
   place-items: center;
-  border-bottom: 1px solid #dbe3ec;
+  background: #fff;
   color: #475569;
 }
 
-.timeline-date span {
+.timeline-head span {
   font-size: 13px;
   font-weight: 900;
   text-transform: uppercase;
 }
 
-.timeline-date b {
-  font-size: 34px;
+.timeline-head strong {
+  font-size: 46px;
   line-height: 1;
 }
 
-.timeline-date.active b {
+.timeline-head.active strong {
   display: grid;
-  height: 58px;
-  width: 58px;
+  height: 70px;
+  width: 70px;
   place-items: center;
   border-radius: 999px;
-  background: #0f5bd8;
+  background: #2563eb;
   color: #fff;
 }
 
-.timeline-date.active span {
-  color: #0f5bd8;
+.timeline-head.active span {
+  color: #2563eb;
 }
 
-.timeline-column {
-  position: relative;
-  height: 504px;
-  background:
-    repeating-linear-gradient(to bottom, transparent 0 71px, #e5e7eb 72px),
-    #fff;
+.timeline-zone {
+  place-items: start;
+  padding: 18px 14px;
+  font-size: 14px;
+  font-weight: 900;
 }
 
-.timeline-event {
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  min-height: 82px;
-  border-radius: 8px;
-  background: #0ea5e9;
-  padding: 12px;
+.timeline-hour {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: #fff;
+  padding-top: 14px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.timeline-slot {
+  background: #fff;
+}
+
+.timeline-event-layer {
+  z-index: 2;
+  padding: 10px;
+}
+
+.timeline-event-card {
+  height: 100%;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #27aae5 0%, #1699dd 100%);
+  padding: 14px;
   color: #fff;
-  box-shadow: 0 10px 24px rgb(14 165 233 / .25);
+  box-shadow: 0 12px 24px rgb(22 153 221 / .2);
 }
 
-.timeline-event b,
-.timeline-event span,
-.timeline-event small {
+.timeline-event-card b,
+.timeline-event-card span,
+.timeline-event-card small {
   display: block;
 }
 
-.timeline-event small {
-  opacity: .86;
+.timeline-event-card b {
+  font-size: 16px;
+}
+
+.timeline-event-card span {
+  margin-top: 6px;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.timeline-event-card small {
+  margin-top: 8px;
+  opacity: .9;
+}
+
+.booking-map {
+  position: relative;
+  min-height: 380px;
+  overflow: hidden;
+  border: 1px solid #dbe3ec;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 18% 22%, rgb(7 172 140 / .1) 0 10%, transparent 11%),
+    radial-gradient(circle at 72% 28%, rgb(59 130 246 / .08) 0 12%, transparent 13%),
+    radial-gradient(circle at 50% 72%, rgb(139 92 246 / .08) 0 11%, transparent 12%),
+    linear-gradient(180deg, #f0fffb 0%, #ecfdf5 48%, #f8fafc 100%);
+}
+
+.booking-map::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgb(201 230 223 / .65) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(201 230 223 / .65) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+.map-you,
+.map-pin {
+  position: absolute;
+  z-index: 1;
+  border: 0;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.map-you {
+  left: 10%;
+  top: 62%;
+  background: #111827;
+  padding: 10px 16px;
+  color: #fff;
+}
+
+.map-pin {
+  transform: translate(-50%, -50%);
+  background: #fff;
+  padding: 9px 14px;
+  color: #0f766e;
+  box-shadow: 0 12px 24px rgb(15 23 42 / .1);
+}
+
+.map-pin.active {
+  background: #08ad8c;
+  color: #fff;
+}
+
+.clinic-card,
+.doctor-list-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  padding: 16px 18px;
+  text-align: left;
+  transition: 160ms ease;
+}
+
+.clinic-card.active {
+  border-color: #8fdcca;
+  background: #f0fdf9;
+  box-shadow: 0 0 0 4px rgb(8 173 140 / .08);
+}
+
+.clinic-card p,
+.doctor-list-card p {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.clinic-card small {
+  display: block;
+  margin-top: 6px;
+  color: #64748b;
+}
+
+.doctor-slot-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.doctor-slot-grid button {
+  min-height: 40px;
+  border: 1px solid #d9dee7;
+  border-radius: 999px;
+  background: #fff;
+  padding: 0 16px;
+  color: #334155;
+  font-weight: 700;
+}
+
+.doctor-slot-grid .active-slot {
+  border-color: #08ad8c;
+  background: #dcf7ef;
+  color: #0f766e;
+}
+
+.patient-schedule-board {
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+}
+
+.schedule-board-head,
+.schedule-board-row {
+  display: grid;
+  grid-template-columns: 220px repeat(7, minmax(72px, 1fr));
+}
+
+.schedule-board-head {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.schedule-board-head span,
+.schedule-board-row > * {
+  min-height: 56px;
+  border-right: 1px solid #edf1f6;
+  border-bottom: 1px solid #edf1f6;
+  padding: 14px 12px;
+}
+
+.schedule-board-head span:last-child,
+.schedule-board-row > *:last-child {
+  border-right: 0;
+}
+
+.schedule-doctor-label {
+  border: 0;
+  background: #fff;
+  text-align: left;
+}
+
+.schedule-doctor-label small {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+}
+
+.slot-open,
+.slot-empty {
+  display: grid;
+  place-items: center;
+}
+
+.slot-open::before,
+.slot-empty::before {
+  content: "";
+  height: 16px;
+  width: 16px;
+  border-radius: 999px;
+}
+
+.slot-open::before {
+  background: #10b981;
+  box-shadow: 0 0 0 5px rgb(16 185 129 / .12);
+}
+
+.slot-empty::before {
+  background: #e2e8f0;
+}
+
+.rating-star {
+  border: 0;
+  background: transparent;
+  color: #cbd5e1;
+  font-size: 26px;
+}
+
+.rating-star.active {
+  color: #f59e0b;
+}
+
+.record-chart {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+  align-items: end;
+  min-height: 240px;
+}
+
+.record-bar {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+}
+
+.record-bar span {
+  display: block;
+  width: 100%;
+  max-width: 54px;
+  border-radius: 12px 12px 6px 6px;
+  background: linear-gradient(180deg, #49d6b5 0%, #08ad8c 100%);
+  box-shadow: 0 12px 22px rgb(8 173 140 / .18);
+}
+
+.record-bar small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.settings-social {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 26px;
+  align-items: start;
+}
+
+.settings-avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f0fffb 0%, #ffffff 100%);
+  padding: 28px;
+}
+
+.settings-avatar img,
+.settings-avatar span {
+  display: grid;
+  height: 160px;
+  width: 160px;
+  place-items: center;
+  overflow: hidden;
+  border: 4px solid #d8fbf3;
+  border-radius: 999px;
+  background: #fff;
+  color: #0f766e;
+  font-size: 42px;
+  font-weight: 900;
+}
+
+.settings-avatar img {
+  object-fit: cover;
+}
+
+.settings-profile-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .rating-progress {
@@ -1205,6 +1565,15 @@ textarea.input {
   .week-timeline {
     grid-template-columns: 72px repeat(5, 170px);
   }
+
+  .settings-social {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-board-head,
+  .schedule-board-row {
+    min-width: 820px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1244,7 +1613,18 @@ textarea.input {
     grid-template-columns: 1fr;
   }
 
+  .status-card,
+  .clinic-card,
+  .doctor-list-card {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+  }
+
   .rating-progress {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-profile-grid {
     grid-template-columns: 1fr;
   }
 }
