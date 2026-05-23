@@ -1,11 +1,19 @@
 import { useState } from 'react'
-import { CalendarDays, Download, TrendingDown, TrendingUp, Users } from 'lucide-react'
+import { CalendarDays, Download, Star, TrendingDown, TrendingUp, Users } from 'lucide-react'
 import { AppShell, Button, Card, PageHeader, StatCard, TopBar } from '../../components/ui.jsx'
 
 const chartData = {
   Tuần: [120, 150, 178, 210, 196],
   Tháng: [520, 680, 760, 910, 1040],
   Năm: [4200, 5100, 6300, 7200, 8400],
+}
+
+const clinics = ['Tất cả phòng khám', 'Phòng khám Đa khoa Tâm An', 'Phòng khám Tim mạch An Bình', 'MedCare Family Clinic']
+
+const monthlyRevenue = {
+  'Phòng khám Đa khoa Tâm An': [820, 910, 980, 1120, 1280, 1360],
+  'Phòng khám Tim mạch An Bình': [640, 720, 790, 860, 930, 1010],
+  'MedCare Family Clinic': [520, 610, 690, 760, 840, 900],
 }
 
 const revenueBySpecialty = [
@@ -17,7 +25,12 @@ const revenueBySpecialty = [
 
 export function AdminRevenue() {
   const [range, setRange] = useState('Tuần')
+  const [clinic, setClinic] = useState('Tất cả phòng khám')
+  const [period, setPeriod] = useState('Tháng')
   const points = chartData[range]
+  const bars = clinic === 'Tất cả phòng khám'
+    ? [1980, 2240, 2460, 2740, 3050, 3270]
+    : monthlyRevenue[clinic]
 
   return (
     <AppShell role="admin">
@@ -36,11 +49,34 @@ export function AdminRevenue() {
         </div>
 
         <Card className="mt-7">
+          <div className="grid gap-4 md:grid-cols-[1fr_220px]">
+            <div>
+              <label className="field-label">Quản lý phòng khám</label>
+              <select className="input" value={clinic} onChange={(event) => setClinic(event.target.value)}>
+                {clinics.map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="field-label">Chu kỳ báo cáo</label>
+              <select className="input" value={period} onChange={(event) => setPeriod(event.target.value)}>
+                <option>Tháng</option>
+                <option>Năm</option>
+              </select>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="mt-7">
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
             <div><h2 className="section-title">Xu hướng doanh thu</h2><p className="text-sm text-slate-500">Thống kê theo {range.toLowerCase()} trong kỳ hiện tại</p></div>
             <div className="segmented">{Object.keys(chartData).map((item) => <button key={item} className={range === item ? 'active' : ''} onClick={() => setRange(item)}>{item}</button>)}</div>
           </div>
           <RevenueLineChart points={points} />
+        </Card>
+
+        <Card className="mt-7">
+          <div><h2 className="section-title">Doanh thu theo {period.toLowerCase()} của từng phòng khám</h2><p className="text-sm text-slate-500">{clinic}</p></div>
+          <RevenueBarChart values={bars} period={period} />
         </Card>
 
         <div className="mt-7 grid gap-7 lg:grid-cols-2">
@@ -55,10 +91,27 @@ export function AdminRevenue() {
               </div>
             </div>
           </Card>
-          <Card><h2 className="section-title">Bác sĩ doanh thu cao</h2>{['BS. Nguyễn Văn A','BS. Trần Đức B','BS. Lê Thị C','BS. Phạm Văn D'].map((name, i) => <div className="leader" key={name}><span className="avatar avatar-violet">★</span><div><b>{name}</b><p>{['Nội tổng quát','Nhi khoa','Sản phụ khoa','Da liễu'][i]}</p></div><strong>{[342,285,210,195][i]},000,000đ</strong></div>)}</Card>
+          <Card><h2 className="section-title">Bác sĩ doanh thu cao</h2>{['BS. Nguyễn Văn A','BS. Trần Đức B','BS. Lê Thị C','BS. Phạm Văn D'].map((name, i) => <div className="leader" key={name}><span className="avatar avatar-violet"><Star size={15} fill="currentColor" /></span><div><b>{name}</b><p>{['Nội tổng quát','Nhi khoa','Sản phụ khoa','Da liễu'][i]}</p></div><strong>{[342,285,210,195][i]},000,000đ</strong></div>)}</Card>
         </div>
       </div>
     </AppShell>
+  )
+}
+
+function RevenueBarChart({ values, period }) {
+  const max = Math.max(...values)
+  const labels = period === 'Tháng' ? ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'] : ['2021', '2022', '2023', '2024', '2025', '2026']
+
+  return (
+    <div className="revenue-bars mt-7">
+      {values.map((value, index) => (
+        <div className="revenue-bar" key={labels[index]}>
+          <strong>{value}</strong>
+          <span style={{ height: `${Math.max((value / max) * 220, 24)}px` }} />
+          <small>{labels[index]}</small>
+        </div>
+      ))}
+    </div>
   )
 }
 

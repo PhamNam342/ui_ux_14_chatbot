@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Mic, Paperclip, PhoneOff, Send, Search, Video } from 'lucide-react'
 import { AppShell, Badge, Button, Card, PageHeader, TopBar } from '../../components/ui.jsx'
 
 export function PatientConsult() {
@@ -69,7 +70,7 @@ export function PatientConsult() {
               </div>
               <div className="chat-input">
                 <label className="mini-btn cursor-pointer">
-                  +
+                  <Paperclip size={16} />
                   <input
                     hidden
                     type="file"
@@ -82,7 +83,7 @@ export function PatientConsult() {
                   />
                 </label>
                 <input value={input} onChange={(event) => setInput(event.target.value)} placeholder="Nhập triệu chứng, ví dụ: tôi đau đầu..." />
-                <Button onClick={sendChatbotMessage}>Gửi</Button>
+                <Button onClick={sendChatbotMessage}><Send size={17} /> Gửi</Button>
               </div>
               {attachments.length > 0 && <div className="px-4 pb-4 text-sm font-semibold text-slate-500">Đã đính kèm: {attachments.join(', ')}</div>}
             </Card>
@@ -100,7 +101,7 @@ export function PatientConsult() {
               <div className="mt-5 video-card">
                 <div className="patient-chip"><span /> Phiên đang kết nối</div>
                 <div className="doctor-cam">BS. Trần Thị Hoa</div>
-                <div className="call-controls"><button>●</button><button>○</button><button className="danger">×</button><button>□</button></div>
+                <div className="call-controls"><button aria-label="Tìm kiếm"><Search size={18} /></button><button aria-label="Mic"><Mic size={18} /></button><button className="danger" aria-label="Kết thúc"><PhoneOff size={18} /></button><button aria-label="Camera"><Video size={18} /></button></div>
               </div>
               <div className="mt-6 consult-chat-body">
                 {doctorMessages.map((message, index) => (
@@ -114,11 +115,11 @@ export function PatientConsult() {
               </div>
               <div className="chat-input">
                 <label className="mini-btn cursor-pointer">
-                  +
+                  <Paperclip size={16} />
                   <input hidden type="file" accept="image/*" />
                 </label>
                 <input value={doctorInput} onChange={(event) => setDoctorInput(event.target.value)} placeholder="Nhập tin nhắn cho bác sĩ..." />
-                <Button onClick={sendDoctorMessage}>Gửi</Button>
+                <Button onClick={sendDoctorMessage}><Send size={17} /> Gửi</Button>
               </div>
             </Card>
             <Card>

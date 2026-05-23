@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Camera, Mic, PhoneOff, Plus, Search, Send, Video } from 'lucide-react'
 import { AppShell, Avatar, Badge, Button, Card } from '../../components/ui.jsx'
 
 const initialMessages = [
@@ -12,8 +13,6 @@ export function DoctorConsult() {
   const navigate = useNavigate()
   const [messages, setMessages] = useState(initialMessages)
   const [draft, setDraft] = useState('')
-  const [micOn, setMicOn] = useState(true)
-  const [cameraOn, setCameraOn] = useState(true)
 
   function sendMessage(event) {
     event.preventDefault()
@@ -38,14 +37,14 @@ export function DoctorConsult() {
     <AppShell role="doctor">
       <div className="consult-grid">
         <section className="space-y-5">
-          <div className="video-card">
-            <div className="patient-chip"><span /> Bệnh nhân: Trần Thị Mai</div>
-            <div className="doctor-cam">{cameraOn ? 'Bạn (Bác sĩ)' : 'Camera tắt'}</div>
+            <div className="video-card">
+              <div className="patient-chip"><span /> Bệnh nhân: Trần Thị Mai</div>
+            <div className="doctor-cam">Bạn (Bác sĩ)</div>
             <div className="call-controls">
-              <button aria-label="Tìm kiếm">⌕</button>
-              <button className={!micOn ? 'off' : ''} onClick={() => setMicOn((value) => !value)}>{micOn ? '●' : '○'}</button>
-              <button className="danger" onClick={() => navigate('/doctor/medicine')}>×</button>
-              <button className={!cameraOn ? 'off' : ''} onClick={() => setCameraOn((value) => !value)}>□</button>
+              <button aria-label="Tìm kiếm"><Search size={18} /></button>
+              <button aria-label="Mic"><Mic size={18} /></button>
+              <button className="danger" aria-label="Kết thúc tư vấn" onClick={() => navigate('/doctor/medicine')}><PhoneOff size={18} /></button>
+              <button aria-label="Camera"><Video size={18} /></button>
             </div>
           </div>
 
@@ -57,9 +56,9 @@ export function DoctorConsult() {
               ))}
             </div>
             <form className="chat-input" onSubmit={sendMessage}>
-              <button type="button">+</button>
+              <button type="button"><Plus size={18} /></button>
               <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Nhập tin nhắn..." />
-              <Button type="submit">↗</Button>
+              <Button type="submit"><Send size={17} /> Gửi</Button>
             </form>
           </Card>
         </section>
@@ -77,16 +76,17 @@ export function DoctorConsult() {
                 <p>CA250501-001</p>
               </div>
             </div>
-            <div className="mt-5 grid gap-3">
-              <div className="grid grid-cols-2 gap-3">
-                <Info label="Tuổi" value="42" />
-                <Info label="Giới tính" value="Nữ" />
-              </div>
-              <Info label="Số điện thoại" value="0901 234 567" />
+            <div className="patient-meta-strip">
+              <Info label="Tuổi" value="42" />
+              <Info label="Giới tính" value="Nữ" />
+              <Info label="SĐT" value="0901 234 567" />
             </div>
-            <div className="mt-5">
-              <Badge tone="yellow">Trung bình</Badge>
-              <ul className="mt-4 space-y-3 text-sm text-slate-500">
+            <div className="symptom-panel">
+              <div className="flex items-center justify-between gap-3">
+                <h3>Triệu chứng chính</h3>
+                <Badge tone="yellow">Trung bình</Badge>
+              </div>
+              <ul>
                 <li>Sốt 38.5°C</li>
                 <li>Ho khan, đau họng</li>
                 <li>Đau đầu, mệt mỏi</li>
@@ -96,11 +96,8 @@ export function DoctorConsult() {
           </Card>
 
           <Card>
-            <div className="grid grid-cols-2 gap-3">
-              <Button variant={micOn ? 'outline' : 'ghost'} onClick={() => setMicOn((value) => !value)}>Mic {micOn ? 'bật' : 'tắt'}</Button>
-              <Button variant={cameraOn ? 'outline' : 'ghost'} onClick={() => setCameraOn((value) => !value)}>Camera {cameraOn ? 'bật' : 'tắt'}</Button>
-            </div>
-            <Button variant="blue" className="mt-3 w-full justify-center" onClick={() => navigate('/doctor/medicine')}>
+            <Button variant="danger" className="w-full justify-center" onClick={() => navigate('/doctor/medicine')}>
+              <Camera size={17} />
               Kết thúc tư vấn và nhập kết luận
             </Button>
           </Card>
@@ -111,7 +108,7 @@ export function DoctorConsult() {
 }
 
 function Info({ label, value }) {
-  return <div className="info-box"><small>{label}</small><b>{value}</b></div>
+  return <div className="patient-meta"><small>{label}</small><span>{value}</span></div>
 }
 
 function Message({ text, who, time, initials, mine = false }) {

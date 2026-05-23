@@ -1,8 +1,15 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AppShell, Badge, Card, DataTable, PageHeader, TopBar } from '../../components/ui.jsx'
 import { doctorSchedule } from '../../data/mock.js'
 
-const hours = Array.from({ length: 24 }, (_, index) => `${String(index).padStart(2, '0')}:00`)
+const visibleHours = Array.from({ length: 16 }, (_, index) => index + 7)
+const hours = visibleHours.map((hour) => `${String(hour).padStart(2, '0')}:00`)
+const firstHour = visibleHours[0]
+const rowHeight = 78
+const headerHeight = 104
+const hourColumnWidth = 132
+const dayColumnWidth = 214
+const dayLabels = ['CN', 'THỨ 2', 'THỨ 3', 'THỨ 4', 'THỨ 5', 'THỨ 6', 'THỨ 7']
 
 function statusTone(status) {
   return status === 'Dự kiến' ? 'yellow' : 'green'
@@ -10,7 +17,24 @@ function statusTone(status) {
 
 export function DoctorSchedule() {
   const [view, setView] = useState('chart')
-  const timelineDays = useMemo(() => doctorSchedule.map((item, index) => ({ ...item, column: index + 2 })), [])
+  const [now, setNow] = useState(() => new Date())
+  const currentHour = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+  const currentDecimalHour = now.getHours() + now.getMinutes() / 60
+  const nowTop = headerHeight + (currentDecimalHour - firstHour) * rowHeight
+  const showNowLine = currentDecimalHour >= firstHour && currentDecimalHour <= visibleHours.at(-1)
+  const weekDays = useMemo(() => getCurrentWeekDays(now), [now])
+  const scheduleForWeek = useMemo(() => doctorSchedule.map((item, index) => ({
+    ...item,
+    day: weekDays[index].day,
+    date: weekDays[index].date,
+    dayIndex: index,
+  })), [weekDays])
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 30000)
+    return () => window.clearInterval(timer)
+  }, [])
+
   const columns = [
     { key: 'day', label: 'NGÀY', render: (row) => <div><b>{row.day}</b><p className="text-sm text-slate-500">{row.date}</p></div> },
     { key: 'shift', label: 'CA TRỰC' },
@@ -47,28 +71,31 @@ export function DoctorSchedule() {
             <h2 className="section-title">Timeline lịch trực tuần</h2>
             <div className="doctor-timeline-wrap">
               <div className="doctor-timeline">
-                <div className="timeline-head timeline-zone">GMT+07</div>
-                {timelineDays.map((item, index) => (
-                  <div key={item.day} className={`timeline-head ${index === 2 ? 'active' : ''}`}>
+                <div className="timeline-head timeline-zone"><span>GMT+07</span><strong>{currentHour}</strong></div>
+                {scheduleForWeek.map((item, index) => (
+                  <div key={`${item.day}-${item.date}`} className={`timeline-head ${weekDays[index].isToday ? 'active' : ''}`}>
                     <span>{item.day}</span>
-                    <strong>{item.date.split('/')[0]}</strong>
+                    <strong>{weekDays[index].dayNumber}</strong>
                   </div>
                 ))}
 
-                {hours.map((hour) => (
-                  <div className="timeline-row" key={hour}>
+                <div className="timeline-body">
+                  {hours.map((hour) => (
+                    <div className="timeline-row" key={hour}>
                     <div className="timeline-hour">{hour}</div>
-                    {timelineDays.map((item) => <div key={`${item.day}-${hour}`} className="timeline-slot" />)}
-                  </div>
-                ))}
+                    {scheduleForWeek.map((item) => <div key={`${item.day}-${hour}`} className="timeline-slot" />)}
+                    </div>
+                  ))}
 
-                {timelineDays.map((item) => (
+                  {scheduleForWeek.map((item) => (
                   <div
                     key={`${item.day}-${item.time}`}
                     className="timeline-event-layer"
                     style={{
-                      gridColumn: item.column,
-                      gridRow: `${item.startHour + 2} / span ${Math.max(item.endHour - item.startHour, 1)}`,
+                      left: `${hourColumnWidth + item.dayIndex * dayColumnWidth}px`,
+                      top: `${headerHeight + (item.startHour - firstHour) * rowHeight}px`,
+                      width: `${dayColumnWidth}px`,
+                      height: `${Math.max(item.endHour - item.startHour, 1) * rowHeight}px`,
                     }}
                   >
                     <div className="timeline-event-card">
@@ -77,16 +104,37 @@ export function DoctorSchedule() {
                       <small>{item.room} · {item.patients} ca</small>
                     </div>
                   </div>
-                ))}
+                  ))}
+                  {showNowLine && <div className="timeline-now-line" style={{ top: `${nowTop}px` }}><span>{currentHour}</span></div>}
+                </div>
               </div>
             </div>
           </Card>
         ) : (
-          <div className="mt-7">
-            <DataTable columns={columns} rows={doctorSchedule} footer={false} />
+        <div className="mt-7">
+            <DataTable columns={columns} rows={scheduleForWeek} footer={false} />
           </div>
         )}
       </div>
     </AppShell>
   )
+}
+
+function getCurrentWeekDays(date) {
+  const start = new Date(date)
+  const day = start.getDay()
+  const diffToMonday = day === 0 ? -6 : 1 - day
+  start.setDate(start.getDate() + diffToMonday)
+  start.setHours(0, 0, 0, 0)
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const current = new Date(start)
+    current.setDate(start.getDate() + index)
+    return {
+      day: dayLabels[current.getDay()],
+      date: current.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }),
+      dayNumber: current.toLocaleDateString('vi-VN', { day: '2-digit' }),
+      isToday: current.toDateString() === date.toDateString(),
+    }
+  })
 }

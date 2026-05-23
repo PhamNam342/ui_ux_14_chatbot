@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { RoleSelect } from './pages/RoleSelect.jsx'
+import { AdminClinics } from './pages/admin/AdminClinics.jsx'
 import { AdminDashboard } from './pages/admin/AdminDashboard.jsx'
 import { AdminRevenue } from './pages/admin/AdminRevenue.jsx'
 import { AdminSchedule } from './pages/admin/AdminSchedule.jsx'
@@ -10,6 +11,7 @@ import { DoctorConsult } from './pages/doctor/DoctorConsult.jsx'
 import { DoctorDetail } from './pages/doctor/DoctorDetail.jsx'
 import { DoctorMedicine } from './pages/doctor/DoctorMedicine.jsx'
 import { DoctorSchedule } from './pages/doctor/DoctorSchedule.jsx'
+import { DoctorHistory } from './pages/doctor/DoctorHistory.jsx'
 import { AdvisorDataList } from './pages/advisor/AdvisorDataList.jsx'
 import { AdvisorForm } from './pages/advisor/AdvisorForm.jsx'
 import { AdvisorChatbot } from './pages/advisor/AdvisorChatbot.jsx'
@@ -22,13 +24,14 @@ import { PatientRecords } from './pages/patient/PatientRecords.jsx'
 import { PatientHistory } from './pages/patient/PatientHistory.jsx'
 import { PatientSettings } from './pages/patient/PatientSettings.jsx'
 import { DoctorSettings } from './pages/doctor/DoctorSettings.jsx'
+import { AdvisorSettings } from './pages/advisor/AdvisorSettings.jsx'
 
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<RoleSelect />} />
 
-      <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/admin" element={<AdminClinics />} />
       <Route path="/admin/doctors" element={<AdminDashboard />} />
       <Route path="/admin/doctors/:id" element={<AdminDoctorDetail />} />
       <Route path="/admin/schedule" element={<AdminSchedule />} />
@@ -42,6 +45,7 @@ export default function App() {
       <Route path="/doctor/consult" element={<DoctorConsult />} />
       <Route path="/doctor/medicine" element={<DoctorMedicine />} />
       <Route path="/doctor/schedule" element={<DoctorSchedule />} />
+      <Route path="/doctor/history" element={<DoctorHistory />} />
       <Route path="/doctor/settings" element={<DoctorSettings />} />
 
       <Route path="/advisor" element={<AdvisorDataList />} />
@@ -50,6 +54,7 @@ export default function App() {
       <Route path="/advisor/import" element={<AdvisorImport />} />
       <Route path="/advisor/chatbot" element={<AdvisorChatbot />} />
       <Route path="/advisor/conversation" element={<AdvisorConversation />} />
+      <Route path="/advisor/settings" element={<AdvisorSettings />} />
 
       <Route path="/patient" element={<PatientDashboard />} />
       <Route path="/patient/booking" element={<PatientBooking />} />

@@ -14,6 +14,8 @@ const progress = [
   { label: '2 sao', value: 18, color: '#ef4444' },
 ]
 
+const clinics = ['Tất cả phòng khám', 'Phòng khám Đa khoa Tâm An', 'Phòng khám Tim mạch An Bình', 'MedCare Family Clinic']
+
 export function AdminQuality() {
   return (
     <AppShell role="admin">
@@ -21,7 +23,8 @@ export function AdminQuality() {
       <div className="content-wide">
         <PageHeader title="Báo cáo chất lượng ca khám" subtitle="Theo dõi mức độ hài lòng, thời gian xử lý và xu hướng hoạt động" />
         <Card className="mb-7">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-3">
+            <div><label className="field-label">Quản lý phòng khám</label><select className="input">{clinics.map((item) => <option key={item}>{item}</option>)}</select></div>
             <div><label className="field-label">Lọc theo khoa</label><select className="input"><option>Tất cả chuyên khoa</option><option>Tim mạch</option><option>Nhi khoa</option><option>Nội tổng quát</option></select></div>
             <div><label className="field-label">Lọc theo thời gian</label><select className="input"><option>7 ngày gần đây</option><option>30 ngày gần đây</option><option>Quý này</option></select></div>
           </div>

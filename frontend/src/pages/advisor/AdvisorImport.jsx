@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { Upload } from 'lucide-react'
 import { AppShell, Button, Card, DataTable, PageHeader } from '../../components/ui.jsx'
 import { medicalData } from '../../data/mock.js'
 
@@ -14,7 +15,7 @@ export function AdvisorImport() {
       <div className="content-advisor">
         <PageHeader title="Nhập dữ liệu tu CSV" subtitle="Tải tệp lên, xem trước dữ liệu và xác nhận trước khi lưu vào hệ thống." />
         <Card className="mb-7 border-dashed text-center">
-          <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-teal-50 text-2xl text-teal-600">↑</div>
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-teal-50 text-teal-600"><Upload size={28} /></div>
           <h2 className="mt-4 text-xl font-black">Kéo thả file CSV vào đây</h2>
           <p className="mt-2 text-slate-500">Hỗ trợ .csv tối đa 10MB</p>
           <Button className="mt-5">Chọn tệp</Button>
