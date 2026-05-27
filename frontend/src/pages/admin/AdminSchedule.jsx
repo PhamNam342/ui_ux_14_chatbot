@@ -3,45 +3,63 @@ import { CalendarPlus } from 'lucide-react'
 import { AppShell, Badge, Button, Card, DataTable, PageHeader, TopBar } from '../../components/ui.jsx'
 import { scheduleRows } from '../../data/mock.js'
 
+const clinics = ['Tất cả phòng khám', 'Phòng khám Đa khoa Tâm An', 'Phòng khám Tim mạch An Bình', 'MedCare Family Clinic']
+
+function statusTone(status) {
+  if (status === 'Đang tiến hành') return 'blue'
+  if (status === 'Hủy') return 'red'
+  return 'yellow'
+}
+
+function statusClass(status) {
+  if (status === 'Đang tiến hành') return 'status-card status-blue'
+  if (status === 'Hủy') return 'status-card status-red'
+  return 'status-card status-yellow'
+}
+
 export function AdminSchedule({ showModal = false }) {
   const [open, setOpen] = useState(showModal)
-  const statusTone = {
-    'Đang tiến hành': 'blue',
-    Chờ: 'yellow',
-    Huỷ: 'red',
-  }
-  const statusClass = {
-    'Đang tiến hành': 'is-active',
-    Chờ: 'is-waiting',
-    Huỷ: 'is-cancelled',
-  }
+  const [clinic, setClinic] = useState('Tất cả phòng khám')
+  const rows = scheduleRows.map((row, index) => ({ ...row, clinic: clinics[(index % 3) + 1] }))
+  const filteredRows = clinic === 'Tất cả phòng khám' ? rows : rows.filter((row) => row.clinic === clinic)
   const columns = [
     { key: 'time', label: 'Thời gian', render: (r) => `${r.time} - ${r.endTime}` },
     { key: 'doctor', label: 'Bác sĩ' },
+    { key: 'clinic', label: 'Phòng khám' },
     { key: 'room', label: 'Phòng' },
     { key: 'patient', label: 'Bệnh nhân' },
-    { key: 'status', label: 'Trạng thái', render: (r) => <Badge tone={statusTone[r.status]}>{r.status}</Badge> },
+    { key: 'status', label: 'Trạng thái', render: (r) => <Badge tone={statusTone(r.status)}>{r.status}</Badge> },
     { key: 'action', label: 'Thao tác', render: () => <button className="mini-btn">Sửa</button> },
   ]
   return (
     <AppShell role="admin">
       <TopBar />
       <div className="content-wide">
-        <PageHeader title="Quản lí ca khám" subtitle="Sắp xếp lịch khám và điều phối phòng trong ngày" action={<Button onClick={() => setOpen(true)}><CalendarPlus size={18} /> Thêm lịch khám</Button>} />
+        <PageHeader title="Quản lí ca khám" subtitle="Sắp xếp lịch khám và điều phối phòng theo từng phòng khám" action={<Button onClick={() => setOpen(true)}><CalendarPlus size={18} /> Thêm lịch khám</Button>} />
+        <Card className="mb-7">
+          <label className="field-label">Quản lý phòng khám</label>
+          <select className="input" value={clinic} onChange={(event) => setClinic(event.target.value)}>
+            {clinics.map((item) => <option key={item}>{item}</option>)}
+          </select>
+        </Card>
         <div className="grid gap-5 md:grid-cols-3"><Stat label="Ca hôm nay" value="142" /><Stat label="Đã xác nhận" value="96" /><Stat label="Đang chờ" value="18" /></div>
         <Card className="mt-7">
           <h2 className="section-title">Lịch khám trong ngày</h2>
           <div className="admin-calendar">
-            {scheduleRows.map((item) => (
-              <div className={`admin-calendar-event ${statusClass[item.status]}`} key={`${item.time}-${item.patient}`}>
-                <time>{item.time}<span>{item.endTime}</span></time>
-                <div><b>{item.patient}</b><p>{item.doctor} · {item.room}</p></div>
-                <Badge tone={statusTone[item.status]}>{item.status}</Badge>
+            {filteredRows.map((item) => (
+              <div className={statusClass(item.status)} key={`${item.time}-${item.patient}`}>
+                <time>{item.time}</time>
+                <div>
+                  <b>{item.patient}</b>
+                  <p>{item.doctor} · {item.clinic} · {item.room}</p>
+                  <small>Kết thúc lúc {item.endTime}</small>
+                </div>
+                <Badge tone={statusTone(item.status)}>{item.status}</Badge>
               </div>
             ))}
           </div>
         </Card>
-        <div className="mt-7"><DataTable columns={columns} rows={scheduleRows} /></div>
+        <div className="mt-7"><DataTable columns={columns} rows={filteredRows} /></div>
       </div>
       {open && (
         <div className="modal-backdrop">

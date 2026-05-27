@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Mic, MicOff, PhoneOff, Search, Send, Video, VideoOff } from 'lucide-react'
+import { Camera, Mic, PhoneOff, Plus, Search, Send, Video } from 'lucide-react'
 import { AppShell, Avatar, Badge, Button, Card } from '../../components/ui.jsx'
 
 const initialMessages = [
@@ -13,8 +13,6 @@ export function DoctorConsult() {
   const navigate = useNavigate()
   const [messages, setMessages] = useState(initialMessages)
   const [draft, setDraft] = useState('')
-  const [micOn, setMicOn] = useState(true)
-  const [cameraOn, setCameraOn] = useState(true)
 
   function sendMessage(event) {
     event.preventDefault()
@@ -39,14 +37,14 @@ export function DoctorConsult() {
     <AppShell role="doctor">
       <div className="consult-grid">
         <section className="space-y-5">
-          <div className="video-card">
-            <div className="patient-chip"><span /> Bệnh nhân: Trần Thị Mai</div>
-            <div className="doctor-cam">{cameraOn ? 'Bạn (Bác sĩ)' : 'Camera tắt'}</div>
+            <div className="video-card">
+              <div className="patient-chip"><span /> Bệnh nhân: Trần Thị Mai</div>
+            <div className="doctor-cam">Bạn (Bác sĩ)</div>
             <div className="call-controls">
-              <button aria-label="Tìm kiếm"><Search size={19} /></button>
-              <button aria-label={micOn ? 'Tắt mic' : 'Bật mic'} className={!micOn ? 'off' : ''} onClick={() => setMicOn((value) => !value)}>{micOn ? <Mic size={19} /> : <MicOff size={19} />}</button>
-              <button aria-label="Kết thúc tư vấn" className="danger" onClick={() => navigate('/doctor/medicine')}><PhoneOff size={19} /></button>
-              <button aria-label={cameraOn ? 'Tắt camera' : 'Bật camera'} className={!cameraOn ? 'off' : ''} onClick={() => setCameraOn((value) => !value)}>{cameraOn ? <Video size={19} /> : <VideoOff size={19} />}</button>
+              <button aria-label="Tìm kiếm"><Search size={18} /></button>
+              <button aria-label="Mic"><Mic size={18} /></button>
+              <button className="danger" aria-label="Kết thúc tư vấn" onClick={() => navigate('/doctor/medicine')}><PhoneOff size={18} /></button>
+              <button aria-label="Camera"><Video size={18} /></button>
             </div>
           </div>
 
@@ -58,9 +56,9 @@ export function DoctorConsult() {
               ))}
             </div>
             <form className="chat-input" onSubmit={sendMessage}>
-              <button type="button">+</button>
+              <button type="button"><Plus size={18} /></button>
               <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Nhập tin nhắn..." />
-              <Button type="submit"><Send size={16} /></Button>
+              <Button type="submit"><Send size={17} /> Gửi</Button>
             </form>
           </Card>
         </section>
@@ -78,16 +76,17 @@ export function DoctorConsult() {
                 <p>CA250501-001</p>
               </div>
             </div>
-            <div className="mt-5 grid gap-3">
-              <div className="grid grid-cols-2 gap-3">
-                <Info label="Tuổi" value="42" />
-                <Info label="Giới tính" value="Nữ" />
-              </div>
-              <Info label="Số điện thoại" value="0901 234 567" />
+            <div className="patient-meta-strip">
+              <Info label="Tuổi" value="42" />
+              <Info label="Giới tính" value="Nữ" />
+              <Info label="SĐT" value="0901 234 567" />
             </div>
-            <div className="mt-5">
-              <Badge tone="yellow">Trung bình</Badge>
-              <ul className="mt-4 space-y-3 text-sm text-slate-500">
+            <div className="symptom-panel">
+              <div className="flex items-center justify-between gap-3">
+                <h3>Triệu chứng chính</h3>
+                <Badge tone="yellow">Trung bình</Badge>
+              </div>
+              <ul>
                 <li>Sốt 38.5°C</li>
                 <li>Ho khan, đau họng</li>
                 <li>Đau đầu, mệt mỏi</li>
@@ -96,9 +95,9 @@ export function DoctorConsult() {
             <Link to="/doctor/cases/CA250501-001"><Button variant="outline" className="mt-5 w-full justify-center">Xem chi tiết ca bệnh</Button></Link>
           </Card>
 
-          <Card className="consult-end-card">
-            <Button className="w-full justify-center" onClick={() => navigate('/doctor/medicine')}>
-              <PhoneOff size={16} />
+          <Card>
+            <Button variant="danger" className="w-full justify-center" onClick={() => navigate('/doctor/medicine')}>
+              <Camera size={17} />
               Kết thúc tư vấn và nhập kết luận
             </Button>
           </Card>
@@ -109,7 +108,7 @@ export function DoctorConsult() {
 }
 
 function Info({ label, value }) {
-  return <div className="info-box"><small>{label}</small><b>{value}</b></div>
+  return <div className="patient-meta"><small>{label}</small><span>{value}</span></div>
 }
 
 function Message({ text, who, time, initials, mine = false }) {

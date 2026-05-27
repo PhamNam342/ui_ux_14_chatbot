@@ -1,14 +1,19 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import {
+  CircleUserRound,
   BarChart3,
   Bell,
   Bot,
   CalendarDays,
+  CheckCircle2,
   ClipboardList,
   Database,
   FileBarChart,
-  Home,
+  Hospital,
+  LayoutDashboard,
+  MapPinned,
+  NotebookPen,
   LogOut,
   MessageSquareText,
   Plus,
@@ -58,40 +63,48 @@ export function Sidebar({ items, legacy = false }) {
 }
 
 export function TopBar({ legacy = false }) {
-  const [open, setOpen] = useState(false)
-  const [noticeOpen, setNoticeOpen] = useState(false)
-  const [tab, setTab] = useState('profile')
   const navigate = useNavigate()
+  const path = window.location.pathname
+  const isAdmin = path.startsWith('/admin')
+  const isAdvisor = path.startsWith('/advisor')
+  const profile = isAdmin
+    ? { name: 'Admin', subtitle: 'Quản trị hệ thống', initials: 'A', email: 'admin@medconsult.vn' }
+    : isAdvisor
+      ? { name: 'Chuyên gia dữ liệu', subtitle: 'Cố vấn y khoa', initials: 'CG', email: 'advisor@medconsult.vn' }
+      : { name: 'Dr. Alexander', subtitle: 'Bác sĩ tư vấn', initials: 'DA', email: 'alexander@medconsult.vn' }
+  const [open, setOpen] = useState(false)
+  const [tab, setTab] = useState('profile')
+  const [notifyOpen, setNotifyOpen] = useState(false)
+  const [toast, setToast] = useState('')
+  const notifications = [
+    'Có 1 lịch tư vấn mới lúc 14:00.',
+    'Bệnh án của Trần Thị Mai vừa được cập nhật.',
+    'Nhắc lịch tái khám ngày 22/05/2026.',
+  ]
 
   return (
     <header className={clsx('topbar', legacy && 'legacy-topbar')}>
       <button className="icon-btn"><Search size={17} /></button>
       <div className="relative">
-        <button className="icon-btn" onClick={() => setNoticeOpen((value) => !value)}><Bell size={17} /></button>
-        {noticeOpen && (
-          <div className="notification-menu">
+        <button className="icon-btn" onClick={() => setNotifyOpen((value) => !value)}><Bell size={17} /></button>
+        {notifyOpen && (
+          <div className="notify-menu">
             <h3>Thông báo</h3>
-            <div className="notification-item">
-              <b>Lịch khám sắp bắt đầu</b>
-              <p>Ca khám với Trần Thị Mai lúc 08:00 tại Phòng 102.</p>
-            </div>
-            <div className="notification-item">
-              <b>Cập nhật hồ sơ</b>
-              <p>Thông tin bác sĩ đã được đồng bộ thành công.</p>
-            </div>
-            <div className="notification-item">
-              <b>Nhắc kê đơn</b>
-              <p>Vui lòng hoàn tất đơn thuốc cho ca tư vấn CA250501-001.</p>
-            </div>
+            {notifications.map((item, index) => (
+              <div key={item} className="notify-item">
+                <span className="notify-dot">{index + 1}</span>
+                <div>{item}</div>
+              </div>
+            ))}
           </div>
         )}
       </div>
       <div className="relative">
       <button className="pill-avatar" onClick={() => setOpen((value) => !value)}>
-        <span className="avatar-ring">A</span>
+        <span className="avatar-ring">{profile.initials}</span>
         <span className="text-left">
-          <b>Dr. Alexander</b>
-          <small>Sẵn sàng</small>
+          <b>{profile.name}</b>
+          <small>{isAdmin ? 'Đang hoạt động' : 'Sẵn sàng'}</small>
         </span>
       </button>
       {open && (
@@ -103,23 +116,27 @@ export function TopBar({ legacy = false }) {
           {tab === 'profile' ? (
             <div className="profile-menu-body">
               <div className="patient-summary mt-0">
-                <span className="avatar-ring">A</span>
+                <span className="avatar-ring">{profile.initials}</span>
                 <div>
-                  <h3>Dr. Alexander</h3>
-                  <p>Bác sĩ tư vấn</p>
+                  <h3>{profile.name}</h3>
+                  <p>{profile.subtitle}</p>
                 </div>
               </div>
-              <p className="mt-3 text-sm text-slate-500">alexander@medconsult.vn</p>
+              <p className="mt-3 text-sm text-slate-500">{profile.email}</p>
             </div>
           ) : (
             <div className="profile-menu-body">
               <p className="text-sm text-slate-500">Bạn có muốn đăng xuất khỏi phiên làm việc hiện tại?</p>
-              <button className="btn btn-dark mt-4 w-full" onClick={() => navigate('/')}><LogOut size={16} /> Đăng xuất</button>
+              <button className="btn btn-danger mt-4 w-full" onClick={() => {
+                setToast('Đăng xuất thành công')
+                window.setTimeout(() => navigate('/'), 700)
+              }}><LogOut size={16} /> Đăng xuất</button>
             </div>
           )}
         </div>
       )}
       </div>
+      {toast && <div className="toast toast-red"><CheckCircle2 size={18} /> {toast}</div>}
     </header>
   )
 }
@@ -127,17 +144,17 @@ export function TopBar({ legacy = false }) {
 export function AppShell({ role, children, legacy = false }) {
   const items = {
     admin: [
-      { to: '/admin', label: 'Quản lí phòng khám', icon: <Home size={18} />, end: true },
+      { to: '/admin', label: 'Quản lý các phòng khám', icon: <Hospital size={18} />, end: true },
       { to: '/admin/doctors', label: 'Quản lí bác sĩ', icon: <Users size={18} /> },
       { to: '/admin/schedule', label: 'Quản lí ca khám', icon: <CalendarDays size={18} /> },
       { to: '/admin/revenue', label: 'Báo cáo doanh thu', icon: <BarChart3 size={18} /> },
       { to: '/admin/quality', label: 'Báo cáo ca khám', icon: <FileBarChart size={18} /> },
     ],
     doctor: [
-      { to: '/doctor', label: 'Dashboard', icon: <BarChart3 size={18} />, end: true },
+      { to: '/doctor', label: 'Dashboard', icon: <LayoutDashboard size={18} />, end: true },
       { to: '/doctor/consult', label: 'Tư vấn trực tuyến', icon: <Video size={18} /> },
       { to: '/doctor/schedule', label: 'Lịch khám', icon: <CalendarDays size={18} /> },
-      { to: '/doctor/history', label: 'Lịch sử tư vấn', icon: <ClipboardList size={18} /> },
+      { to: '/doctor/history', label: 'Lịch sử khám bệnh', icon: <ClipboardList size={18} /> },
       { to: '/doctor/medicine', label: 'Kết luận tư vấn', icon: <MessageSquareText size={18} /> },
       { to: '/doctor/settings', label: 'Cài đặt', icon: <Settings size={18} /> },
     ],
@@ -145,8 +162,15 @@ export function AppShell({ role, children, legacy = false }) {
       { to: '/advisor/data', label: 'Danh sách dữ liệu', icon: <Database size={18} /> },
       { to: '/advisor/input', label: 'Nhập dữ liệu', icon: <ClipboardList size={18} /> },
       { to: '/advisor/chatbot', label: 'Kiểm thử chatbot', icon: <Bot size={18} /> },
-      { to: '/advisor/notice', label: 'Thông báo', icon: <Bell size={18} /> },
       { to: '/advisor/settings', label: 'Cài đặt', icon: <Settings size={18} /> },
+    ],
+    patient: [
+      { to: '/patient', label: 'Dashboard', icon: <LayoutDashboard size={18} />, end: true },
+      { to: '/patient/booking', label: 'Đặt lịch khám', icon: <MapPinned size={18} /> },
+      { to: '/patient/consult', label: 'Tư vấn trực tuyến', icon: <Video size={18} /> },
+      { to: '/patient/records', label: 'Hồ sơ bệnh án', icon: <NotebookPen size={18} /> },
+      { to: '/patient/history', label: 'Lịch sử khám bệnh', icon: <ClipboardList size={18} /> },
+      { to: '/patient/settings', label: 'Cài đặt', icon: <CircleUserRound size={18} /> },
     ],
   }
 
@@ -225,7 +249,10 @@ export function DataTable({ columns, rows, footer = true }) {
           <tbody>
             {rows.map((row, index) => (
               <tr key={row.id || row.code || index}>
-                {columns.map((column) => <td key={column.key}>{column.render ? column.render(row, index) : row[column.key]}</td>)}
+                {columns.map((column) => {
+                  const value = column.render ? column.render(row, index) : row[column.key]
+                  return <td key={column.key}>{value}</td>
+                })}
               </tr>
             ))}
           </tbody>
