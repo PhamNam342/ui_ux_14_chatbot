@@ -2,9 +2,9 @@ import { Link } from 'react-router-dom'
 import { Button, Logo } from '../components/ui.jsx'
 
 const roles = [
-  { to: '/admin', title: 'Admin', desc: 'Quản trị phòng khám, bác sĩ, lịch khám và báo cáo.', accent: 'from-teal-500 to-emerald-400', glyph: 'A' },
-  { to: '/doctor', title: 'Doctor', desc: 'Theo dõi ca bệnh, tư vấn trực tuyến và đơn thuốc.', accent: 'from-cyan-500 to-teal-500', glyph: 'D' },
-  { to: '/advisor', title: 'Advisor', desc: 'Quản lý dữ liệu y khoa và kiểm thử chatbot chẩn đoán.', accent: 'from-emerald-500 to-lime-400', glyph: 'V' },
+  { to: '/login/admin', title: 'Admin', desc: 'Quản trị phòng khám, bác sĩ, lịch khám và báo cáo.', accent: 'from-teal-500 to-emerald-400', glyph: 'A' },
+  { to: '/login/doctor', title: 'Doctor', desc: 'Theo dõi ca bệnh, tư vấn trực tuyến và đơn thuốc.', accent: 'from-cyan-500 to-teal-500', glyph: 'D' },
+  { to: '/login/advisor', title: 'Advisor', desc: 'Quản lý dữ liệu y khoa và kiểm thử chatbot chẩn đoán.', accent: 'from-emerald-500 to-lime-400', glyph: 'V' },
 ]
 
 export function RoleSelect() {

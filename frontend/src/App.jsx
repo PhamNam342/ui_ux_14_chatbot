@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { RoleSelect } from './pages/RoleSelect.jsx'
+import { Login } from './pages/Login.jsx'
 import { AdminClinic } from './pages/admin/AdminClinic.jsx'
 import { AdminClinicDetail, AdminClinicForm } from './pages/admin/AdminClinicDetail.jsx'
 import { AdminDashboard } from './pages/admin/AdminDashboard.jsx'
@@ -24,6 +25,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<RoleSelect />} />
+      <Route path="/login/:role" element={<Login />} />
 
       <Route path="/admin" element={<AdminClinic />} />
       <Route path="/admin/clinics/new" element={<AdminClinicForm />} />
