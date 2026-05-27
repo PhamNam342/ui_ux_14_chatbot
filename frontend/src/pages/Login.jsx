@@ -122,7 +122,7 @@ export function Login() {
           <div className={`absolute top-0 left-0 right-0 h-1.5 rounded-t-2xl bg-gradient-to-r ${config.accentGrad}`} />
 
           {/* Role Glyph Indicator */}
-          <div className="flex justify-center -mt-16 mb-5">
+          <div className="relative z-10 flex justify-center -mt-16 mb-5">
             <div className={`grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br ${config.accentGrad} text-3xl font-black text-white shadow-lg border-4 border-white`}>
               {config.glyph}
             </div>
