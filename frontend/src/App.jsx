@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { RoleSelect } from './pages/RoleSelect.jsx'
+import { Login } from './pages/Login.jsx'
 import { AdminClinics } from './pages/admin/AdminClinics.jsx'
 import { AdminDashboard } from './pages/admin/AdminDashboard.jsx'
 import { AdminRevenue } from './pages/admin/AdminRevenue.jsx'
@@ -30,6 +31,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<RoleSelect />} />
+      <Route path="/login/:role" element={<Login />} />
 
       <Route path="/admin" element={<AdminClinics />} />
       <Route path="/admin/doctors" element={<AdminDashboard />} />

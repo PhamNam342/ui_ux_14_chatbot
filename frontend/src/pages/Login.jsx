@@ -42,6 +42,19 @@ const roleConfigs = {
     demoUser: 'advisor',
     demoPass: 'advisor',
     redirectPath: '/advisor'
+  },
+  patient: {
+    title: 'Bệnh nhân',
+    subtitle: 'Đặt lịch khám, tư vấn trực tuyến và theo dõi toàn bộ lịch sử điều trị cá nhân.',
+    bgGrad: 'bg-[radial-gradient(circle_at_top_left,#f5f3ff_0,#f8fafc_45%,#ffffff_100%)]',
+    accentGrad: 'from-violet-500 to-fuchsia-400',
+    accentText: 'text-violet-600',
+    focusRing: 'focus:border-violet-500 focus:ring-violet-500/10',
+    buttonBg: 'bg-violet-600 hover:bg-violet-700 shadow-violet-600/20',
+    glyph: 'P',
+    demoUser: 'benhnhan01',
+    demoPass: '123456',
+    redirectPath: '/patient'
   }
 }
 

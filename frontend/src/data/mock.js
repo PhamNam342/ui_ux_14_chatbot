@@ -98,3 +98,33 @@ export const patientMedicalRecords = [
   { month: '04/2026', issue: 'Theo dõi tim mạch', detail: 'Đau ngực nhẹ khi vận động', history: 'Tiền sử huyết áp cao nhẹ' },
   { month: '01/2026', issue: 'Viêm dạ dày', detail: 'Đau bụng thượng vị, ợ chua', history: 'Tiền sử viêm dạ dày tái phát' },
 ]
+
+export const consultationHistory = [
+  {
+    code: 'CA250501-004',
+    patient: 'Nguyễn Thị Lan',
+    initials: 'NL',
+    symptoms: 'Ho, đau họng',
+    time: '25/05/2026 09:30',
+    rating: 5,
+    diagnosis: 'Viêm họng cấp, kê đơn thuốc ho thảo dược.',
+    feedback: [
+      { author: 'Nguyễn Thị Lan', time: '10:00', text: 'Bác sĩ tư vấn rất nhiệt tình và chu đáo!' }
+    ]
+  }
+]
+
+export const advisorConversations = [
+  {
+    id: 'conv-01',
+    question: 'Tôi bị đau thượng vị âm ỉ kèm theo ợ chua nhiều lần trong ngày, có cần đi khám không?',
+    answer: 'Có thể bạn đang gặp tình trạng viêm loét dạ dày tá tràng hoặc trào ngược dạ dày thực quản. Hãy điều chỉnh chế độ ăn uống, tránh đồ cay nóng và chua. Nếu triệu chứng dai dẳng, nên đi khám bác sĩ.',
+    status: 'Hoàn thành'
+  },
+  {
+    id: 'conv-02',
+    question: 'Bé nhà tôi bị sốt 38.5 độ kèm phát ban nhẹ ở tay chân, xử lý thế nào?',
+    answer: 'Trẻ có thể bị sốt virus hoặc tay chân miệng. Hãy theo dõi sát sao, lau ấm và dùng hạ sốt hạ nhiệt nếu cần. Hãy đưa bé đến bác sĩ nhi khoa khám ngay nếu có dấu hiệu mệt lả.',
+    status: 'Chưa kiểm tra'
+  }
+]
