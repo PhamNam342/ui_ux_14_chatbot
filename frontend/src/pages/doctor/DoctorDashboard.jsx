@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { CalendarPlus, Clock, CheckCircle2 } from 'lucide-react'
 import { AppShell, Avatar, Badge, Button, Card, DataTable, SearchBar, StatCard, TopBar } from '../../components/ui.jsx'
 import { cases, consultationHistory } from '../../data/mock.js'
 
@@ -53,9 +54,9 @@ export function DoctorDashboard() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          <StatCard label="Ca mới hôm nay" value="32" delta="+12% so với hôm qua" />
-          <StatCard label="Đang chờ tư vấn" value="18" tone="amber" delta="Thời gian chờ TB: 15p" />
-          <StatCard label="Đã tư vấn hôm nay" value="126" tone="blue" delta="Hoàn thành 85% mục tiêu" />
+          <StatCard label="Ca mới hôm nay" value="32" delta="+12% so với hôm qua" icon={<CalendarPlus size={20} />} />
+          <StatCard label="Đang chờ tư vấn" value="18" tone="amber" delta="Thời gian chờ TB: 15p" icon={<Clock size={20} />} />
+          <StatCard label="Đã tư vấn hôm nay" value="126" tone="blue" delta="Hoàn thành 85% mục tiêu" icon={<CheckCircle2 size={20} />} />
         </div>
 
         <Card className="mt-7">

@@ -16,17 +16,42 @@ const monthlyRevenue = {
   'MedCare Family Clinic': [520, 610, 690, 760, 840, 900],
 }
 
-const revenueBySpecialty = [
-  { label: 'Nội tổng quát', value: 45, revenue: '578,000,000đ', color: '#9de4d5' },
-  { label: 'Nhi khoa', value: 25, revenue: '321,000,000đ', color: '#14b8a6' },
-  { label: 'Sản phụ khoa', value: 20, revenue: '257,000,000đ', color: '#111827' },
-  { label: 'Khác', value: 10, revenue: '128,000,000đ', color: '#d5dbe3' },
-]
+const revenueBySpecialty = {
+  'Tất cả phòng khám': {
+    'Tháng 1': [578, 321, 257, 128], 'Tháng 2': [610, 340, 270, 140], 'Tháng 3': [640, 360, 290, 150],
+    'Tháng 4': [700, 390, 310, 160], 'Tháng 5': [740, 410, 330, 170], 'Tháng 6': [780, 430, 350, 180],
+  },
+  'Phòng khám Đa khoa Tâm An': {
+    'Tháng 1': [320, 192, 128, 0], 'Tháng 2': [350, 210, 140, 0], 'Tháng 3': [370, 220, 150, 0],
+    'Tháng 4': [400, 240, 160, 0], 'Tháng 5': [430, 260, 170, 0], 'Tháng 6': [460, 280, 180, 0],
+  },
+  'Phòng khám Tim mạch An Bình': {
+    'Tháng 1': [448, 192, 0, 0], 'Tháng 2': [480, 200, 0, 0], 'Tháng 3': [510, 210, 0, 0],
+    'Tháng 4': [540, 230, 0, 0], 'Tháng 5': [570, 240, 0, 0], 'Tháng 6': [600, 250, 0, 0],
+  },
+  'MedCare Family Clinic': {
+    'Tháng 1': [208, 182, 130, 0], 'Tháng 2': [220, 190, 140, 0], 'Tháng 3': [235, 200, 150, 0],
+    'Tháng 4': [250, 215, 160, 0], 'Tháng 5': [265, 230, 170, 0], 'Tháng 6': [280, 245, 180, 0],
+  },
+}
+
+const specialtyLabels = {
+  'Tất cả phòng khám': ['Nội tổng quát', 'Nhi khoa', 'Sản phụ khoa', 'Khác'],
+  'Phòng khám Đa khoa Tâm An': ['Nội tổng quát', 'Nhi khoa', 'Da liễu'],
+  'Phòng khám Tim mạch An Bình': ['Tim mạch', 'Nội tổng quát'],
+  'MedCare Family Clinic': ['Gia đình', 'Nhi khoa', 'Dinh dưỡng'],
+}
+
+const SPEC_COLORS = ['#08ad8c', '#08ad8c', '#08ad8c', '#08ad8c']
+
+const MONTHS = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6']
 
 export function AdminRevenue() {
   const [range, setRange] = useState('Tuần')
   const [clinic, setClinic] = useState('Tất cả phòng khám')
   const [period, setPeriod] = useState('Tháng')
+  const [specClinic, setSpecClinic] = useState('Tất cả phòng khám')
+  const [specMonth, setSpecMonth] = useState('Tháng 1')
   const points = chartData[range]
   const bars = clinic === 'Tất cả phòng khám'
     ? [1980, 2240, 2460, 2740, 3050, 3270]
@@ -75,23 +100,74 @@ export function AdminRevenue() {
         </Card>
 
         <Card className="mt-7">
-          <div><h2 className="section-title">Doanh thu theo {period.toLowerCase()} của từng phòng khám</h2><p className="text-sm text-slate-500">{clinic}</p></div>
-          <RevenueBarChart values={bars} period={period} />
+          <div className="grid gap-6 md:grid-cols-[1fr_260px]">
+            <div>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+                <div>
+                  <h2 className="section-title !mb-0">Doanh thu theo chuyên khoa</h2>
+                  <p className="text-sm text-slate-400 mt-1">X: Chuyên khoa – Y: Doanh thu (triệu VNĐ)</p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <select className="input !py-1.5 !text-sm" value={specClinic} onChange={e => setSpecClinic(e.target.value)}>
+                    {clinics.map(c => <option key={c}>{c}</option>)}
+                  </select>
+                  <select className="input !py-1.5 !text-sm" value={specMonth} onChange={e => setSpecMonth(e.target.value)}>
+                    {MONTHS.map(m => <option key={m}>{m}</option>)}
+                  </select>
+                </div>
+              </div>
+              <SpecBarChart
+                values={revenueBySpecialty[specClinic]?.[specMonth] ?? []}
+                labels={specialtyLabels[specClinic] ?? []}
+              />
+            </div>
+            <div className="flex items-center justify-center">
+              {(() => {
+                const vals = revenueBySpecialty[specClinic]?.[specMonth] ?? []
+                const total = vals.filter(v => v > 0).reduce((a, b) => a + b, 0)
+                return (
+                  <div className="w-full rounded-2xl bg-gradient-to-br from-teal-50 to-emerald-100 border border-teal-200 p-6 text-center">
+                    <p className="text-sm text-teal-600 font-semibold mb-1">{specClinic === 'Tất cả phòng khám' ? 'Tất cả cơ sở' : specClinic}</p>
+                    <p className="text-xs text-teal-500 mb-4">{specMonth}</p>
+                    <p className="text-3xl font-black text-teal-700">{total.toLocaleString('vi-VN')}</p>
+                    <p className="text-sm text-teal-500 mt-1">triệu VNĐ</p>
+                    <div className="mt-4 pt-4 border-t border-teal-200">
+                      <p className="text-xs text-teal-400 uppercase tracking-wide">Tổng doanh thu tháng</p>
+                    </div>
+                  </div>
+                )
+              })()}
+            </div>
+          </div>
         </Card>
 
         <div className="mt-7 grid gap-7 lg:grid-cols-2">
           <Card>
-            <h2 className="section-title">Doanh thu theo chuyên khoa</h2>
+            <h2 className="section-title">Tỷ lệ doanh thu theo chuyên khoa</h2>
             <div className="revenue-donut-wrap">
               <div className="donut revenue-donut" />
               <div className="donut-legend">
-                {revenueBySpecialty.map((item) => (
+                {[
+                  { label: 'Nội tổng quát', value: 45, revenue: '578,000,000đ', color: '#9de4d5' },
+                  { label: 'Nhi khoa', value: 25, revenue: '321,000,000đ', color: '#14b8a6' },
+                  { label: 'Sản phụ khoa', value: 20, revenue: '257,000,000đ', color: '#111827' },
+                  { label: 'Khác', value: 10, revenue: '128,000,000đ', color: '#d5dbe3' },
+                ].map(item => (
                   <div key={item.label}><span style={{ background: item.color }} /><b>{item.label}</b><em>{item.revenue} · {item.value}%</em></div>
                 ))}
               </div>
             </div>
           </Card>
-          <Card><h2 className="section-title">Bác sĩ doanh thu cao</h2>{['BS. Nguyễn Văn A','BS. Trần Đức B','BS. Lê Thị C','BS. Phạm Văn D'].map((name, i) => <div className="leader" key={name}><span className="avatar avatar-violet"><Star size={15} fill="currentColor" /></span><div><b>{name}</b><p>{['Nội tổng quát','Nhi khoa','Sản phụ khoa','Da liễu'][i]}</p></div><strong>{[342,285,210,195][i]},000,000đ</strong></div>)}</Card>
+          <Card>
+            <h2 className="section-title">Bác sĩ doanh thu cao</h2>
+            {['BS. Nguyễn Văn A','BS. Trần Đức B','BS. Lê Thị C','BS. Phạm Văn D'].map((name, i) => (
+              <div className="leader" key={name}>
+                <span className="avatar avatar-violet"><Star size={15} fill="currentColor" /></span>
+                <div><b>{name}</b><p>{['Nội tổng quát','Nhi khoa','Sản phụ khoa','Da liễu'][i]}</p></div>
+                <strong>{[342,285,210,195][i]},000,000đ</strong>
+              </div>
+            ))}
+          </Card>
         </div>
       </div>
     </AppShell>
@@ -106,9 +182,26 @@ function RevenueBarChart({ values, period }) {
     <div className="revenue-bars mt-7">
       {values.map((value, index) => (
         <div className="revenue-bar" key={labels[index]}>
-          <strong>{value}</strong>
+          <strong>{value}tr</strong>
           <span style={{ height: `${Math.max((value / max) * 220, 24)}px` }} />
           <small>{labels[index]}</small>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function SpecBarChart({ values, labels }) {
+  const filtered = values.map((v, i) => ({ v, label: labels[i] })).filter(item => item.v > 0)
+  if (!filtered.length) return <div className="mt-6 py-8 text-center text-slate-400 text-sm">Không có dữ liệu</div>
+  const max = Math.max(...filtered.map(item => item.v))
+  return (
+    <div className="revenue-bars mt-6">
+      {filtered.map((item) => (
+        <div className="revenue-bar" key={item.label}>
+          <strong style={{ color: '#08ad8c' }}>{item.v}</strong>
+          <span style={{ height: `${Math.max((item.v / max) * 220, 24)}px`, background: '#08ad8c' }} />
+          <small>{item.label}</small>
         </div>
       ))}
     </div>
@@ -134,7 +227,7 @@ function RevenueLineChart({ points }) {
         {coords.map((point, index) => (
           <g key={point.x}>
             <circle cx={point.x} cy={point.y} r="6" fill="#08ad8c" stroke="#fff" strokeWidth="4" />
-            <text x={point.x} y={point.y - 18} textAnchor="middle" className="chart-value">{point.value}</text>
+            <text x={point.x} y={point.y - 18} textAnchor="middle" className="chart-value">{point.value}tr</text>
             <text x={point.x} y="318" textAnchor="middle" className="chart-label">Kỳ {index + 1}</text>
           </g>
         ))}

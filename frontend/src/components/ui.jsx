@@ -19,9 +19,14 @@ import {
   Plus,
   Search,
   Settings,
+  Wallet,
   Users,
   Video,
+  HeartPulse,
+  Pill,
+  AlarmClockCheck,
 } from 'lucide-react'
+import { patientUser } from '../data/mock.js'
 
 function clsx(...values) {
   return values.flat().filter(Boolean).join(' ')
@@ -67,11 +72,24 @@ export function TopBar({ legacy = false }) {
   const path = window.location.pathname
   const isAdmin = path.startsWith('/admin')
   const isAdvisor = path.startsWith('/advisor')
+  const isPatient = path.startsWith('/patient')
   const profile = isAdmin
     ? { name: 'Admin', subtitle: 'Quản trị hệ thống', initials: 'A', email: 'admin@medconsult.vn' }
     : isAdvisor
       ? { name: 'Chuyên gia dữ liệu', subtitle: 'Cố vấn y khoa', initials: 'CG', email: 'advisor@medconsult.vn' }
-      : { name: 'Dr. Alexander', subtitle: 'Bác sĩ tư vấn', initials: 'DA', email: 'alexander@medconsult.vn' }
+      : isPatient
+        ? {
+            name: patientUser.name,
+            subtitle: 'Bệnh nhân',
+            initials: patientUser.name
+              .split(' ')
+              .slice(-2)
+              .map((part) => part[0])
+              .join('')
+              .toUpperCase(),
+            email: patientUser.email,
+          }
+        : { name: 'Dr. Alexander', subtitle: 'Bác sĩ tư vấn', initials: 'DA', email: 'alexander@medconsult.vn' }
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState('profile')
   const [notifyOpen, setNotifyOpen] = useState(false)
@@ -86,7 +104,10 @@ export function TopBar({ legacy = false }) {
     <header className={clsx('topbar', legacy && 'legacy-topbar')}>
       <button className="icon-btn"><Search size={17} /></button>
       <div className="relative">
-        <button className="icon-btn" onClick={() => setNotifyOpen((value) => !value)}><Bell size={17} /></button>
+        <button className="icon-btn" onClick={() => setNotifyOpen((value) => !value)}>
+          <Bell size={17} />
+          {notifications.length > 0 && <span className="notify-badge">{notifications.length}</span>}
+        </button>
         {notifyOpen && (
           <div className="notify-menu">
             <h3>Thông báo</h3>
@@ -167,6 +188,8 @@ export function AppShell({ role, children, legacy = false }) {
     patient: [
       { to: '/patient', label: 'Dashboard', icon: <LayoutDashboard size={18} />, end: true },
       { to: '/patient/booking', label: 'Đặt lịch khám', icon: <MapPinned size={18} /> },
+      { to: '/patient/appointments', label: 'Lịch khám', icon: <CalendarDays size={18} /> },
+      { to: '/patient/billing', label: 'Hóa đơn', icon: <Wallet size={18} /> },
       { to: '/patient/consult', label: 'Tư vấn trực tuyến', icon: <Video size={18} /> },
       { to: '/patient/records', label: 'Hồ sơ bệnh án', icon: <NotebookPen size={18} /> },
       { to: '/patient/history', label: 'Lịch sử khám bệnh', icon: <ClipboardList size={18} /> },

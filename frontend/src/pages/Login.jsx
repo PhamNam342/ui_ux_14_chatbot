@@ -205,6 +205,15 @@ export function Login() {
               </a>
             </div>
 
+            {role === 'patient' && (
+              <div className="pt-1 text-sm text-center">
+                <span className="text-slate-500">Chưa có tài khoản? </span>
+                <Link to="/register/patient" className={`font-semibold hover:underline ${config.accentText}`}>
+                  Đăng ký
+                </Link>
+              </div>
+            )}
+
             {/* Submit Button */}
             <button
               type="submit"

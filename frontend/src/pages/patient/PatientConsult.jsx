@@ -10,6 +10,8 @@ export function PatientConsult() {
   ])
   const [attachments, setAttachments] = useState([])
   const [danger, setDanger] = useState(false)
+  const [doctorUnlocked, setDoctorUnlocked] = useState(false)
+  const [toast, setToast] = useState('')
   const [doctorMessages, setDoctorMessages] = useState([
     { from: 'doctor', text: 'Chào bạn, tôi là BS. Trần Thị Hoa. Bạn mô tả rõ hơn triệu chứng nhé.', time: '09:12' },
   ])
@@ -20,10 +22,10 @@ export function PatientConsult() {
     const userText = input.trim() || 'Tôi gửi kèm hình ảnh mô tả triệu chứng.'
     const next = [...messages, { from: 'user', text: userText, time: '09:03' }]
     const normalized = userText.toLowerCase()
-    if (normalized.includes('đau đầu')) {
+    if (normalized.includes('đau đầu') || normalized.includes('khó thở') || normalized.includes('tức ngực') || normalized.includes('choáng')) {
       next.push({
         from: 'bot',
-        text: 'Cảnh báo: đau đầu kéo dài hoặc dữ dội có thể là dấu hiệu nguy hiểm. Bạn có muốn chuyển sang tư vấn với bác sĩ ngay không?',
+        text: 'Cảnh báo: Hệ thống phát hiện dấu hiệu nguy hiểm. Bạn có thể chuyển sang tư vấn bác sĩ ngay. Phiên tư vấn bác sĩ sẽ mất phí 180.000đ/lượt.',
         time: '09:04',
       })
       setDanger(true)
@@ -39,6 +41,18 @@ export function PatientConsult() {
     setAttachments([])
   }
 
+  function unlockDoctorConsult() {
+    setDoctorUnlocked(true)
+    setMode('doctor')
+    setDanger(false)
+    setToast('Đã kết nối tư vấn bác sĩ')
+    window.setTimeout(() => setToast(''), 2200)
+    setMessages((current) => [
+      ...current,
+      { from: 'bot', text: 'Bạn đã xác nhận chi phí. Hệ thống đang kết nối bạn với bác sĩ trực tuyến.', time: '09:05' },
+    ])
+  }
+
   function sendDoctorMessage() {
     if (!doctorInput.trim()) return
     setDoctorMessages((current) => [...current, { from: 'user', text: doctorInput, time: '09:14' }])
@@ -52,7 +66,13 @@ export function PatientConsult() {
         <PageHeader title="Tư vấn trực tuyến" subtitle="Chọn chatbot để hỏi nhanh hoặc chuyển sang tư vấn trực tiếp với bác sĩ." />
         <div className="segmented mb-7">
           <button className={mode === 'chatbot' ? 'active' : ''} onClick={() => setMode('chatbot')}>Chatbot</button>
-          <button className={mode === 'doctor' ? 'active' : ''} onClick={() => setMode('doctor')}>Bác sĩ</button>
+          <button
+            className={`${mode === 'doctor' ? 'active' : ''} ${!doctorUnlocked ? 'is-disabled' : ''}`}
+            disabled={!doctorUnlocked}
+            onClick={() => setMode('doctor')}
+          >
+            Bác sĩ
+          </button>
         </div>
         {mode === 'chatbot' ? (
           <div className="grid gap-7 xl:grid-cols-[1fr_360px]">
@@ -91,7 +111,17 @@ export function PatientConsult() {
               <h2 className="section-title">Gợi ý hướng xử lý</h2>
               <p className="mt-4 text-sm leading-7 text-slate-500">Nếu chatbot nhận thấy dấu hiệu nguy hiểm, hệ thống sẽ đề nghị chuyển sang bác sĩ ngay để được tư vấn trực tiếp.</p>
               <Button className="mt-6 w-full justify-center" onClick={() => setInput('Tôi đau đầu dữ dội và choáng váng.')}>Mô phỏng ca nghiêm trọng</Button>
-              {danger && <Button variant="dark" className="mt-3 w-full justify-center" onClick={() => setMode('doctor')}>Đồng ý chuyển sang bác sĩ</Button>}
+              {danger && (
+                <Card className="mt-4 border-red-200 bg-red-50 consult-alert">
+                  <p className="text-sm text-red-800 font-semibold">
+                    Chuyển sang bác sĩ sẽ phát sinh <b>180.000đ</b> cho một phiên tư vấn trực tuyến.
+                  </p>
+                  <div className="mt-3 flex gap-2">
+                    <Button className="flex-1 justify-center" onClick={unlockDoctorConsult}>Xác nhận chuyển bác sĩ</Button>
+                    <Button variant="ghost" className="flex-1 justify-center" onClick={() => setDanger(false)}>Từ chối</Button>
+                  </div>
+                </Card>
+              )}
             </Card>
           </div>
         ) : (
@@ -118,8 +148,13 @@ export function PatientConsult() {
                   <Paperclip size={16} />
                   <input hidden type="file" accept="image/*" />
                 </label>
-                <input value={doctorInput} onChange={(event) => setDoctorInput(event.target.value)} placeholder="Nhập tin nhắn cho bác sĩ..." />
-                <Button onClick={sendDoctorMessage}><Send size={17} /> Gửi</Button>
+                <input
+                  value={doctorInput}
+                  onChange={(event) => setDoctorInput(event.target.value)}
+                  placeholder="Nhập tin nhắn cho bác sĩ..."
+                  disabled={!doctorUnlocked}
+                />
+                <Button onClick={sendDoctorMessage} disabled={!doctorUnlocked}><Send size={17} /> Gửi</Button>
               </div>
             </Card>
             <Card>
@@ -132,6 +167,7 @@ export function PatientConsult() {
             </Card>
           </div>
         )}
+        {toast && <div className="toast"><span>✓</span> {toast}</div>}
       </div>
     </AppShell>
   )

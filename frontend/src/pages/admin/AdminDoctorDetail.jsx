@@ -16,6 +16,8 @@ export function AdminDoctorDetail() {
     spec: doctor.spec,
     phone: doctor.phone,
     room: doctor.room,
+    username: doctor.email ? doctor.email.split('@')[0] : 'doctor.account',
+    password: '••••••••',
   })
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [toast, setToast] = useState('')
@@ -110,6 +112,26 @@ export function AdminDoctorDetail() {
                 <span className="field-label">Phòng khám</span>
                 <input className="input" value={form.room} onChange={(event) => updateField('room', event.target.value)} />
               </label>
+              
+              <div className="sm:col-span-2 mt-4 pt-4 border-t border-slate-100">
+                <h3 className="font-bold text-slate-800 mb-4">Tài khoản & Mật khẩu</h3>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="block">
+                    <span className="field-label">Tên đăng nhập</span>
+                    <input className="input bg-slate-50 text-slate-500" value={form.username} readOnly />
+                  </label>
+                  <label className="block">
+                    <span className="field-label">Cấp lại mật khẩu</span>
+                    <div className="flex gap-2">
+                      <input className="input" type="password" value={form.password} onChange={(event) => updateField('password', event.target.value)} />
+                      <Button variant="outline" className="px-4 shrink-0" onClick={() => {
+                        setToast('Đã cấp lại mật khẩu cho bác sĩ')
+                        window.setTimeout(() => setToast(''), 2200)
+                      }}>Đổi mật khẩu</Button>
+                    </div>
+                  </label>
+                </div>
+              </div>
             </div>
           </Card>
         </div>

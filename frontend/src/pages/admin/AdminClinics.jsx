@@ -41,6 +41,9 @@ const clinics = [
 export function AdminClinics() {
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('Tất cả trạng thái')
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [toast, setToast] = useState('')
+  const [newClinic, setNewClinic] = useState({ name: '', address: '', phone: '' })
 
   const filteredClinics = useMemo(() => {
     const normalized = query.trim().toLowerCase()
@@ -71,7 +74,7 @@ export function AdminClinics() {
         <PageHeader
           title="Quản lý các phòng khám"
           subtitle="Theo dõi thông tin vận hành, địa chỉ, bác sĩ và đánh giá của từng phòng khám."
-          action={<Button><Plus size={18} /> Thêm phòng khám</Button>}
+          action={<Button onClick={() => setShowAddModal(true)}><Plus size={18} /> Thêm phòng khám</Button>}
         />
 
         <div className="grid gap-5 lg:grid-cols-4">
@@ -124,6 +127,39 @@ export function AdminClinics() {
           <DataTable columns={columns} rows={filteredClinics} footer={false} />
         </div>
       </div>
+
+      {showAddModal && (
+        <div className="modal-backdrop">
+          <Card className="modal">
+            <h2 className="text-2xl font-black">Thêm phòng khám mới</h2>
+            <div className="mt-6 grid gap-4">
+              <label className="block">
+                <span className="field-label">Tên phòng khám</span>
+                <input className="input" value={newClinic.name} onChange={(e) => setNewClinic({ ...newClinic, name: e.target.value })} placeholder="VD: Phòng khám Đa khoa Tâm An" />
+              </label>
+              <label className="block">
+                <span className="field-label">Địa chỉ</span>
+                <input className="input" value={newClinic.address} onChange={(e) => setNewClinic({ ...newClinic, address: e.target.value })} placeholder="Địa chỉ cơ sở" />
+              </label>
+              <label className="block">
+                <span className="field-label">Số điện thoại liên hệ</span>
+                <input className="input" value={newClinic.phone} onChange={(e) => setNewClinic({ ...newClinic, phone: e.target.value })} placeholder="0901234567" />
+              </label>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <Button variant="ghost" onClick={() => setShowAddModal(false)}>Hủy</Button>
+              <Button onClick={() => {
+                setToast('Đã thêm phòng khám thành công')
+                window.setTimeout(() => setToast(''), 2200)
+                setShowAddModal(false)
+                setNewClinic({ name: '', address: '', phone: '' })
+              }}>Thêm phòng khám</Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {toast && <div className="toast"><span>✓</span> {toast}</div>}
     </AppShell>
   )
 }

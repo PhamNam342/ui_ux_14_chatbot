@@ -60,10 +60,20 @@ export const clinics = [
 
 export const doctorAvailability = [
   { id: 'AV-01', clinicId: 'C-01', doctor: 'BS. Nguyễn Văn Minh', spec: 'Nội tổng quát', slot: '09:00', day: 'Hôm nay', free: true, rating: 4.9, exp: '12 năm', about: 'Chuyên điều trị bệnh nội khoa và tư vấn điều trị dài hạn.', slots: ['09:00', '10:30', '15:00'] },
-  { id: 'AV-02', clinicId: 'C-01', doctor: 'BS. Vũ Thanh Lam', spec: 'Nội tổng quát', slot: '13:30', day: 'Ngày mai', free: true, rating: 4.8, exp: '9 năm', about: 'Theo dõi sức khoẻ tổng quát, tiêu hoá và hô hấp.', slots: ['13:30', '14:00', '16:30'] },
+  { id: 'AV-02', clinicId: 'C-01', doctor: 'BS. Vũ Thanh Lam', spec: 'Tiêu hóa', slot: '13:30', day: 'Ngày mai', free: true, rating: 4.8, exp: '9 năm', about: 'Theo dõi sức khoẻ tổng quát, tiêu hoá và hô hấp.', slots: ['13:30', '14:00', '16:30'] },
+  { id: 'AV-06', clinicId: 'C-01', doctor: 'BS. Đỗ Gia Huy', spec: 'Hô hấp', slot: '08:00', day: 'Hôm nay', free: true, rating: 4.7, exp: '8 năm', about: 'Chuyên tư vấn bệnh hô hấp và dị ứng theo mùa.', slots: ['08:00', '09:00', '16:30'] },
   { id: 'AV-03', clinicId: 'C-02', doctor: 'BS. Trần Thị Hoa', spec: 'Tim mạch', slot: '14:00', day: 'Ngày mai', free: true, rating: 5.0, exp: '15 năm', about: 'Khám chuyên sâu bệnh lý tim mạch và theo dõi huyết áp.', slots: ['14:00', '15:30', '16:00'] },
   { id: 'AV-04', clinicId: 'C-02', doctor: 'BS. Lê Quốc Bảo', spec: 'Tim mạch', slot: '18:00', day: 'Thứ 6', free: true, rating: 4.7, exp: '11 năm', about: 'Tư vấn tim mạch từ xa và đọc kết quả cận lâm sàng.', slots: ['18:00', '19:00'] },
+  { id: 'AV-07', clinicId: 'C-02', doctor: 'BS. Ngô Văn Sơn', spec: 'Thần kinh', slot: '10:30', day: 'Hôm nay', free: true, rating: 4.8, exp: '13 năm', about: 'Khám đau đầu, chóng mặt, rối loạn giấc ngủ.', slots: ['10:30', '13:30', '15:00'] },
   { id: 'AV-05', clinicId: 'C-03', doctor: 'BS. Lê Quốc An', spec: 'Nhi khoa', slot: '08:30', day: 'Thứ 6', free: true, rating: 4.8, exp: '10 năm', about: 'Khám nhi khoa tổng quát và theo dõi tăng trưởng cho trẻ.', slots: ['08:30', '09:30', '10:30'] },
+  { id: 'AV-08', clinicId: 'C-03', doctor: 'BS. Phan Minh Đức', spec: 'Tai mũi họng', slot: '15:00', day: 'Ngày mai', free: true, rating: 4.6, exp: '7 năm', about: 'Tư vấn viêm mũi dị ứng và bệnh lý tai mũi họng thường gặp.', slots: ['15:00', '16:30', '18:00'] },
+]
+
+export const patientBills = [
+  { id: 'INV-2505-001', date: '2026-05-23', type: 'Khám trực tiếp', item: 'Khám tim mạch tổng quát', amount: 450000, status: 'Đã thanh toán', method: 'Thẻ ngân hàng' },
+  { id: 'INV-2505-002', date: '2026-05-18', type: 'Tư vấn trực tuyến', item: 'Tư vấn triệu chứng sốt, ho', amount: 180000, status: 'Đã thanh toán', method: 'Ví điện tử' },
+  { id: 'INV-2505-003', date: '2026-05-30', type: 'Khám trực tiếp', item: 'Khám nội tổng quát', amount: 320000, status: 'Chưa thanh toán', method: 'Thanh toán tại quầy' },
+  { id: 'INV-2506-001', date: '2026-06-02', type: 'Tư vấn trực tuyến', item: 'Tái khám trực tuyến', amount: 150000, status: 'Chưa thanh toán', method: 'Chờ xác nhận' },
 ]
 
 export const patientHistory = [

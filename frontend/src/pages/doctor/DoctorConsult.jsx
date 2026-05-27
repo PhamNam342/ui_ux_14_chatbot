@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Camera, Mic, PhoneOff, Plus, Search, Send, Video } from 'lucide-react'
+import { Camera, Mic, MicOff, PhoneOff, Plus, Search, Send, Video, VideoOff } from 'lucide-react' // Đã bổ sung MicOff và VideoOff
 import { AppShell, Avatar, Badge, Button, Card } from '../../components/ui.jsx'
 
 const initialMessages = [
@@ -13,6 +13,10 @@ export function DoctorConsult() {
   const navigate = useNavigate()
   const [messages, setMessages] = useState(initialMessages)
   const [draft, setDraft] = useState('')
+
+  // Khai báo state để quản lý trạng thái bật/tắt thiết bị
+  const [micOn, setMicOn] = useState(true)
+  const [camOn, setCamOn] = useState(true)
 
   function sendMessage(event) {
     event.preventDefault()
@@ -37,17 +41,46 @@ export function DoctorConsult() {
     <AppShell role="doctor">
       <div className="consult-grid">
         <section className="space-y-5">
-            <div className="video-card">
-              <div className="patient-chip"><span /> Bệnh nhân: Trần Thị Mai</div>
+          <div className="video-card">
+            <div className="patient-chip"><span /> Bệnh nhân: Trần Thị Mai</div>
             <div className="doctor-cam">Bạn (Bác sĩ)</div>
+
+            {/* Cụm điều khiển cuộc gọi với logic xử lý bật/tắt mới */}
             <div className="call-controls">
               <button aria-label="Tìm kiếm"><Search size={18} /></button>
-              <button aria-label="Mic"><Mic size={18} /></button>
-              <button className="danger" aria-label="Kết thúc tư vấn" onClick={() => navigate('/doctor/medicine')}><PhoneOff size={18} /></button>
-              <button aria-label="Camera"><Video size={18} /></button>
+
+              {/* Nút bấm điều khiển Micro */}
+              <button
+                aria-label="Mic"
+                onClick={() => setMicOn(v => !v)}
+                style={{
+                  color: !micOn ? '#ef4444' : '',
+                  backgroundColor: !micOn ? 'rgba(239, 68, 68, 0.2)' : ''
+                }}
+              >
+                {micOn ? <Mic size={18} /> : <MicOff size={18} />}
+              </button>
+
+              {/* Nút Kết thúc tư vấn */}
+              <button className="danger" aria-label="Kết thúc tư vấn" onClick={() => navigate('/doctor/medicine')}>
+                <PhoneOff size={18} />
+              </button>
+
+              {/* Nút bấm điều khiển Camera */}
+              <button
+                aria-label="Camera"
+                onClick={() => setCamOn(v => !v)}
+                style={{
+                  color: !camOn ? '#ef4444' : '',
+                  backgroundColor: !camOn ? 'rgba(239, 68, 68, 0.2)' : ''
+                }}
+              >
+                {camOn ? <Video size={18} /> : <VideoOff size={18} />}
+              </button>
             </div>
           </div>
 
+          {/* Khung chat tin nhắn */}
           <Card className="p-0">
             <div className="chat-head"><b>Tin nhắn</b><Badge>{messages.length} tin nhắn</Badge></div>
             <div className="chat-body consult-chat-body">
@@ -63,6 +96,7 @@ export function DoctorConsult() {
           </Card>
         </section>
 
+        {/* Sidebar Thông tin bệnh nhân bên phải */}
         <aside className="space-y-5">
           <Card>
             <div className="flex justify-between gap-3">
@@ -92,7 +126,9 @@ export function DoctorConsult() {
                 <li>Đau đầu, mệt mỏi</li>
               </ul>
             </div>
-            <Link to="/doctor/cases/CA250501-001"><Button variant="outline" className="mt-5 w-full justify-center">Xem chi tiết ca bệnh</Button></Link>
+            <Link to="/doctor/cases/CA250501-001">
+              <Button variant="outline" className="mt-5 w-full justify-center">Xem chi tiết ca bệnh</Button>
+            </Link>
           </Card>
 
           <Card>
@@ -107,6 +143,7 @@ export function DoctorConsult() {
   )
 }
 
+// Các sub-components dùng nội bộ trong trang
 function Info({ label, value }) {
   return <div className="patient-meta"><small>{label}</small><span>{value}</span></div>
 }

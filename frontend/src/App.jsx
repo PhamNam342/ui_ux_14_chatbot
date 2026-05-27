@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { RoleSelect } from './pages/RoleSelect.jsx'
 import { Login } from './pages/Login.jsx'
+import { PatientRegister } from './pages/PatientRegister.jsx'
 import { AdminClinics } from './pages/admin/AdminClinics.jsx'
 import { AdminDashboard } from './pages/admin/AdminDashboard.jsx'
 import { AdminRevenue } from './pages/admin/AdminRevenue.jsx'
@@ -24,6 +25,8 @@ import { PatientConsult } from './pages/patient/PatientConsult.jsx'
 import { PatientRecords } from './pages/patient/PatientRecords.jsx'
 import { PatientHistory } from './pages/patient/PatientHistory.jsx'
 import { PatientSettings } from './pages/patient/PatientSettings.jsx'
+import { PatientAppointments } from './pages/patient/PatientAppointments.jsx'
+import { PatientBilling } from './pages/patient/PatientBilling.jsx'
 import { DoctorSettings } from './pages/doctor/DoctorSettings.jsx'
 import { AdvisorSettings } from './pages/advisor/AdvisorSettings.jsx'
 
@@ -32,6 +35,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<RoleSelect />} />
       <Route path="/login/:role" element={<Login />} />
+      <Route path="/register/patient" element={<PatientRegister />} />
 
       <Route path="/admin" element={<AdminClinics />} />
       <Route path="/admin/doctors" element={<AdminDashboard />} />
@@ -60,6 +64,8 @@ export default function App() {
 
       <Route path="/patient" element={<PatientDashboard />} />
       <Route path="/patient/booking" element={<PatientBooking />} />
+      <Route path="/patient/appointments" element={<PatientAppointments />} />
+      <Route path="/patient/billing" element={<PatientBilling />} />
       <Route path="/patient/consult" element={<PatientConsult />} />
       <Route path="/patient/records" element={<PatientRecords />} />
       <Route path="/patient/history" element={<PatientHistory />} />

@@ -1,4 +1,5 @@
 import { AppShell, Badge, Card, PageHeader, StatCard, TopBar } from '../../components/ui.jsx'
+import { CalendarDays, CheckCircle2, BellPlus } from 'lucide-react'
 
 const upcoming = [
   { date: '22/05/2026', time: '09:00', clinic: 'Phòng khám Đa khoa Tâm An', doctor: 'BS. Nguyễn Văn Minh', type: 'Khám trực tiếp' },
@@ -17,9 +18,26 @@ export function PatientDashboard() {
       <div className="content-wide">
         <PageHeader title="Dashboard bệnh nhân" subtitle="Theo dõi lịch hẹn sắp tới, các ca khám gần đây và nhắc nhở điều trị của bạn." />
         <div className="grid gap-6 lg:grid-cols-3">
-          <StatCard label="Ca khám lịch hẹn" value="02" delta="1 lịch trong ngày mai" />
-          <StatCard label="Đã khám xong" value="05" tone="blue" delta="Đã hoàn tất 1 phiên tuần này" />
-          <StatCard label="Nhắc tái khám" value="03" tone="amber" delta="Còn 2 nhắc trong tháng" />
+          <StatCard
+            label="Ca khám lịch hẹn"
+            value="02"
+            delta="1 lịch trong ngày mai"
+            icon={<CalendarDays size={18} />}
+          />
+          <StatCard
+            label="Đã khám xong"
+            value="05"
+            tone="blue"
+            delta="Đã hoàn tất 1 phiên tuần này"
+            icon={<CheckCircle2 size={18} />}
+          />
+          <StatCard
+            label="Nhắc tái khám"
+            value="03"
+            tone="amber"
+            delta="Còn 2 nhắc trong tháng"
+            icon={<BellPlus size={18} />}
+          />
         </div>
 
         <div className="mt-7 grid gap-7 lg:grid-cols-[1.12fr_0.88fr]">
