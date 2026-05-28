@@ -32,7 +32,7 @@ export function DoctorDashboard() {
     { key: 'status', label: 'TRẠNG THÁI', render: (r) => <Badge tone={statusTone(r.status)}>{r.status}</Badge> },
     { key: 'level', label: 'MỨC ĐỘ', render: (r) => <Badge tone={levelTone(r.level)}>{r.level}</Badge> },
     { key: 'symptoms', label: 'TRIỆU CHỨNG' },
-    { key: 'action', label: 'HÀNH ĐỘNG', render: (r) => <Link className="mini-btn teal" to={`/doctor/cases/${r.code}`}>Xem ca</Link> },
+    { key: 'action', label: 'HÀNH ĐỘNG', render: (r) => <Link className="mini-btn teal" to={`/doctor/patients/${r.code}`}>Xem ca</Link> },
   ]
 
   const historyColumns = [
@@ -41,7 +41,7 @@ export function DoctorDashboard() {
     { key: 'symptoms', label: 'TRIỆU CHỨNG' },
     { key: 'time', label: 'THỜI GIAN' },
     { key: 'rating', label: 'ĐÁNH GIÁ', render: (r) => <Stars value={r.rating} /> },
-    { key: 'action', label: 'CHI TIẾT', render: (r) => <Link className="mini-btn teal" to={`/doctor/cases/${r.code}`}>Chi tiết</Link> },
+    { key: 'action', label: 'CHI TIẾT', render: (r) => <Link className="mini-btn teal" to={`/doctor/patients/${r.code}`}>Chi tiết</Link> },
   ]
 
   return (

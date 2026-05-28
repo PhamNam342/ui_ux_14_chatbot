@@ -89,6 +89,7 @@ export function AdminRevenue() {
               </select>
             </div>
           </div>
+          <RevenueBarChart values={bars} period={period} />
         </Card>
 
         <Card className="mt-7">

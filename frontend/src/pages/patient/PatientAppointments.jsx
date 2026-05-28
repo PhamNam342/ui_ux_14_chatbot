@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, CalendarDays, Clock, MapPin } from 'lucide-react'
 import { Badge, Button, Card, PageHeader, TopBar, AppShell } from '../../components/ui.jsx'
@@ -64,32 +64,29 @@ function defaultAppointments() {
   ]
 }
 
+function initialAppointments() {
+  const defaults = defaultAppointments()
+  try {
+    const raw = window.localStorage.getItem('patientAppointments')
+    if (!raw) return defaults
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed) || !parsed.length) return defaults
+    const map = new Map(defaults.map((item) => [item.id, item]))
+    for (const item of parsed) map.set(item.id, item)
+    return Array.from(map.values()).sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
+  } catch {
+    return defaults
+  }
+}
+
 export function PatientAppointments() {
   const [anchor, setAnchor] = useState(() => new Date())
   const [activeDate, setActiveDate] = useState(() => toLocalISODate(new Date()))
-  const [appointments, setAppointments] = useState(() => defaultAppointments())
+  const [appointments] = useState(() => initialAppointments())
   const navigate = useNavigate()
 
   const todayISO = toLocalISODate(new Date())
   const isPastDate = activeDate < todayISO
-
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem('patientAppointments')
-      if (!raw) return
-      const parsed = JSON.parse(raw)
-      if (Array.isArray(parsed) && parsed.length) {
-        // Ưu tiên dữ liệu đã đặt (nhưng vẫn giữ demo nếu chưa có)
-        setAppointments((prev) => {
-          const map = new Map(prev.map((p) => [p.id, p]))
-          for (const item of parsed) map.set(item.id, item)
-          return Array.from(map.values()).sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
-        })
-      }
-    } catch {
-      // Ignore
-    }
-  }, [])
 
   const monthGrid = useMemo(() => getMonthGrid(anchor), [anchor])
   const activeAppointments = useMemo(() => appointments.filter((a) => a.date === activeDate), [appointments, activeDate])
@@ -223,4 +220,3 @@ export function PatientAppointments() {
     </AppShell>
   )
 }
-

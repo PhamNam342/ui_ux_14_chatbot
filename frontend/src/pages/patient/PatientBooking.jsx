@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { CalendarDays, MapPin, Search, Star } from 'lucide-react'
 import { Badge, Button, Card, PageHeader, TopBar, AppShell } from '../../components/ui.jsx'
 import { clinics, doctorAvailability } from '../../data/mock.js'
@@ -48,13 +48,6 @@ export function PatientBooking() {
   const selectedDateCategory = dateCategory(selectedDate)
   const selectedClinic = clinics.find((clinic) => clinic.id === clinicId)
 
-  useEffect(() => {
-    // Khi đổi phòng khám, reset thao tác chọn bác sĩ/ca để tránh lệch dữ liệu
-    setPreviewDoctor(null)
-    setSelectedDoctor(null)
-    setSelectedSlot('')
-  }, [clinicId])
-
   const clinicDoctors = useMemo(
     () => {
       if (!clinicId) return []
@@ -75,6 +68,13 @@ export function PatientBooking() {
   })
 
   const specialties = ['Tất cả chuyên khoa', ...new Set(doctorAvailability.map((item) => item.spec))]
+
+  function selectClinic(id) {
+    setClinicId(id)
+    setPreviewDoctor(null)
+    setSelectedDoctor(null)
+    setSelectedSlot('')
+  }
 
   function confirmBooking() {
     if (!selectedDoctor || !selectedSlot || !clinicId) return
@@ -147,7 +147,7 @@ export function PatientBooking() {
             <h2 className="section-title">Danh sách bệnh viện</h2>
             <div className="mt-5 space-y-4">
               {clinics.map((clinic) => (
-                <button key={clinic.id} className={`clinic-card ${clinicId === clinic.id ? 'active' : ''}`} onClick={() => setClinicId(clinic.id)}>
+                <button key={clinic.id} className={`clinic-card ${clinicId === clinic.id ? 'active' : ''}`} onClick={() => selectClinic(clinic.id)}>
                   <div><b>{clinic.name}</b><p>{clinic.address}</p></div>
                   <div className="flex flex-col items-end text-right">
                     <strong className="flex items-center gap-1">{clinic.rating}<Star size={14} className="fill-amber-400 text-amber-400" /></strong>

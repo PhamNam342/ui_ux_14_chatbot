@@ -126,7 +126,7 @@ export function DoctorConsult() {
                 <li>Đau đầu, mệt mỏi</li>
               </ul>
             </div>
-            <Link to="/doctor/cases/CA250501-001">
+            <Link to="/doctor/patients/CA250501-001">
               <Button variant="outline" className="mt-5 w-full justify-center">Xem chi tiết ca bệnh</Button>
             </Link>
           </Card>
