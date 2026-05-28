@@ -187,10 +187,10 @@ export function AppShell({ role, children, legacy = false }) {
     ],
     patient: [
       { to: '/patient', label: 'Dashboard', icon: <LayoutDashboard size={18} />, end: true },
+      { to: '/patient/consult', label: 'Tư vấn trực tuyến', icon: <Video size={18} /> },
       { to: '/patient/booking', label: 'Đặt lịch khám', icon: <MapPinned size={18} /> },
       { to: '/patient/appointments', label: 'Lịch khám', icon: <CalendarDays size={18} /> },
       { to: '/patient/billing', label: 'Hóa đơn', icon: <Wallet size={18} /> },
-      { to: '/patient/consult', label: 'Tư vấn trực tuyến', icon: <Video size={18} /> },
       { to: '/patient/records', label: 'Hồ sơ bệnh án', icon: <NotebookPen size={18} /> },
       { to: '/patient/history', label: 'Lịch sử khám bệnh', icon: <ClipboardList size={18} /> },
       { to: '/patient/settings', label: 'Cài đặt', icon: <CircleUserRound size={18} /> },
