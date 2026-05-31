@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, Lock, User, Eye, EyeOff, AlertCircle, Loader2, KeyRound } from 'lucide-react'
+import { ArrowLeft, Lock, User, Eye, EyeOff, AlertCircle, Loader2, KeyRound, ShieldCheck, Stethoscope, DatabaseZap, CalendarHeart } from 'lucide-react'
 import { Logo } from '../components/ui.jsx'
+import heroImage from '../assets/medical-ai-hero.png'
 
 const roleConfigs = {
   admin: {
@@ -13,6 +14,7 @@ const roleConfigs = {
     focusRing: 'focus:border-teal-500 focus:ring-teal-500/10',
     buttonBg: 'bg-teal-600 hover:bg-teal-700 shadow-teal-600/20',
     glyph: 'A',
+    Icon: ShieldCheck,
     demoUser: 'admin',
     demoPass: 'admin',
     redirectPath: '/admin'
@@ -26,6 +28,7 @@ const roleConfigs = {
     focusRing: 'focus:border-cyan-500 focus:ring-cyan-500/10',
     buttonBg: 'bg-cyan-600 hover:bg-cyan-700 shadow-cyan-600/20',
     glyph: 'D',
+    Icon: Stethoscope,
     demoUser: 'doctor',
     demoPass: 'doctor',
     redirectPath: '/doctor'
@@ -39,6 +42,7 @@ const roleConfigs = {
     focusRing: 'focus:border-emerald-500 focus:ring-emerald-500/10',
     buttonBg: 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20',
     glyph: 'V',
+    Icon: DatabaseZap,
     demoUser: 'advisor',
     demoPass: 'advisor',
     redirectPath: '/advisor'
@@ -46,17 +50,25 @@ const roleConfigs = {
   patient: {
     title: 'Bệnh nhân',
     subtitle: 'Đặt lịch khám, tư vấn trực tuyến và theo dõi toàn bộ lịch sử điều trị cá nhân.',
-    bgGrad: 'bg-[radial-gradient(circle_at_top_left,#f5f3ff_0,#f8fafc_45%,#ffffff_100%)]',
-    accentGrad: 'from-violet-500 to-fuchsia-400',
-    accentText: 'text-violet-600',
-    focusRing: 'focus:border-violet-500 focus:ring-violet-500/10',
-    buttonBg: 'bg-violet-600 hover:bg-violet-700 shadow-violet-600/20',
+    bgGrad: 'bg-[radial-gradient(circle_at_top_left,#d9f8ef_0,#f8fafc_45%,#ffffff_100%)]',
+    accentGrad: 'from-teal-600 to-emerald-500',
+    accentText: 'text-teal-700',
+    focusRing: 'focus:border-teal-500 focus:ring-teal-500/10',
+    buttonBg: 'bg-teal-700 hover:bg-teal-800 shadow-teal-700/20',
     glyph: 'P',
+    Icon: CalendarHeart,
     demoUser: 'benhnhan01',
     demoPass: '123456',
     redirectPath: '/patient'
   }
 }
+
+const roleOptions = [
+  { key: 'patient', label: 'Patient' },
+  { key: 'admin', label: 'Admin' },
+  { key: 'doctor', label: 'Doctor' },
+  { key: 'advisor', label: 'Advisor' },
+]
 
 export function Login() {
   const { role } = useParams()
@@ -77,6 +89,12 @@ export function Login() {
   }, [role, config, navigate])
 
   if (!config) return null
+  const clearFormState = () => {
+    setUsername('')
+    setPassword('')
+    setError('')
+    setShowPassword(false)
+  }
 
   const handleLogin = (e) => {
     e.preventDefault()
@@ -106,43 +124,62 @@ export function Login() {
   }
 
   return (
-    <main className={`relative min-h-screen ${config.bgGrad} flex flex-col justify-between px-5 py-8 text-slate-900 overflow-hidden`}>
-      {/* Decorative Blur Spots */}
-      <div className={`absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-gradient-to-br ${config.accentGrad} opacity-15 blur-3xl -z-10`} />
-
-      <div className="mx-auto flex w-full max-w-md flex-col flex-1 justify-center py-6">
-        {/* Top Header Logo */}
-        <div className="flex justify-center mb-8">
+    <main className={`min-h-screen ${config.bgGrad} px-5 py-6 text-slate-900`}>
+      <div className="mx-auto grid min-h-[calc(100vh-48px)] max-w-7xl overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl shadow-slate-900/8 lg:grid-cols-[0.92fr_1.08fr]">
+        <section className="flex flex-col px-6 py-6 sm:px-10 lg:px-12">
           <Logo />
-        </div>
 
-        {/* Login Card */}
-        <div className="relative bg-white/85 backdrop-blur-md border border-slate-200/60 shadow-xl rounded-2xl p-8 w-full transition-all duration-300">
-          {/* Top Decorative Line */}
-          <div className={`absolute top-0 left-0 right-0 h-1.5 rounded-t-2xl bg-gradient-to-r ${config.accentGrad}`} />
+          <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-5">
+            <Link
+              to="/"
+              className="mb-5 inline-flex w-fit items-center gap-2 text-sm font-bold text-slate-500 transition-colors hover:text-slate-800"
+            >
+              <ArrowLeft size={16} />
+              <span>Quay lại</span>
+            </Link>
 
-          {/* Role Glyph Indicator */}
-          <div className="relative z-10 flex justify-center -mt-16 mb-5">
-            <div className={`grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br ${config.accentGrad} text-3xl font-black text-white shadow-lg border-4 border-white`}>
-              {config.glyph}
+            <div className="mb-4">
+              <h1 className="text-3xl font-black tracking-normal text-slate-950">Đăng nhập</h1>
             </div>
-          </div>
 
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-black tracking-tight">Đăng nhập</h1>
-            <p className="mt-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">Vai trò: {config.title}</p>
-            <p className="mt-2 text-sm text-slate-500 leading-relaxed">{config.subtitle}</p>
-          </div>
+            <div className="mb-4">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                Vai trò
+              </label>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {roleOptions.map((item) => {
+                  const itemConfig = roleConfigs[item.key]
+                  const ItemIcon = itemConfig.Icon
+                  const active = role === item.key
+
+                  return (
+                    <Link
+                      key={item.key}
+                      to={`/login/${item.key}`}
+                      onClick={item.key === role ? undefined : clearFormState}
+                      className={`flex min-h-16 flex-col items-center justify-center gap-1.5 rounded-lg border px-2 text-base font-black transition ${
+                        active
+                          ? `border-transparent bg-gradient-to-br ${itemConfig.accentGrad} text-white shadow-lg`
+                          : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-900'
+                      }`}
+                    >
+                      <ItemIcon size={22} strokeWidth={2.4} />
+                      <span>{item.label}</span>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
 
           {/* Error message block */}
           {error && (
-            <div className="mb-5 flex items-start gap-2.5 rounded-xl bg-rose-50 border border-rose-100 p-4 text-sm text-rose-600 animate-in fade-in slide-in-from-top-1 duration-200">
+            <div className="mb-5 flex items-start gap-2.5 rounded-lg bg-rose-50 border border-rose-100 p-4 text-sm text-rose-600 animate-in fade-in slide-in-from-top-1 duration-200">
               <AlertCircle size={18} className="mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-3">
             {/* Username Input */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
@@ -155,7 +192,7 @@ export function Login() {
                 <input
                   type="text"
                   disabled={loading}
-                  className={`w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 transition-all bg-white/70 ${config.focusRing} disabled:opacity-50`}
+                  className={`w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-4 transition-all bg-white ${config.focusRing} disabled:opacity-50`}
                   placeholder={`VD: ${config.demoUser}`}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -175,7 +212,7 @@ export function Login() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   disabled={loading}
-                  className={`w-full pl-10 pr-11 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 transition-all bg-white/70 ${config.focusRing} disabled:opacity-50`}
+                  className={`w-full pl-10 pr-11 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-4 transition-all bg-white ${config.focusRing} disabled:opacity-50`}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -218,7 +255,7 @@ export function Login() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-white font-extrabold shadow-lg transition-all duration-150 transform active:scale-[0.98] ${config.buttonBg} disabled:opacity-75 disabled:pointer-events-none cursor-pointer`}
+              className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-white font-extrabold shadow-lg transition-all duration-150 transform active:scale-[0.98] ${config.buttonBg} disabled:opacity-75 disabled:pointer-events-none cursor-pointer`}
             >
               {loading ? (
                 <>
@@ -234,33 +271,27 @@ export function Login() {
             </button>
           </form>
 
-          {/* Quick Sandbox Tooltip */}
-          <div className="mt-6 border-t border-slate-100 pt-5">
-            <button
-              type="button"
-              onClick={fillDemoCredentials}
-              className="w-full group flex flex-col items-center gap-1.5 p-3 rounded-xl border border-slate-100 hover:border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-all text-center cursor-pointer"
-            >
-              <span className="text-xs font-semibold text-slate-500 group-hover:text-slate-700 transition-colors">
-                Trải nghiệm nhanh? Click tự động điền tài khoản:
-              </span>
-              <span className={`text-sm font-extrabold ${config.accentText} bg-white px-3 py-1 rounded-lg border border-slate-100 shadow-sm`}>
-                {config.demoUser} / {config.demoPass}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {/* Back Link */}
-        <div className="text-center mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors group"
+          <button
+            type="button"
+            onClick={fillDemoCredentials}
+            className="mt-3 inline-flex w-full items-center justify-between gap-3 border-t border-slate-100 pt-3 text-left text-xs font-bold text-slate-400 transition hover:text-teal-700"
           >
-            <ArrowLeft size={16} className="transform group-hover:-translate-x-1 transition-transform" />
-            <span>Quay lại chọn vai trò</span>
-          </Link>
-        </div>
+            <span>Tài khoản demo</span>
+            <span className="font-extrabold text-teal-700">{config.demoUser} / {config.demoPass}</span>
+          </button>
+
+          </div>
+        </section>
+
+        <section className="relative hidden min-h-full overflow-hidden bg-slate-950 lg:block">
+          <img src={heroImage} alt="Bác sĩ tư vấn cùng trợ lý AI y tế" className="absolute inset-0 h-full w-full object-cover object-[72%_center]" />
+          <div className="absolute inset-0 bg-teal-950/8" />
+          <div className="absolute inset-0 bg-[linear-gradient(145deg,rgba(15,118,110,0.02),rgba(15,23,42,0.12))]" />
+          <div className="absolute inset-x-10 top-10 flex items-center justify-between text-white/85">
+            <span className="text-sm font-extrabold uppercase tracking-[0.18em]">MedConsult</span>
+            <span className="rounded-lg border border-white/25 px-3 py-2 text-xs font-bold">{config.title}</span>
+          </div>
+        </section>
       </div>
     </main>
   )

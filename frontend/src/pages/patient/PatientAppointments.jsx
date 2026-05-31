@@ -1,219 +1,160 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, CalendarDays, Clock, MapPin } from 'lucide-react'
-import { Badge, Button, Card, PageHeader, TopBar, AppShell } from '../../components/ui.jsx'
+import { AppShell, Badge, Card, PageHeader, TopBar } from '../../components/ui.jsx'
 import { clinics } from '../../data/mock.js'
 
-function toLocalISODate(d) {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
+function toLocalISODate(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 function getMonthGrid(anchorDate) {
   const year = anchorDate.getFullYear()
   const month = anchorDate.getMonth()
   const first = new Date(year, month, 1)
-  const firstDay = first.getDay() // 0 = Sun
-
-  // 42 cells: 6 tuần x 7 ngày
-  const start = new Date(year, month, 1 - firstDay)
-  return Array.from({ length: 42 }).map((_, idx) => {
-    const d = new Date(start)
-    d.setDate(start.getDate() + idx)
-    return d
+  const mondayOffset = (first.getDay() + 6) % 7
+  const start = new Date(year, month, 1 - mondayOffset)
+  const last = new Date(year, month + 1, 0)
+  const total = Math.ceil((mondayOffset + last.getDate()) / 7) * 7
+  return Array.from({ length: total }, (_, index) => {
+    const date = new Date(start)
+    date.setDate(start.getDate() + index)
+    return date
   })
 }
 
-function formatDateVN(isoDate) {
-  const d = new Date(`${isoDate}T00:00:00`)
-  return d.toLocaleDateString('vi-VN', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' })
+function getWeekGrid(anchorDate) {
+  const mondayOffset = (anchorDate.getDay() + 6) % 7
+  const start = new Date(anchorDate)
+  start.setDate(anchorDate.getDate() - mondayOffset)
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(start)
+    date.setDate(start.getDate() + index)
+    return date
+  })
+}
+
+function shiftFor(time) {
+  const hour = Number(time?.split(':')[0] || 0)
+  if (hour < 13) return 'morning'
+  if (hour < 18) return 'afternoon'
+  return 'evening'
 }
 
 function defaultAppointments() {
-  // Demo: lấy từ dữ liệu PatientDashboard (đổi sang ISO để render lịch)
   return [
-    {
-      id: 'demo-1',
-      date: '2026-05-22',
-      time: '09:00',
-      clinicId: 'C-01',
-      clinicName: 'Phòng khám Đa khoa Tâm An',
-      doctorName: 'BS. Nguyễn Văn Minh',
-      type: 'Khám trực tiếp',
-    },
-    {
-      id: 'demo-2',
-      date: '2026-05-23',
-      time: '14:00',
-      clinicId: 'C-02',
-      clinicName: 'Phòng khám Tim mạch An Bình',
-      doctorName: 'BS. Trần Thị Hoa',
-      type: 'Tư vấn trực tuyến',
-    },
-    {
-      id: 'demo-3',
-      date: '2026-05-18',
-      time: '08:30',
-      clinicId: 'C-03',
-      clinicName: 'MedCare Family Clinic',
-      doctorName: 'BS. Lê Hoàng Anh',
-      type: 'Khám bệnh',
-    },
+    { id: 'demo-1', date: '2026-05-22', time: '09:00', clinicId: 'C-01', clinicName: 'Phòng khám Đa khoa Tâm An', doctorName: 'BS. Nguyễn Văn Minh', type: 'Khám trực tiếp' },
+    { id: 'demo-2', date: '2026-05-23', time: '14:00', clinicId: 'C-02', clinicName: 'Phòng khám Tim mạch An Bình', doctorName: 'BS. Trần Thị Hoa', type: 'Tư vấn trực tuyến' },
+    { id: 'demo-3', date: '2026-05-18', time: '18:30', clinicId: 'C-03', clinicName: 'MedCare Family Clinic', doctorName: 'BS. Lê Hoàng Anh', type: 'Khám bệnh' },
+    { id: 'demo-4', date: '2026-05-07', time: '08:00', clinicId: 'C-01', clinicName: 'Phòng khám Đa khoa Tâm An', doctorName: 'BS. Nguyễn Văn Minh', type: 'Khám trực tiếp' },
+    { id: 'demo-5', date: '2026-05-07', time: '14:00', clinicId: 'C-02', clinicName: 'Phòng khám Tim mạch An Bình', doctorName: 'BS. Trần Thị Hoa', type: 'Khám trực tiếp' },
+    { id: 'demo-6', date: '2026-05-14', time: '09:30', clinicId: 'C-01', clinicName: 'Phòng khám Đa khoa Tâm An', doctorName: 'BS. Vũ Thanh Lam', type: 'Khám trực tiếp' },
+    { id: 'demo-7', date: '2026-05-14', time: '18:00', clinicId: 'C-02', clinicName: 'Phòng khám Tim mạch An Bình', doctorName: 'BS. Lê Quốc Bảo', type: 'Tư vấn trực tuyến' },
   ]
 }
 
 function initialAppointments() {
   const defaults = defaultAppointments()
   try {
-    const raw = window.localStorage.getItem('patientAppointments')
-    if (!raw) return defaults
-    const parsed = JSON.parse(raw)
-    if (!Array.isArray(parsed) || !parsed.length) return defaults
-    const map = new Map(defaults.map((item) => [item.id, item]))
-    for (const item of parsed) map.set(item.id, item)
-    return Array.from(map.values()).sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
+    const parsed = JSON.parse(window.localStorage.getItem('patientAppointments') || '[]')
+    if (!Array.isArray(parsed)) return defaults
+    const appointments = new Map(defaults.map((item) => [item.id, item]))
+    parsed.forEach((item) => appointments.set(item.id, item))
+    return Array.from(appointments.values())
   } catch {
     return defaults
   }
 }
 
 export function PatientAppointments() {
-  const [anchor, setAnchor] = useState(() => new Date())
-  const [activeDate, setActiveDate] = useState(() => toLocalISODate(new Date()))
+  const [anchor, setAnchor] = useState(() => new Date(2026, 4, 1))
+  const [activeDate, setActiveDate] = useState('2026-05-22')
+  const [viewMode, setViewMode] = useState('month')
   const [appointments] = useState(() => initialAppointments())
-  const navigate = useNavigate()
-
-  const todayISO = toLocalISODate(new Date())
-  const isPastDate = activeDate < todayISO
-
-  const monthGrid = useMemo(() => getMonthGrid(anchor), [anchor])
-  const activeAppointments = useMemo(() => appointments.filter((a) => a.date === activeDate), [appointments, activeDate])
-
-  const activeDayAppointmentsCount = useMemo(() => {
-    const map = new Map()
-    for (const a of appointments) {
-      map.set(a.date, (map.get(a.date) || 0) + 1)
-    }
-    return map
+  const calendarDates = useMemo(() => viewMode === 'month' ? getMonthGrid(anchor) : getWeekGrid(new Date(`${activeDate}T00:00:00`)), [anchor, activeDate, viewMode])
+  const groupedAppointments = useMemo(() => {
+    const grouped = new Map()
+    appointments.forEach((appointment) => {
+      const dayAppointments = grouped.get(appointment.date) || []
+      grouped.set(appointment.date, [...dayAppointments, appointment])
+    })
+    return grouped
   }, [appointments])
-
-  const handlePrevMonth = () => setAnchor((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))
-  const handleNextMonth = () => setAnchor((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
+  const activeAppointments = groupedAppointments.get(activeDate) || []
+  const todayISO = toLocalISODate(new Date())
+  const moveCalendar = (amount) => {
+    if (viewMode === 'month') {
+      setAnchor((date) => new Date(date.getFullYear(), date.getMonth() + amount, 1))
+      return
+    }
+    const next = new Date(`${activeDate}T00:00:00`)
+    next.setDate(next.getDate() + (amount * 7))
+    setActiveDate(toLocalISODate(next))
+    setAnchor(new Date(next.getFullYear(), next.getMonth(), 1))
+  }
 
   return (
     <AppShell role="patient">
       <TopBar />
       <div className="content-wide">
-        <PageHeader
-          title="Lịch khám"
-          subtitle="Xem lịch hẹn theo ngày và chọn ngày để xem chi tiết cuộc hẹn."
-        />
-
-        <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-          <Card className="p-5">
-            <div className="flex items-center justify-between gap-3 mb-4">
-              <div className="flex items-center gap-2 font-black">
-                <CalendarDays size={18} className="text-violet-600" />
-                <span>
-                  {anchor.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" className="px-3" onClick={() => { setAnchor(() => new Date()); setActiveDate(() => toLocalISODate(new Date())) }}>
-                  Hôm nay
-                </Button>
-                <Button variant="ghost" onClick={handlePrevMonth} className="p-2"> <ArrowLeft size={16} /> </Button>
-                <Button variant="ghost" onClick={handleNextMonth} className="p-2"> <ArrowRight size={16} /> </Button>
+        <PageHeader title="Lịch khám" subtitle="Theo dõi lịch hẹn theo tháng và chọn ngày để xem thông tin chi tiết." />
+        <div className="patient-calendar-layout">
+          <Card className="patient-month-calendar p-0">
+            <div className="patient-calendar-toolbar">
+              <button onClick={() => moveCalendar(-1)}><ArrowLeft size={20} /></button>
+              <h2>{viewMode === 'month' ? `Tháng ${anchor.getMonth() + 1}, ${anchor.getFullYear()}` : `Tuần ${calendarDates[0].toLocaleDateString('vi-VN')} - ${calendarDates[6].toLocaleDateString('vi-VN')}`}</h2>
+              <button onClick={() => moveCalendar(1)}><ArrowRight size={20} /></button>
+              <div className="patient-calendar-toggle">
+                <button className={viewMode === 'week' ? 'active' : ''} onClick={() => setViewMode('week')}>Tuần</button>
+                <button className={viewMode === 'month' ? 'active' : ''} onClick={() => setViewMode('month')}>Tháng</button>
               </div>
             </div>
-
-            <div className="grid grid-cols-7 gap-2 text-xs font-black text-slate-500 uppercase mb-3">
-              {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'].map((d) => (
-                <div key={d} className="text-center">{d}</div>
-              ))}
+            <div className="patient-calendar-weekdays">
+              {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((day) => <b key={day}>{day}</b>)}
             </div>
-
-            <div className="grid grid-cols-7 gap-2">
-              {monthGrid.map((d) => {
-                const iso = toLocalISODate(d)
-                const inMonth = d.getMonth() === anchor.getMonth()
-                const isActive = iso === activeDate
-                const count = activeDayAppointmentsCount.get(iso) || 0
-
+            <div className="patient-calendar-grid">
+              {calendarDates.map((date) => {
+                const iso = toLocalISODate(date)
+                const dayAppointments = groupedAppointments.get(iso) || []
+                const inMonth = viewMode === 'week' || date.getMonth() === anchor.getMonth()
+                const active = iso === activeDate
+                const today = iso === todayISO
                 return (
-                  <button
-                    key={iso}
-                    type="button"
-                    onClick={() => setActiveDate(iso)}
-                    className={[
-                      'relative rounded-xl border px-2 py-2 text-left transition',
-                      isActive ? 'bg-violet-600 border-violet-600 text-white' : (inMonth ? 'bg-white border-slate-200 hover:bg-slate-50' : 'bg-slate-50 border-slate-100'),
-                    ].join(' ')}
-                    aria-label={`Chọn ngày ${iso}`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <span className={['text-sm font-black', isActive ? 'text-white' : (inMonth ? 'text-slate-900' : 'text-slate-300')].join(' ')}>
-                        {d.getDate()}
-                      </span>
-                      {count > 0 && (
-                        <Badge tone="blue">{count}</Badge>
-                      )}
-                    </div>
-                    {count > 0 && (
-                      <div className="mt-2 flex items-center gap-1 flex-wrap h-1.5">
-                        {Array.from({ length: Math.min(count, 4) }).map((_, i) => (
-                           <span key={i} className={`block h-1.5 w-1.5 rounded-full ${isActive ? 'bg-violet-200' : 'bg-violet-500'}`} />
-                        ))}
+                  <button key={iso} className={`patient-calendar-day ${!inMonth ? 'muted' : ''} ${active ? 'active' : ''}`} onClick={() => setActiveDate(iso)}>
+                    <span className={today ? 'today' : ''}>{date.getDate()}</span>
+                    {dayAppointments.length > 0 && (
+                      <div className="patient-calendar-dots">
+                        {[...new Set(dayAppointments.map((item) => shiftFor(item.time)))].map((shift) => <i key={shift} className={shift} />)}
                       </div>
                     )}
+                    {dayAppointments.length > 1 && <small>{dayAppointments.length}</small>}
                   </button>
                 )
               })}
             </div>
+            <div className="patient-calendar-legend">
+              <span><i className="morning" /> Ca Sáng · 08:00 - 12:00</span>
+              <span><i className="afternoon" /> Ca Chiều · 13:00 - 17:00</span>
+              <span><i className="evening" /> Ca Tối · 18:00 - 06:00</span>
+            </div>
           </Card>
 
-          <Card className="p-5">
-            <div className="flex items-center justify-between gap-3 mb-3">
-              <div>
-                <div className="text-xs font-black uppercase text-slate-500">Ngày</div>
-                <div className="text-lg font-black">{formatDateVN(activeDate)}</div>
-              </div>
-            </div>
-
-            {activeAppointments.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/50 py-10 px-4 text-center mt-2">
-                <CalendarDays size={42} className="text-slate-300 mb-3" />
-                <div className="text-slate-500 font-semibold mb-1">Trống lịch</div>
-                <p className="text-sm text-slate-400 mb-5">Bạn chưa có lịch hẹn nào trong ngày này.</p>
-                {!isPastDate && (
-                  <Button onClick={() => navigate('/patient/booking')} className="bg-violet-100 text-violet-700 hover:bg-violet-200 border-none shadow-none">Đặt lịch ngay</Button>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {activeAppointments.map((a) => (
-                  <div key={a.id} className="rounded-xl border border-slate-200 bg-white p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="font-black">{a.type}</div>
-                        <div className="mt-1 text-sm text-slate-600">
-                          <Clock size={14} className="inline-block mr-2 text-slate-400" /> {a.time}
-                        </div>
-                        <div className="mt-1 text-sm text-slate-600">
-                          <span className="font-semibold">{a.doctorName}</span>
-                        </div>
-                        <div className="mt-1 text-sm text-slate-600">
-                          <MapPin size={14} className="inline-block mr-2 text-slate-400" /> {a.clinicName || clinics.find((c) => c.id === a.clinicId)?.name}
-                        </div>
-                      </div>
-                      <Badge tone="green">Đã đặt</Badge>
-                    </div>
+          <Card className="patient-calendar-detail">
+            <div className="flex items-center gap-3"><CalendarDays size={18} /><h2 className="section-title">Lịch hẹn khám</h2></div>
+            <p className="mt-2 text-sm text-slate-500">{new Date(`${activeDate}T00:00:00`).toLocaleDateString('vi-VN')}</p>
+            {activeAppointments.length ? (
+              <div className="mt-5 grid gap-3">
+                {activeAppointments.map((appointment) => (
+                  <div key={appointment.id} className="patient-calendar-appointment">
+                    <div><b>{appointment.type}</b><Badge tone="green">Đã đặt</Badge></div>
+                    <p><Clock size={14} /> {appointment.time} · {appointment.doctorName}</p>
+                    <p><MapPin size={14} /> {appointment.clinicName || clinics.find((clinic) => clinic.id === appointment.clinicId)?.name}</p>
                   </div>
                 ))}
               </div>
-            )}
+            ) : <p className="mt-4 text-sm text-slate-500">Bạn chưa có lịch hẹn trong ngày này.</p>}
           </Card>
         </div>
       </div>

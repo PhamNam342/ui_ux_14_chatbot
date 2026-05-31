@@ -1,110 +1,134 @@
-import { useState } from 'react'
-import { AppShell, Card, PageHeader, TopBar } from '../../components/ui.jsx'
-import { patientMedicalRecords } from '../../data/mock.js'
+import {
+  Activity,
+  CalendarCheck2,
+  ClipboardCheck,
+  FileHeart,
+  HeartPulse,
+  Pill,
+  Stethoscope,
+  Thermometer,
+  Wind,
+} from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { AppShell, Badge, Button, Card, PageHeader, TopBar } from '../../components/ui.jsx'
+import { patientHistory } from '../../data/mock.js'
+
+const metrics = [
+  { label: 'Nhịp tim', value: '72', unit: 'bpm', status: 'Bình thường', tone: 'green', icon: <HeartPulse size={18} />, trend: [64, 68, 66, 72, 69, 72], updated: '08:30 hôm nay', history: 'Gần nhất: 69 bpm · 20:15 hôm qua' },
+  { label: 'SpO2', value: '98', unit: '%', status: 'Bình thường', tone: 'green', icon: <Wind size={18} />, trend: [96, 97, 97, 98, 97, 98], updated: '08:28 hôm nay', history: 'Gần nhất: 97% · 20:12 hôm qua' },
+  { label: 'Huyết áp', value: '118/78', unit: 'mmHg', status: 'Ổn định', tone: 'teal', icon: <Activity size={18} />, trend: [72, 76, 73, 78, 75, 78], updated: '08:25 hôm nay', history: 'Gần nhất: 121/80 · 20:10 hôm qua' },
+  { label: 'BMI', value: '22.4', unit: 'kg/m²', status: 'Cần theo dõi', tone: 'amber', icon: <ClipboardCheck size={18} />, trend: [23, 22, 22, 23, 22, 22], updated: '24/05/2026', history: 'Gần nhất: 22.7 kg/m² · tháng trước' },
+  { label: 'Nhiệt độ', value: '36.7', unit: '°C', status: 'Bình thường', tone: 'green', icon: <Thermometer size={18} />, trend: [37, 36, 37, 37, 36, 37], updated: '08:20 hôm nay', history: 'Gần nhất: 36.8°C · 20:05 hôm qua' },
+]
+
+const diagnoses = [
+  { issue: 'Viêm họng cấp', detail: 'Sốt, ho khan, đau họng kéo dài', date: '18/05/2026', doctor: 'BS. Nguyễn Văn Minh', status: 'Đang điều trị', tone: 'green' },
+  { issue: 'Theo dõi tim mạch', detail: 'Đau ngực nhẹ khi vận động', date: '05/04/2026', doctor: 'BS. Trần Thị Hoa', status: 'Theo dõi', tone: 'yellow' },
+  { issue: 'Viêm dạ dày', detail: 'Đau bụng thượng vị, ợ chua', date: '12/01/2026', doctor: 'BS. Vũ Thanh Lam', status: 'Tái khám', tone: 'blue' },
+]
+
+const monthVisits = [2, 1, 3, 2, 4, 2]
+const diagnosisTrend = [1, 1, 2, 2, 3, 3]
 
 export function PatientRecords() {
-  const [metric, setMetric] = useState('heart_rate')
-
-  const chartData = {
-    heart_rate: [72, 75, 80, 78, 85, 76],
-    spo2: [98, 97, 96, 98, 95, 99],
-    illness: [1, 0, 2, 0, 1, 0]
-  }
-
-  const trend = chartData[metric]
-  const max = Math.max(...trend)
-  const min = Math.min(...trend)
-  const range = max === min ? 1 : max - min
-
-  const points = trend
-    .map((value, idx) => {
-      const x = 20 + idx * 70
-      const y = 160 - ((value - min) / range) * 120
-      return `${x},${y}`
-    })
-    .join(' ')
-
+  const navigate = useNavigate()
   return (
     <AppShell role="patient">
       <TopBar />
-      <div className="content-wide">
-        <PageHeader title="Hồ sơ bệnh án" subtitle="Lưu lại các tình trạng bệnh, phát hiện theo tháng năm và tiền sử điều trị." />
+      <div className="content-wide health-record-page">
+        <PageHeader eyebrow="Hồ sơ sức khỏe" title="Hồ sơ bệnh án" subtitle="Theo dõi toàn diện sức khỏe, chẩn đoán và hành trình điều trị của bạn." />
 
-        <div className="grid gap-7 xl:grid-cols-[1.1fr_0.9fr]">
+        <section className="health-summary-grid">
+          <Summary icon={<Stethoscope size={19} />} label="Tổng số lần khám" value="12" note="+2 lần khám tháng này" trend="up" />
+          <Summary icon={<FileHeart size={19} />} label="Chẩn đoán đã phát hiện" value="03" note="1 bệnh đã khỏi" trend="down" />
+          <Summary icon={<Pill size={19} />} label="Đơn thuốc gần nhất" value="18/05" note="Tuân thủ điều trị tốt" trend="up" />
+          <Summary icon={<CalendarCheck2 size={19} />} label="Lần khám gần nhất" value="18/05" note="Sức khỏe cải thiện" trend="up" />
+        </section>
+
+        <Card className="health-metric-section">
+          <div className="health-section-heading">
+            <div><h2>Chỉ số sức khỏe hiện tại</h2><p>Cập nhật gần nhất hôm nay, lúc 08:30</p></div>
+            <Badge tone="green">Ổn định</Badge>
+          </div>
+          <div className="health-metric-grid">
+            {metrics.map((metric) => <MetricCard key={metric.label} {...metric} />)}
+          </div>
+        </Card>
+
+        <section className="health-chart-grid">
+          <Card className="health-chart-card">
+            <div className="health-section-heading"><div><h2>Tần suất khám theo tháng</h2><p>Số lượt khám và tư vấn trong 6 tháng gần nhất</p></div></div>
+            <BarChart values={monthVisits} />
+          </Card>
+          <Card className="health-chart-card">
+            <div className="health-section-heading"><div><h2>Diễn biến chẩn đoán</h2><p>Số nhóm bệnh được ghi nhận theo thời gian</p></div></div>
+            <LineChart values={diagnosisTrend} />
+          </Card>
+        </section>
+
+        <section className="record-lower-grid">
           <Card>
-            <div className="flex items-center justify-between">
-              <h2 className="section-title">Biểu đồ theo dõi theo tháng</h2>
-              <select 
-                className="input"
-                style={{ width: 'auto', minHeight: '36px', fontSize: '13px', padding: '0 32px 0 12px' }}
-                value={metric}
-                onChange={e => setMetric(e.target.value)}
-              >
-                <option value="heart_rate">Nhịp tim</option>
-                <option value="spo2">SpO2</option>
-                <option value="illness">Số lần đổ bệnh</option>
-              </select>
-            </div>
-            <div className="mt-6 p-4 w-full">
-              <svg viewBox="0 0 400 210" className="w-full h-56">
-                <defs>
-                  <linearGradient id="recordArea" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="#10b981" stopOpacity="0.02" />
-                  </linearGradient>
-                </defs>
-                
-                {[0, 1, 2, 3].map((i) => (
-                  <line 
-                    key={`grid-${i}`}
-                    x1="20" y1={40 + i * 40} x2="370" y2={40 + i * 40} 
-                    stroke="#f1f5f9" strokeDasharray="4 4" strokeWidth="2"
-                  />
-                ))}
-
-                <polyline points={points} fill="none" stroke="#10b981" strokeWidth="4" strokeLinecap="round" />
-                <polygon points={`${points} 370,190 20,190`} fill="url(#recordArea)" />
-                {trend.map((value, idx) => {
-                  const x = 20 + idx * 70
-                  const y = 160 - ((value - min) / range) * 120
-                  return (
-                    <g key={idx}>
-                      <circle cx={x} cy={y} r="6" fill="#10b981" />
-                      <text x={x} y={y - 12} textAnchor="middle" className="fill-emerald-700 text-[12px] font-bold">
-                        {value}
-                      </text>
-                      <text x={x} y="205" textAnchor="middle" className="fill-slate-500 text-[10px] font-bold">
-                        {['01', '02', '03', '04', '05', '06'][idx]}
-                      </text>
-                    </g>
-                  )
-                })}
-              </svg>
+            <div className="health-section-heading"><div><h2>Bệnh và chẩn đoán đã phát hiện</h2><p>Danh sách tình trạng cần tiếp tục theo dõi</p></div></div>
+            <div className="diagnosis-card-list">
+              {diagnoses.map((record, index) => (
+                <article className="diagnosis-card" key={record.issue}>
+                  <span className={`diagnosis-icon diagnosis-${index === 1 ? 'amber' : 'teal'}`}><FileHeart size={17} /></span>
+                  <div><h3>{record.issue}</h3><p>{record.detail}</p><small>Phát hiện: {record.date} · {record.doctor}</small></div>
+                  <Badge tone={record.tone}>{record.status}</Badge>
+                </article>
+              ))}
             </div>
           </Card>
 
           <Card>
-            <h2 className="section-title">Tổng quan sức khoẻ</h2>
-            <div className="mt-5 space-y-4">
-              <div className="info-box"><small>Nhóm bệnh theo dõi</small><b>Hô hấp, tim mạch, tiêu hoá</b></div>
-              <div className="info-box"><small>Lần cập nhật gần nhất</small><b>18/05/2026</b></div>
-              <div className="info-box"><small>Khuyến nghị</small><b>Duy trì theo dõi định kỳ và tái khám đúng lịch.</b></div>
+            <div className="health-section-heading"><div><h2>Timeline lịch sử khám</h2><p>Thông tin khám và điều trị gần đây</p></div></div>
+            <div className="health-timeline">
+              {patientHistory.map((item) => (
+                <article className={`timeline-${item.type === 'Tư vấn trực tuyến' ? 'online' : item.type === 'Tái khám' ? 'followup' : 'clinic'}`} key={item.id}>
+                  <i />
+                  <div className="health-timeline-date">{item.date}</div>
+                  <div className="health-timeline-content">
+                    <div className="health-timeline-title"><h3>{item.diagnosis}</h3><Badge tone="green">{item.type}</Badge></div>
+                    <p>{item.clinic} · {item.doctor}</p>
+                    <small>Đơn thuốc: {item.prescription}</small>
+                    <Button variant="ghost" onClick={() => navigate('/patient/history')}>Xem chi tiết</Button>
+                  </div>
+                </article>
+              ))}
             </div>
           </Card>
-        </div>
-
-        <div className="mt-7 space-y-5">
-          {patientMedicalRecords.map((item) => (
-            <Card key={item.month}>
-              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                <div><h2 className="section-title">{item.issue}</h2><p className="mt-2 text-slate-500">{item.month}</p></div>
-                <div className="rounded-full bg-teal-50 px-4 py-2 text-sm font-bold text-teal-700">Tiền sử: {item.history}</div>
-              </div>
-              <p className="mt-5 text-sm leading-7 text-slate-600">{item.detail}</p>
-            </Card>
-          ))}
-        </div>
+        </section>
       </div>
     </AppShell>
   )
+}
+
+function Summary({ icon, label, value, note, trend }) {
+  return <Card className="health-summary-card"><span>{icon}</span><div><p>{label}</p><strong>{value}</strong><small className={trend}>{trend === 'down' ? '↓' : '↑'} {note}</small></div><i>{icon}</i></Card>
+}
+
+function MetricCard({ label, value, unit, status, tone, icon, trend, updated, history }) {
+  return (
+    <article className={`health-metric-card metric-${tone}`}>
+      <div className="health-metric-top"><span>{icon}</span><small>{status}</small></div>
+      <p>{label}</p><strong>{value} <em>{unit}</em></strong>
+      <Sparkline values={trend} />
+      <small className="health-metric-updated">Cập nhật: {updated}</small>
+      <div className="health-metric-history">{history}</div>
+    </article>
+  )
+}
+
+function Sparkline({ values }) {
+  const points = values.map((value, index) => `${index * 20},${32 - (value - Math.min(...values)) * (24 / Math.max(1, Math.max(...values) - Math.min(...values)))}`).join(' ')
+  return <svg className="health-sparkline" viewBox="0 0 100 36" preserveAspectRatio="none"><polyline points={points} /></svg>
+}
+
+function BarChart({ values }) {
+  return <div className="health-bar-chart">{values.map((value, index) => <div key={index}><span style={{ height: `${value * 22}px` }} /><small>{['T1', 'T2', 'T3', 'T4', 'T5', 'T6'][index]}</small></div>)}</div>
+}
+
+function LineChart({ values }) {
+  const points = values.map((value, index) => `${10 + index * 18},${88 - value * 19}`).join(' ')
+  return <div className="health-line-chart"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polyline points={points} />{values.map((value, index) => <circle key={index} cx={10 + index * 18} cy={88 - value * 19} r="2.5" />)}</svg><div>{['T1', 'T2', 'T3', 'T4', 'T5', 'T6'].map((month) => <small key={month}>{month}</small>)}</div></div>
 }

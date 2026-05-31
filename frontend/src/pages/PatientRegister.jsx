@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { ArrowLeft, CalendarDays, Eye, EyeOff, Loader2, Lock, Phone, UserRound } from 'lucide-react'
+import { ArrowLeft, CalendarDays, CalendarHeart, Eye, EyeOff, Loader2, Lock, Phone, UserRound } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Logo } from '../components/ui.jsx'
+import heroImage from '../assets/medical-ai-hero.png'
 
 export function PatientRegister() {
   const navigate = useNavigate()
@@ -57,32 +58,35 @@ export function PatientRegister() {
   }
 
   return (
-    <main className="relative min-h-screen bg-[radial-gradient(circle_at_top_left,#f5f3ff_0,#f8fafc_45%,#ffffff_100%)] flex flex-col justify-between px-5 py-8 text-slate-900 overflow-hidden">
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-400 opacity-15 blur-3xl -z-10" />
-
-      <div className="mx-auto flex w-full max-w-md flex-col flex-1 justify-center py-6">
-        <div className="flex justify-center mb-8">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#d9f8ef_0,#f8fafc_45%,#ffffff_100%)] px-5 py-6 text-slate-900">
+      <div className="mx-auto grid min-h-[calc(100vh-48px)] max-w-7xl overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl shadow-slate-900/8 lg:grid-cols-[0.92fr_1.08fr]">
+        <section className="flex flex-col px-6 py-7 sm:px-10 lg:px-12">
           <Logo />
-        </div>
 
-        <div className="relative bg-white/85 backdrop-blur-md border border-slate-200/60 shadow-xl rounded-2xl p-8 w-full transition-all duration-300">
-          <div className="absolute top-0 left-0 right-0 h-1.5 rounded-t-2xl bg-gradient-to-r from-violet-500 to-fuchsia-400" />
+          <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-10 motion-safe:animate-[fadeUp_.7s_ease-out_both]">
+            <button
+              type="button"
+              onClick={() => navigate('/login/patient')}
+              className="mb-8 inline-flex w-fit items-center gap-2 text-sm font-bold text-slate-500 transition-colors hover:text-slate-800"
+            >
+              <ArrowLeft size={16} />
+              <span>Quay lại đăng nhập</span>
+            </button>
 
-          <div className="relative z-10 flex justify-center -mt-16 mb-5">
-            <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-400 text-3xl font-black text-white shadow-lg border-4 border-white">
-              P
+            <div className="mb-6 grid h-14 w-14 place-items-center rounded-lg bg-gradient-to-br from-teal-600 to-emerald-500 text-white shadow-lg">
+              <CalendarHeart size={27} strokeWidth={2.4} />
             </div>
-          </div>
 
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-black tracking-tight">Đăng ký bệnh nhân</h1>
-            <p className="mt-2 text-sm text-slate-500 leading-relaxed">
-              Tạo tài khoản theo số điện thoại để bắt đầu đặt lịch khám và tư vấn trực tuyến.
-            </p>
-          </div>
+            <div className="mb-7">
+              <p className="text-sm font-extrabold uppercase tracking-[0.16em] text-teal-700">Tài khoản bệnh nhân</p>
+              <h1 className="mt-3 text-3xl font-black tracking-normal text-slate-950">Đăng ký MedConsult</h1>
+              <p className="mt-3 text-sm leading-6 text-slate-500">
+                Tạo tài khoản theo số điện thoại để bắt đầu đặt lịch khám và tư vấn trực tuyến.
+              </p>
+            </div>
 
           {error && (
-            <div className="mb-5 rounded-xl bg-rose-50 border border-rose-100 p-4 text-sm text-rose-600">
+            <div className="mb-5 rounded-lg bg-rose-50 border border-rose-100 p-4 text-sm text-rose-600">
               {error}
             </div>
           )}
@@ -99,7 +103,7 @@ export function PatientRegister() {
                 <input
                   type="tel"
                   disabled={loading}
-                  className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 transition-all bg-white/70 focus:border-violet-500 focus:ring-violet-500/10 disabled:opacity-50"
+                  className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-4 transition-all bg-white focus:border-teal-500 focus:ring-teal-500/10 disabled:opacity-50"
                   placeholder="VD: 0912345678"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
@@ -118,7 +122,7 @@ export function PatientRegister() {
                 <input
                   type="text"
                   disabled={loading}
-                  className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 transition-all bg-white/70 focus:border-violet-500 focus:ring-violet-500/10 disabled:opacity-50"
+                  className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-4 transition-all bg-white focus:border-teal-500 focus:ring-teal-500/10 disabled:opacity-50"
                   placeholder="VD: Nguyễn Văn A"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
@@ -137,7 +141,7 @@ export function PatientRegister() {
                 <input
                   type="date"
                   disabled={loading}
-                  className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 transition-all bg-white/70 focus:border-violet-500 focus:ring-violet-500/10 disabled:opacity-50"
+                  className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-4 transition-all bg-white focus:border-teal-500 focus:ring-teal-500/10 disabled:opacity-50"
                   value={dob}
                   onChange={(e) => setDob(e.target.value)}
                 />
@@ -155,7 +159,7 @@ export function PatientRegister() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   disabled={loading}
-                  className="w-full pl-10 pr-11 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 transition-all bg-white/70 focus:border-violet-500 focus:ring-violet-500/10 disabled:opacity-50"
+                  className="w-full pl-10 pr-11 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-4 transition-all bg-white focus:border-teal-500 focus:ring-teal-500/10 disabled:opacity-50"
                   placeholder="Tối thiểu 6 ký tự"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -198,7 +202,7 @@ export function PatientRegister() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-white font-extrabold shadow-lg transition-all duration-150 transform active:scale-[0.98] bg-violet-600 hover:bg-violet-700 shadow-violet-600/20 disabled:opacity-75 disabled:pointer-events-none cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-white font-extrabold shadow-lg transition-all duration-150 transform active:scale-[0.98] bg-teal-700 hover:bg-teal-800 shadow-teal-700/20 disabled:opacity-75 disabled:pointer-events-none cursor-pointer"
             >
               {loading ? (
                 <>
@@ -213,22 +217,36 @@ export function PatientRegister() {
 
           <div className="mt-5 text-center text-sm">
             <span className="text-slate-500">Đã có tài khoản? </span>
-            <Link to="/login/patient" className="font-semibold text-violet-600 hover:underline">
+            <Link to="/login/patient" className="font-semibold text-teal-700 hover:underline">
               Đăng nhập ngay
             </Link>
           </div>
-        </div>
+          </div>
+        </section>
 
-        <div className="text-center mt-6">
-          <button
-            type="button"
-            onClick={() => navigate('/login/patient')}
-            className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors group"
-          >
-            <ArrowLeft size={16} className="transform group-hover:-translate-x-1 transition-transform" />
-            <span>Quay lại đăng nhập bệnh nhân</span>
-          </button>
-        </div>
+        <section className="relative hidden min-h-full overflow-hidden bg-slate-950 lg:block">
+          <img src={heroImage} alt="Bác sĩ tư vấn cùng trợ lý AI y tế" className="absolute inset-0 h-full w-full object-cover object-[72%_center]" />
+          <div className="absolute inset-0 bg-teal-950/8" />
+          <div className="absolute inset-0 bg-[linear-gradient(145deg,rgba(15,118,110,0.02),rgba(15,23,42,0.12))]" />
+          <div className="absolute inset-x-10 top-10 flex items-center justify-between text-white/85">
+            <span className="text-sm font-extrabold uppercase tracking-[0.18em]">MedConsult</span>
+            <span className="rounded-lg border border-white/25 px-3 py-2 text-xs font-bold">Bệnh nhân</span>
+          </div>
+
+          <div className="absolute bottom-10 left-10 right-10">
+            <div className="max-w-xl rounded-lg border border-white/25 bg-white/92 p-6 text-slate-900 shadow-2xl backdrop-blur motion-safe:animate-[fadeUp_.8s_ease-out_both]">
+              <div className="flex items-start gap-4">
+                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-teal-600 to-emerald-500 text-white">
+                  <CalendarHeart size={24} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black">Hồ sơ sức khỏe cá nhân</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">Đặt lịch, nhận tư vấn và theo dõi lịch sử điều trị trong một tài khoản bảo mật.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   )

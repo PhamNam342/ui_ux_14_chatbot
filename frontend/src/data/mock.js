@@ -138,3 +138,75 @@ export const advisorConversations = [
     status: 'Chưa kiểm tra'
   }
 ]
+
+export const doctorConsultations = [
+  {
+    id: 'consult-001',
+    patient: 'Trần Thị Mai',
+    initials: 'TM',
+    age: 42,
+    phone: '0901 234 567',
+    symptoms: 'Sốt, đau đầu, ho',
+    level: 'Trung bình',
+    time: '09:12 27-05',
+    doctor: 'Nguyễn Văn A',
+    status: 'Đang tư vấn'
+  },
+  {
+    id: 'consult-002',
+    patient: 'Phạm Quang Minh',
+    initials: 'PM',
+    age: 29,
+    phone: '0917 445 882',
+    symptoms: 'Đau bụng, buồn nôn',
+    level: 'Thấp',
+    time: '10:45 27-05',
+    doctor: 'Trần Thị B',
+    status: 'Đang tư vấn'
+  },
+  {
+    id: 'consult-003',
+    patient: 'Lê Văn Hùng',
+    initials: 'LH',
+    age: 55,
+    phone: '0908 222 118',
+    symptoms: 'Đau ngực, khó thở',
+    level: 'Cao',
+    time: '14:20 26-05',
+    doctor: 'Lê Hoàng C',
+    status: 'Đã hoàn thành'
+  },
+  {
+    id: 'consult-004',
+    patient: 'Nguyễn Thị Lan',
+    initials: 'NL',
+    age: 36,
+    phone: '0934 118 965',
+    symptoms: 'Ho, đau họng',
+    level: 'Trung bình',
+    time: '11:00 23-05',
+    doctor: 'Phạm Minh D',
+    status: 'Đã hoàn thành'
+  }
+]
+
+export const patientConsultations = [
+  {
+    id: 'consult-001',
+    doctor: 'BS. Trần Thị Hoa',
+    initials: 'TH',
+    spec: 'Tim mạch',
+    symptoms: 'Đau đầu và chóng mặt, cần bác sĩ đánh giá thêm.',
+    time: '09:12 hôm nay',
+    status: 'Đang tiếp nhận',
+  },
+  {
+    id: 'consult-005',
+    doctor: 'BS. Nguyễn Văn Minh',
+    initials: 'NM',
+    spec: 'Nội tổng quát',
+    symptoms: 'Tư vấn sốt, ho khan và đau họng.',
+    time: '18/05/2026',
+    status: 'Đã hoàn thành',
+  },
+]

@@ -7,6 +7,7 @@ import {
   Bot,
   CalendarDays,
   CheckCircle2,
+  ChevronRight,
   ClipboardList,
   Database,
   FileBarChart,
@@ -16,10 +17,13 @@ import {
   NotebookPen,
   LogOut,
   MessageSquareText,
+  PanelLeftClose,
+  PanelLeftOpen,
   Plus,
   Search,
   Settings,
   Wallet,
+  ReceiptText,
   Users,
   Video,
   HeartPulse,
@@ -46,10 +50,17 @@ export function Logo() {
   )
 }
 
-export function Sidebar({ items, legacy = false }) {
+export function Sidebar({ items, legacy = false, collapsed = false, onToggle, showLogout = true }) {
+  const navigate = useNavigate()
+
   return (
-    <aside className={clsx('sidebar', legacy && 'sidebar-legacy')}>
-      <Logo />
+    <aside className={clsx('sidebar', legacy && 'sidebar-legacy', collapsed && 'sidebar-collapsed')}>
+      <div className="sidebar-brand">
+        {!collapsed && <Logo />}
+        <button className="sidebar-toggle" onClick={onToggle} title={collapsed ? 'Mở rộng menu' : 'Thu gọn menu'}>
+          {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+        </button>
+      </div>
       <nav className="mt-10 space-y-2">
         {items.map((item) => (
           <NavLink
@@ -59,10 +70,16 @@ export function Sidebar({ items, legacy = false }) {
             className={({ isActive }) => clsx('nav-item', isActive && 'active')}
           >
             <span className="nav-icon">{item.icon}</span>
-            <span>{item.label}</span>
+            {!collapsed && <span>{item.label}</span>}
           </NavLink>
         ))}
       </nav>
+      {showLogout && (
+        <button className="sidebar-logout" onClick={() => navigate('/')} title="Đăng xuất">
+          <LogOut size={18} />
+          {!collapsed && <span>Đăng xuất</span>}
+        </button>
+      )}
     </aside>
   )
 }
@@ -91,37 +108,74 @@ export function TopBar({ legacy = false }) {
           }
         : { name: 'Dr. Alexander', subtitle: 'Bác sĩ tư vấn', initials: 'DA', email: 'alexander@medconsult.vn' }
   const [open, setOpen] = useState(false)
-  const [tab, setTab] = useState('profile')
   const [notifyOpen, setNotifyOpen] = useState(false)
   const [toast, setToast] = useState('')
-  const notifications = [
-    'Có 1 lịch tư vấn mới lúc 14:00.',
-    'Bệnh án của Trần Thị Mai vừa được cập nhật.',
-    'Nhắc lịch tái khám ngày 22/05/2026.',
+  const [notifications, setNotifications] = useState([
+    { id: 'NT-01', title: 'Lịch tư vấn mới đã được xác nhận', detail: 'Bác sĩ sẽ tiếp nhận cuộc gọi lúc 14:00 hôm nay.', time: '5 phút trước', unread: true, icon: <Video size={16} /> },
+    { id: 'NT-02', title: 'Hồ sơ bệnh án vừa được cập nhật', detail: 'Kết quả khám gần nhất đã được bổ sung vào hồ sơ.', time: '45 phút trước', unread: true, icon: <NotebookPen size={16} /> },
+    { id: 'NT-03', title: 'Nhắc lịch tái khám định kỳ', detail: 'Bạn có lịch tái khám vào ngày 22/05/2026.', time: '2 giờ trước', unread: false, icon: <CalendarDays size={16} /> },
+  ])
+  const unreadCount = notifications.filter((item) => item.unread).length
+  const patientProfileItems = [
+    { label: 'Thông tin cá nhân', to: '/patient/settings', icon: <CircleUserRound size={17} /> },
+    { label: 'Lịch khám', to: '/patient/appointments', icon: <CalendarDays size={17} /> },
+    { label: 'Hóa đơn', to: '/patient/billing', icon: <Wallet size={17} /> },
+    { label: 'Lịch sử khám bệnh', to: '/patient/history', icon: <ClipboardList size={17} /> },
+    { label: 'Cài đặt', to: '/patient/settings', icon: <Settings size={17} /> },
   ]
+
+  function openProfileMenu() {
+    setOpen((value) => !value)
+    setNotifyOpen(false)
+  }
+
+  function openNotificationMenu() {
+    setNotifyOpen((value) => !value)
+    setOpen(false)
+  }
+
+  function logout() {
+    setToast('Đăng xuất thành công')
+    window.setTimeout(() => navigate('/'), 700)
+  }
 
   return (
     <header className={clsx('topbar', legacy && 'legacy-topbar')}>
-      <button className="icon-btn"><Search size={17} /></button>
+      <div className="topbar-context">
+        <span className="topbar-context-icon"><CircleUserRound size={18} /></span>
+        <span>
+          <b>{profile.subtitle}</b>
+          <small>Không gian làm việc MedConsult</small>
+        </span>
+      </div>
+      <div className="topbar-actions topbar-action-cluster">
+      <button className="icon-btn topbar-search-btn" title="Tìm kiếm"><Search size={17} /></button>
       <div className="relative">
-        <button className="icon-btn" onClick={() => setNotifyOpen((value) => !value)}>
-          <Bell size={17} />
-          {notifications.length > 0 && <span className="notify-badge">{notifications.length}</span>}
+        <button className={`icon-btn notification-trigger ${unreadCount ? 'has-unread' : ''}`} onClick={openNotificationMenu} title="Thông báo">
+          <Bell size={19} />
+          {unreadCount > 0 && <span className="notify-badge">{unreadCount}</span>}
         </button>
         {notifyOpen && (
           <div className="notify-menu">
-            <h3>Thông báo</h3>
-            {notifications.map((item, index) => (
-              <div key={item} className="notify-item">
-                <span className="notify-dot">{index + 1}</span>
-                <div>{item}</div>
-              </div>
-            ))}
+            <div className="notify-menu-head">
+              <div><h3>Thông báo</h3><p>{unreadCount ? `${unreadCount} thông báo chưa đọc` : 'Bạn đã xem tất cả thông báo'}</p></div>
+              {unreadCount > 0 && <button onClick={() => setNotifications((items) => items.map((item) => ({ ...item, unread: false })))}>Đánh dấu tất cả đã đọc</button>}
+            </div>
+            <div className="notify-list">
+              {notifications.map((item) => (
+                <button key={item.id} className={`notify-item ${item.unread ? 'unread' : ''}`} onClick={() => setNotifications((items) => items.map((current) => current.id === item.id ? { ...current, unread: false } : current))}>
+                  <span className="notify-dot">{item.icon}</span>
+                  <span><b>{item.title}</b><small>{item.detail}</small><time>{item.time}</time></span>
+                  {item.unread && <i />}
+                </button>
+              ))}
+            </div>
+            <button className="notify-menu-footer">Xem tất cả thông báo <ChevronRight size={15} /></button>
           </div>
         )}
       </div>
       <div className="relative">
-      <button className="pill-avatar" onClick={() => setOpen((value) => !value)}>
+      <button className="pill-avatar" onClick={openProfileMenu}>
         <span className="avatar-ring">{profile.initials}</span>
         <span className="text-left">
           <b>{profile.name}</b>
@@ -130,39 +184,29 @@ export function TopBar({ legacy = false }) {
       </button>
       {open && (
         <div className="profile-menu">
-          <div className="profile-menu-tabs">
-            <button className={tab === 'profile' ? 'active' : ''} onClick={() => setTab('profile')}>Thông tin</button>
-            <button className={tab === 'logout' ? 'active' : ''} onClick={() => setTab('logout')}>Đăng xuất</button>
+          <div className="profile-menu-head">
+            <span className="avatar-ring">{profile.initials}</span>
+            <div><h3>{profile.name}</h3><p>{profile.subtitle}</p><small>{profile.email}</small></div>
           </div>
-          {tab === 'profile' ? (
-            <div className="profile-menu-body">
-              <div className="patient-summary mt-0">
-                <span className="avatar-ring">{profile.initials}</span>
-                <div>
-                  <h3>{profile.name}</h3>
-                  <p>{profile.subtitle}</p>
-                </div>
-              </div>
-              <p className="mt-3 text-sm text-slate-500">{profile.email}</p>
+          {isPatient ? (
+            <div className="profile-menu-links">
+              {patientProfileItems.map((item) => <button key={item.label} onClick={() => { setOpen(false); navigate(item.to) }}><span>{item.icon}</span>{item.label}<ChevronRight size={14} /></button>)}
             </div>
-          ) : (
-            <div className="profile-menu-body">
-              <p className="text-sm text-slate-500">Bạn có muốn đăng xuất khỏi phiên làm việc hiện tại?</p>
-              <button className="btn btn-danger mt-4 w-full" onClick={() => {
-                setToast('Đăng xuất thành công')
-                window.setTimeout(() => navigate('/'), 700)
-              }}><LogOut size={16} /> Đăng xuất</button>
-            </div>
-          )}
+          ) : !isAdmin && <div className="profile-menu-links"><button onClick={() => { setOpen(false); navigate(path.split('/').slice(0, 2).join('/') + '/settings') }}><span><Settings size={17} /></span>Cài đặt<ChevronRight size={14} /></button></div>}
+          <div className="profile-menu-logout">
+            <button onClick={logout}><LogOut size={17} /> Đăng xuất</button>
+          </div>
         </div>
       )}
       </div>
       {toast && <div className="toast toast-red"><CheckCircle2 size={18} /> {toast}</div>}
+      </div>
     </header>
   )
 }
 
 export function AppShell({ role, children, legacy = false }) {
+  const [collapsed, setCollapsed] = useState(false)
   const items = {
     admin: [
       { to: '/admin', label: 'Quản lý các phòng khám', icon: <Hospital size={18} />, end: true },
@@ -187,19 +231,17 @@ export function AppShell({ role, children, legacy = false }) {
     ],
     patient: [
       { to: '/patient', label: 'Dashboard', icon: <LayoutDashboard size={18} />, end: true },
+      { to: '/patient/chat', label: 'Chat tư vấn', icon: <Bot size={18} /> },
       { to: '/patient/consult', label: 'Tư vấn trực tuyến', icon: <Video size={18} /> },
       { to: '/patient/booking', label: 'Đặt lịch khám', icon: <MapPinned size={18} /> },
-      { to: '/patient/appointments', label: 'Lịch khám', icon: <CalendarDays size={18} /> },
-      { to: '/patient/billing', label: 'Hóa đơn', icon: <Wallet size={18} /> },
+      { to: '/patient/services', label: 'Bảng giá dịch vụ', icon: <ReceiptText size={18} /> },
       { to: '/patient/records', label: 'Hồ sơ bệnh án', icon: <NotebookPen size={18} /> },
-      { to: '/patient/history', label: 'Lịch sử khám bệnh', icon: <ClipboardList size={18} /> },
-      { to: '/patient/settings', label: 'Cài đặt', icon: <CircleUserRound size={18} /> },
     ],
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <Sidebar items={items[role]} legacy={legacy} />
+    <div className={clsx('min-h-screen bg-slate-50 text-slate-900', collapsed && 'shell-collapsed')}>
+      <Sidebar items={items[role]} legacy={legacy} collapsed={collapsed} onToggle={() => setCollapsed((value) => !value)} />
       <main className="app-main">
         {children}
       </main>
@@ -207,11 +249,12 @@ export function AppShell({ role, children, legacy = false }) {
   )
 }
 
-export function PageHeader({ title, subtitle, action }) {
+export function PageHeader({ eyebrow, title, subtitle, action }) {
   return (
-    <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div className="page-header mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div>
-        <h1 className="text-3xl font-extrabold tracking-normal text-slate-900">{title}</h1>
+        {eyebrow && <span className="page-header-eyebrow">{eyebrow}</span>}
+        <h1>{title}</h1>
         {subtitle && <p className="mt-2 text-base text-slate-500">{subtitle}</p>}
       </div>
       {action}

@@ -10,6 +10,7 @@ import { AdminQuality } from './pages/admin/AdminQuality.jsx'
 import { AdminDoctorDetail } from './pages/admin/AdminDoctorDetail.jsx'
 import { DoctorDashboard } from './pages/doctor/DoctorDashboard.jsx'
 import { DoctorConsult } from './pages/doctor/DoctorConsult.jsx'
+import { DoctorConsultChat } from './pages/doctor/DoctorConsultChat.jsx'
 import { DoctorDetail } from './pages/doctor/DoctorDetail.jsx'
 import { DoctorMedicine } from './pages/doctor/DoctorMedicine.jsx'
 import { DoctorSchedule } from './pages/doctor/DoctorSchedule.jsx'
@@ -21,12 +22,15 @@ import { AdvisorConversation } from './pages/advisor/AdvisorConversation.jsx'
 import { AdvisorImport } from './pages/advisor/AdvisorImport.jsx'
 import { PatientDashboard } from './pages/patient/PatientDashboard.jsx'
 import { PatientBooking } from './pages/patient/PatientBooking.jsx'
+import { PatientChatbot } from './pages/patient/PatientChatbot.jsx'
 import { PatientConsult } from './pages/patient/PatientConsult.jsx'
+import { PatientConsultChat } from './pages/patient/PatientConsultChat.jsx'
 import { PatientRecords } from './pages/patient/PatientRecords.jsx'
 import { PatientHistory } from './pages/patient/PatientHistory.jsx'
 import { PatientSettings } from './pages/patient/PatientSettings.jsx'
 import { PatientAppointments } from './pages/patient/PatientAppointments.jsx'
 import { PatientBilling } from './pages/patient/PatientBilling.jsx'
+import { PatientServices } from './pages/patient/PatientServices.jsx'
 import { DoctorSettings } from './pages/doctor/DoctorSettings.jsx'
 import { AdvisorSettings } from './pages/advisor/AdvisorSettings.jsx'
 
@@ -50,6 +54,7 @@ export default function App() {
       <Route path="/doctor/cases/:id" element={<DoctorDetail />} />
       <Route path="/doctor/patients/:id" element={<DoctorDetail />} />
       <Route path="/doctor/consult" element={<DoctorConsult />} />
+      <Route path="/doctor/consult/chat/:id" element={<DoctorConsultChat />} />
       <Route path="/doctor/medicine" element={<DoctorMedicine />} />
       <Route path="/doctor/schedule" element={<DoctorSchedule />} />
       <Route path="/doctor/history" element={<DoctorHistory />} />
@@ -67,7 +72,10 @@ export default function App() {
       <Route path="/patient/booking" element={<PatientBooking />} />
       <Route path="/patient/appointments" element={<PatientAppointments />} />
       <Route path="/patient/billing" element={<PatientBilling />} />
+      <Route path="/patient/services" element={<PatientServices />} />
+      <Route path="/patient/chat" element={<PatientChatbot />} />
       <Route path="/patient/consult" element={<PatientConsult />} />
+      <Route path="/patient/consult/chat/:id" element={<PatientConsultChat />} />
       <Route path="/patient/records" element={<PatientRecords />} />
       <Route path="/patient/history" element={<PatientHistory />} />
       <Route path="/patient/settings" element={<PatientSettings />} />

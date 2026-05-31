@@ -1,173 +1,63 @@
 import { useState } from 'react'
-import { Mic, Paperclip, PhoneOff, Send, Search, Video } from 'lucide-react'
-import { AppShell, Badge, Button, Card, PageHeader, TopBar } from '../../components/ui.jsx'
+import { Link } from 'react-router-dom'
+import { MessageCircleMore, Search, ShieldCheck, Stethoscope, UsersRound, Video } from 'lucide-react'
+import { AppShell, Badge, Button, Card, TopBar } from '../../components/ui.jsx'
+import { patientConsultations } from '../../data/mock.js'
+
+const conversations = [
+  ...patientConsultations,
+  { id: 'consult-006', doctor: 'BS. Lê Quốc Bảo', initials: 'LB', spec: 'Tim mạch', symptoms: 'Tôi đã nhận kết quả ECG của bạn.', time: 'Hôm qua', status: 'Đang tiếp nhận' },
+  { id: 'consult-007', doctor: 'BS. Đỗ Gia Huy', initials: 'GH', spec: 'Hô hấp', symptoms: 'Bạn còn ho nhiều về đêm không?', time: '24/05', status: 'Đã hoàn thành' },
+]
 
 export function PatientConsult() {
-  const [mode, setMode] = useState('chatbot')
-  const [input, setInput] = useState('')
-  const [messages, setMessages] = useState([
-    { from: 'bot', text: 'Xin chào, bạn đang gặp triệu chứng gì hôm nay?', time: '09:00' },
-  ])
-  const [attachments, setAttachments] = useState([])
-  const [danger, setDanger] = useState(false)
-  const [doctorUnlocked, setDoctorUnlocked] = useState(false)
-  const [toast, setToast] = useState('')
-  const [doctorMessages, setDoctorMessages] = useState([
-    { from: 'doctor', text: 'Chào bạn, tôi là BS. Trần Thị Hoa. Bạn mô tả rõ hơn triệu chứng nhé.', time: '09:12' },
-  ])
-  const [doctorInput, setDoctorInput] = useState('')
+  const [search, setSearch] = useState('')
+  const [tab, setTab] = useState('Đang tiếp nhận')
 
-  function sendChatbotMessage() {
-    if (!input.trim() && attachments.length === 0) return
-    const userText = input.trim() || 'Tôi gửi kèm hình ảnh mô tả triệu chứng.'
-    const next = [...messages, { from: 'user', text: userText, time: '09:03' }]
-    const normalized = userText.toLowerCase()
-    if (normalized.includes('đau đầu') || normalized.includes('khó thở') || normalized.includes('tức ngực') || normalized.includes('choáng')) {
-      next.push({
-        from: 'bot',
-        text: 'Cảnh báo: Hệ thống phát hiện dấu hiệu nguy hiểm. Bạn có thể chuyển sang tư vấn bác sĩ ngay. Phiên tư vấn bác sĩ sẽ mất phí 180.000đ/lượt.',
-        time: '09:04',
-      })
-      setDanger(true)
-    } else {
-      next.push({
-        from: 'bot',
-        text: 'Tôi đã ghi nhận triệu chứng. Bạn vui lòng theo dõi thêm thân nhiệt và mức độ đau trong 24 giờ tới.',
-        time: '09:04',
-      })
-    }
-    setMessages(next)
-    setInput('')
-    setAttachments([])
-  }
-
-  function unlockDoctorConsult() {
-    setDoctorUnlocked(true)
-    setMode('doctor')
-    setDanger(false)
-    setToast('Đã kết nối tư vấn bác sĩ')
-    window.setTimeout(() => setToast(''), 2200)
-    setMessages((current) => [
-      ...current,
-      { from: 'bot', text: 'Bạn đã xác nhận chi phí. Hệ thống đang kết nối bạn với bác sĩ trực tuyến.', time: '09:05' },
-    ])
-  }
-
-  function sendDoctorMessage() {
-    if (!doctorInput.trim()) return
-    setDoctorMessages((current) => [...current, { from: 'user', text: doctorInput, time: '09:14' }])
-    setDoctorInput('')
-  }
+  const filtered = conversations.filter((item) =>
+    item.doctor.toLowerCase().includes(search.toLowerCase())
+    && (tab === 'Tất cả' || item.status === tab)
+  )
 
   return (
     <AppShell role="patient">
       <TopBar />
-      <div className="content-wide">
-        <PageHeader title="Tư vấn trực tuyến" subtitle="Chọn chatbot để hỏi nhanh hoặc chuyển sang tư vấn trực tiếp với bác sĩ." />
-        <div className="segmented mb-7">
-          <button className={mode === 'chatbot' ? 'active' : ''} onClick={() => setMode('chatbot')}>Chatbot</button>
-          <button
-            className={`${mode === 'doctor' ? 'active' : ''} ${!doctorUnlocked ? 'is-disabled' : ''}`}
-            disabled={!doctorUnlocked}
-            onClick={() => setMode('doctor')}
-          >
-            Bác sĩ
-          </button>
+      <div className="content-wide consult-list-page">
+        <div className="consult-list-hero app-page-hero">
+          <div>
+            <span><ShieldCheck size={17} /> Tư vấn bảo mật cùng bác sĩ MedConsult</span>
+            <h1>Tư vấn trực tuyến</h1>
+            <p>Chọn một cuộc trò chuyện để tiếp tục trao đổi với bác sĩ và theo dõi hướng dẫn điều trị.</p>
+          </div>
+          <Button><Video size={17} /> Bắt đầu tư vấn mới</Button>
         </div>
-        {mode === 'chatbot' ? (
-          <div className="grid gap-7 xl:grid-cols-[1fr_360px]">
-            <Card className="p-0">
-              <div className="chat-head"><b>MedConsult AI</b><Badge tone="green">Đang hoạt động</Badge></div>
-              <div className="chat-body consult-chat-body">
-                {messages.map((message, index) => (
-                  <div key={`${message.time}-${index}`} className={`message ${message.from === 'user' ? 'mine' : ''}`}>
-                    <div className={`bubble ${message.from === 'bot' ? 'bot' : ''}`}>
-                      <p>{message.from === 'bot' ? 'MedConsult AI' : 'Bạn'} · {message.time}</p>
-                      <div>{message.text}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="chat-input">
-                <label className="mini-btn cursor-pointer">
-                  <Paperclip size={16} />
-                  <input
-                    hidden
-                    type="file"
-                    accept="image/*"
-                    onChange={(event) => {
-                      const file = event.target.files?.[0]
-                      if (!file) return
-                      setAttachments([file.name])
-                    }}
-                  />
-                </label>
-                <input value={input} onChange={(event) => setInput(event.target.value)} placeholder="Nhập triệu chứng, ví dụ: tôi đau đầu..." />
-                <Button onClick={sendChatbotMessage}><Send size={17} /> Gửi</Button>
-              </div>
-              {attachments.length > 0 && <div className="px-4 pb-4 text-sm font-semibold text-slate-500">Đã đính kèm: {attachments.join(', ')}</div>}
-            </Card>
-            <Card>
-              <h2 className="section-title">Gợi ý hướng xử lý</h2>
-              <p className="mt-4 text-sm leading-7 text-slate-500">Nếu chatbot nhận thấy dấu hiệu nguy hiểm, hệ thống sẽ đề nghị chuyển sang bác sĩ ngay để được tư vấn trực tiếp.</p>
-              <Button className="mt-6 w-full justify-center" onClick={() => setInput('Tôi đau đầu dữ dội và choáng váng.')}>Mô phỏng ca nghiêm trọng</Button>
-              {danger && (
-                <Card className="mt-4 border-red-200 bg-red-50 consult-alert">
-                  <p className="text-sm text-red-800 font-semibold">
-                    Chuyển sang bác sĩ sẽ phát sinh <b>180.000đ</b> cho một phiên tư vấn trực tuyến.
-                  </p>
-                  <div className="mt-3 flex gap-2">
-                    <Button className="flex-1 justify-center" onClick={unlockDoctorConsult}>Xác nhận chuyển bác sĩ</Button>
-                    <Button variant="ghost" className="flex-1 justify-center" onClick={() => setDanger(false)}>Từ chối</Button>
-                  </div>
-                </Card>
-              )}
-            </Card>
+
+        <section className="consult-list-toolbar">
+          <label className="consult-search"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm bác sĩ hoặc cuộc trò chuyện..." /></label>
+          <div className="consult-list-tabs">
+            {['Đang tiếp nhận', 'Đã hoàn thành', 'Tất cả'].map((item) => <button key={item} className={tab === item ? 'active' : ''} onClick={() => setTab(item)}>{item}</button>)}
           </div>
-        ) : (
-          <div className="grid gap-7 xl:grid-cols-[1fr_360px]">
-            <Card>
-              <h2 className="section-title">Tư vấn với bác sĩ</h2>
-              <div className="mt-5 video-card">
-                <div className="patient-chip"><span /> Phiên đang kết nối</div>
-                <div className="doctor-cam">BS. Trần Thị Hoa</div>
-                <div className="call-controls"><button aria-label="Tìm kiếm"><Search size={18} /></button><button aria-label="Mic"><Mic size={18} /></button><button className="danger" aria-label="Kết thúc"><PhoneOff size={18} /></button><button aria-label="Camera"><Video size={18} /></button></div>
+        </section>
+
+        <div className="consult-list-summary">
+          <Card><span><MessageCircleMore size={17} /></span><div><b>{filtered.length}</b><small>Cuộc trò chuyện hiển thị</small></div></Card>
+          <Card><span><UsersRound size={17} /></span><div><b>12</b><small>Bác sĩ đang online</small></div></Card>
+          <Card><span><Stethoscope size={17} /></span><div><b>~ 5 phút</b><small>Thời gian phản hồi</small></div></Card>
+        </div>
+
+        <div className="consult-card-grid">
+          {filtered.map((item, index) => (
+            <Link key={item.id} to={`/patient/consult/chat/${item.id}`} className="consult-thread-card">
+              <div className="consult-thread-top">
+                <span className="consult-doctor-avatar large">{item.initials}<i className={item.status === 'Đang tiếp nhận' ? 'online' : ''} /></span>
+                <div><h2>{item.doctor}</h2><p>{item.spec}</p></div>
+                <Badge tone={item.status === 'Đang tiếp nhận' ? 'green' : 'blue'}>{item.status}</Badge>
               </div>
-              <div className="mt-6 consult-chat-body">
-                {doctorMessages.map((message, index) => (
-                  <div key={`${message.time}-${index}`} className={`message ${message.from === 'user' ? 'mine' : ''}`}>
-                    <div className={`bubble ${message.from === 'doctor' ? 'bot' : ''}`}>
-                      <p>{message.from === 'doctor' ? 'Bác sĩ' : 'Bạn'} · {message.time}</p>
-                      <div>{message.text}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="chat-input">
-                <label className="mini-btn cursor-pointer">
-                  <Paperclip size={16} />
-                  <input hidden type="file" accept="image/*" />
-                </label>
-                <input
-                  value={doctorInput}
-                  onChange={(event) => setDoctorInput(event.target.value)}
-                  placeholder="Nhập tin nhắn cho bác sĩ..."
-                  disabled={!doctorUnlocked}
-                />
-                <Button onClick={sendDoctorMessage} disabled={!doctorUnlocked}><Send size={17} /> Gửi</Button>
-              </div>
-            </Card>
-            <Card>
-              <h2 className="section-title">Thông tin buổi tư vấn</h2>
-              <div className="mt-5 space-y-4">
-                <div className="info-box"><small>Bác sĩ</small><b>BS. Trần Thị Hoa</b></div>
-                <div className="info-box"><small>Chuyên khoa</small><b>Tim mạch</b></div>
-                <div className="info-box"><small>Ghi chú</small><b>Ưu tiên mô tả đầy đủ thời gian đau và cường độ triệu chứng.</b></div>
-              </div>
-            </Card>
-          </div>
-        )}
-        {toast && <div className="toast"><span>✓</span> {toast}</div>}
+              <div className="consult-thread-message"><MessageCircleMore size={15} /><p>{item.symptoms}</p></div>
+              <footer><span className={item.status === 'Đang tiếp nhận' ? 'online' : ''}>{item.status === 'Đang tiếp nhận' ? 'Đang online' : 'Đã offline'}</span><time>{item.time}</time>{index < 2 && <em>{index + 1}</em>}</footer>
+            </Link>
+          ))}
+        </div>
       </div>
     </AppShell>
   )
