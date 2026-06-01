@@ -513,8 +513,8 @@ export function AdminClinics() {
             <button className="admin-soft-btn" onClick={() => notify('Báo cáo đang được chuẩn bị để tải xuống')} type="button">
               <Download size={18} /> Xuất báo cáo
             </button>
-            <button className="admin-soft-btn" onClick={syncData} type="button">
-              <RefreshCw size={18} /> Đồng bộ dữ liệu
+            <button className="admin-soft-btn" disabled={isLoading} onClick={syncData} type="button">
+              <RefreshCw className={isLoading ? 'is-spinning' : ''} size={18} /> {isLoading ? 'Đang đồng bộ' : 'Đồng bộ dữ liệu'}
             </button>
             <button className="admin-primary-btn" onClick={openAddClinic} type="button">
               <Plus size={19} /> Thêm phòng khám
@@ -527,8 +527,7 @@ export function AdminClinics() {
             <section className="admin-clinic-kpi-grid">
               {kpis.map(({ icon: Icon, label, value, trend, tone }) => (
                 <article className={`admin-clinic-kpi is-${tone}`} key={label}>
-                  <span className="admin-clinic-kpi-icon">{createElement(Icon, { size: 26 })}</span>
-                  {createElement(Icon, { className: 'admin-clinic-kpi-watermark', size: 86 })}
+                  <span className="admin-clinic-kpi-icon">{createElement(Icon, { size: 20 })}</span>
                   <p>{label}</p>
                   <strong>{value}</strong>
                   <small><Activity size={14} /> {trend}</small>

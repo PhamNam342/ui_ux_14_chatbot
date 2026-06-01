@@ -212,6 +212,7 @@ export function AppShell({ role, children, legacy = false }) {
       { to: '/admin', label: 'Quản lý các phòng khám', icon: <Hospital size={18} />, end: true },
       { to: '/admin/doctors', label: 'Quản lí bác sĩ', icon: <Users size={18} /> },
       { to: '/admin/schedule', label: 'Quản lí ca khám', icon: <CalendarDays size={18} /> },
+      { to: '/admin/service-pricing', label: 'Bảng giá theo cơ sở', icon: <ReceiptText size={18} /> },
       { to: '/admin/revenue', label: 'Báo cáo doanh thu', icon: <BarChart3 size={18} /> },
       { to: '/admin/quality', label: 'Báo cáo ca khám', icon: <FileBarChart size={18} /> },
     ],
@@ -276,7 +277,7 @@ export function Card({ children, className }) {
 
 export function StatCard({ label, value, tone = 'teal', delta, icon = '+' }) {
   return (
-    <Card className="stat-card">
+    <Card className={clsx('stat-card', `stat-tone-${tone}`)}>
       <div className={clsx('stat-icon', `tone-${tone}`)}>{icon}</div>
       <div className="min-w-0">
         <p className="text-sm text-slate-500">{label}</p>

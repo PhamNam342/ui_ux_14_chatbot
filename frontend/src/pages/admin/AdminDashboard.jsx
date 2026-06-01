@@ -194,7 +194,7 @@ export function AdminDashboard() {
           </div>
           <div className="admin-clinic-head-actions">
             <Button variant="outline" onClick={() => notify('Đã xuất danh sách bác sĩ')}><Download size={17} /> Xuất danh sách</Button>
-            <Button variant="outline" onClick={syncDoctors}><RefreshCw className={syncing ? 'is-spinning' : ''} size={17} /> Đồng bộ dữ liệu</Button>
+            <Button disabled={syncing} variant="outline" onClick={syncDoctors}><RefreshCw className={syncing ? 'is-spinning' : ''} size={17} /> {syncing ? 'Đang đồng bộ' : 'Đồng bộ dữ liệu'}</Button>
             <Button onClick={openAddDoctor}><Plus size={18} /> Thêm bác sĩ mới</Button>
           </div>
         </section>
