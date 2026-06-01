@@ -56,6 +56,7 @@ export default function App() {
       <Route path="/doctor" element={<DoctorDashboard />} />
       <Route path="/doctor/cases" element={<DoctorDashboard />} />
       <Route path="/doctor/cases/:id" element={<DoctorDetail />} />
+      <Route path="/doctor/patients" element={<DoctorDetail />} />
       <Route path="/doctor/patients/:id" element={<DoctorDetail />} />
       <Route path="/doctor/consult" element={<DoctorConsult />} />
       <Route path="/doctor/consult/chat/:id" element={<DoctorConsultChat />} />

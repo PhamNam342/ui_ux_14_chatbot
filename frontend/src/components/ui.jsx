@@ -191,7 +191,15 @@ export function TopBar({ legacy = false }) {
             <div className="profile-menu-links">
               {patientProfileItems.map((item) => <button key={item.label} onClick={() => { setOpen(false); navigate(item.to) }}><span>{item.icon}</span>{item.label}<ChevronRight size={14} /></button>)}
             </div>
-          ) : !isAdmin && <div className="profile-menu-links"><button onClick={() => { setOpen(false); navigate(path.split('/').slice(0, 2).join('/') + '/settings') }}><span><Settings size={17} /></span>Cài đặt<ChevronRight size={14} /></button></div>}
+          ) : !isAdmin && (
+            <div className="profile-menu-links">
+              <button onClick={() => { setOpen(false); navigate(path.split('/').slice(0, 2).join('/') + '/settings') }}>
+                <span><Settings size={17} /></span>
+                {path.startsWith('/doctor') ? 'Hồ sơ & cài đặt' : 'Cài đặt'}
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          )}
           <div className="profile-menu-logout">
             <button onClick={logout}><LogOut size={17} /> Đăng xuất</button>
           </div>
@@ -220,8 +228,6 @@ export function AppShell({ role, children, legacy = false }) {
       { to: '/doctor/consult', label: 'Tư vấn trực tuyến', icon: <Video size={18} /> },
       { to: '/doctor/schedule', label: 'Lịch khám', icon: <CalendarDays size={18} /> },
       { to: '/doctor/history', label: 'Lịch sử khám bệnh', icon: <ClipboardList size={18} /> },
-      { to: '/doctor/medicine', label: 'Kết luận tư vấn', icon: <MessageSquareText size={18} /> },
-      { to: '/doctor/settings', label: 'Cài đặt', icon: <Settings size={18} /> },
     ],
     advisor: [
       { to: '/advisor/data', label: 'Danh sách dữ liệu', icon: <Database size={18} /> },

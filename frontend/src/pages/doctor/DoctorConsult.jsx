@@ -3,7 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { 
   Video, MessageSquare, Mic, MicOff, VideoOff, PhoneOff, ScreenShare, 
   Send, Plus, Paperclip, ClipboardCheck, ArrowLeft, HeartPulse, AlertTriangle, 
-  Pill, Clock, Calendar, CheckCircle2, ChevronRight, User, Info, Phone, Trash2
+  Pill, Clock, Calendar, CheckCircle2, ChevronRight, User, Info, Phone, Trash2,
+  PanelLeftClose, PanelLeftOpen
 } from 'lucide-react'
 import { AppShell, Avatar, Badge, Button, Card, TopBar } from '../../components/ui.jsx'
 import { 
@@ -25,6 +26,7 @@ export function DoctorConsult() {
   const [draftMessage, setDraftMessage] = useState('')
   const [isVideoCall, setIsVideoCall] = useState(false)
   const [isEndingConsult, setIsEndingConsult] = useState(false)
+  const [isQueueCollapsed, setIsQueueCollapsed] = useState(false)
   
   // Call controls states
   const [micOn, setMicOn] = useState(true)
@@ -252,68 +254,107 @@ export function DoctorConsult() {
       <div className="flex flex-col lg:flex-row gap-5 h-[calc(100vh-140px)] overflow-hidden">
         
         {/* Column 1 (Left): Patient Queue Directory */}
-        <div className="w-full lg:w-[300px] flex flex-col bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0">
+        <div className={`w-full flex flex-col bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 transition-all duration-300 ${
+          isQueueCollapsed ? 'lg:w-[72px]' : 'lg:w-[300px]'
+        }`}>
           
           {/* Header & Tabs */}
-          <div className="p-4 border-b border-slate-100 bg-slate-50/50">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3">Danh sách tư vấn</h3>
-            <div className="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-lg">
-              {['Đang chờ', 'Đang tư vấn', 'Đã hoàn thành'].map(tab => (
-                <button
-                  key={tab}
-                  className={`text-center py-1.5 px-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                    activeTab === tab 
-                      ? 'bg-white text-teal-700 shadow-sm' 
-                      : 'text-slate-500 hover:text-slate-800'
-                  }`}
-                  onClick={() => {
-                    setActiveTab(tab)
-                    if (!id) {
-                      const tabCases = cases.filter(c => getTabForStatus(c.status) === tab)
-                      if (tabCases.length > 0) setSelectedCaseCode(tabCases[0].code)
-                      else setSelectedCaseCode('')
-                    }
-                  }}
-                >
-                  {tab}
-                </button>
-              ))}
+          {isQueueCollapsed ? (
+            <div className="p-3 border-b border-slate-100 bg-slate-50/50 flex flex-col items-center">
+              <button 
+                onClick={() => setIsQueueCollapsed(false)} 
+                className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-700 cursor-pointer flex items-center justify-center"
+                title="Mở rộng danh sách"
+              >
+                <PanelLeftOpen size={16} />
+              </button>
             </div>
-          </div>
+          ) : (
+            <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Danh sách tư vấn</h3>
+                <button 
+                  onClick={() => setIsQueueCollapsed(true)} 
+                  className="p-1 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-600 cursor-pointer flex items-center justify-center"
+                  title="Thu gọn danh sách"
+                >
+                  <PanelLeftClose size={15} />
+                </button>
+              </div>
+              <div className="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-lg">
+                {['Đang chờ', 'Đang tư vấn', 'Đã hoàn thành'].map(tab => (
+                  <button
+                    key={tab}
+                    className={`text-center py-1.5 px-0.5 rounded-md text-[10px] font-bold transition-all cursor-pointer ${
+                      activeTab === tab 
+                        ? 'bg-white text-teal-700 shadow-sm' 
+                        : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                    onClick={() => {
+                      setActiveTab(tab)
+                      if (!id) {
+                        const tabCases = cases.filter(c => getTabForStatus(c.status) === tab)
+                        if (tabCases.length > 0) setSelectedCaseCode(tabCases[0].code)
+                        else setSelectedCaseCode('')
+                      }
+                    }}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Scrollable Patient List */}
           <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
             {currentTabCases.length > 0 ? (
-              currentTabCases.map((item) => (
-                <div
-                  key={item.code}
-                  className={`p-3.5 flex items-start gap-3 cursor-pointer hover:bg-slate-50/50 transition-colors ${
-                    selectedCaseCode === item.code ? 'bg-teal-50/30 border-l-4 border-teal-600' : ''
-                  }`}
-                  onClick={() => handleSelectCase(item.code)}
-                >
-                  <Avatar tone={item.level === 'Cao' ? 'rose' : item.level === 'Trung bình' ? 'amber' : 'mint'}>
-                    {item.initials}
-                  </Avatar>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-1.5">
-                      <h4 className="text-sm font-bold text-slate-800 truncate">{item.patient}</h4>
-                      <Badge tone={item.level === 'Cao' ? 'red' : item.level === 'Trung bình' ? 'yellow' : 'green'}>
-                        {item.level}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-slate-500 truncate mt-1">{item.symptoms}</p>
-                    
-                    <div className="flex items-center justify-between text-[10px] text-slate-400 mt-2">
-                      <span className="flex items-center gap-0.5"><Clock size={10} /> Chờ: {item.waitingTime}</span>
-                      <span>{item.code.startsWith('CA') ? 'Chat' : 'Video'}</span>
+              currentTabCases.map((item) => {
+                const isSelected = selectedCaseCode === item.code
+                return isQueueCollapsed ? (
+                  <div
+                    key={item.code}
+                    onClick={() => handleSelectCase(item.code)}
+                    className={`py-4 flex justify-center cursor-pointer hover:bg-slate-50/50 transition-colors relative ${
+                      isSelected ? 'bg-teal-50/30 border-l-4 border-teal-600' : ''
+                    }`}
+                    title={`${item.patient} (${item.code})`}
+                  >
+                    <Avatar tone={item.level === 'Cao' ? 'rose' : item.level === 'Trung bình' ? 'amber' : 'mint'}>
+                      {item.initials}
+                    </Avatar>
+                  </div>
+                ) : (
+                  <div
+                    key={item.code}
+                    className={`p-3.5 flex items-start gap-3 cursor-pointer hover:bg-slate-50/50 transition-colors ${
+                      isSelected ? 'bg-teal-50/30 border-l-4 border-teal-600' : ''
+                    }`}
+                    onClick={() => handleSelectCase(item.code)}
+                  >
+                    <Avatar tone={item.level === 'Cao' ? 'rose' : item.level === 'Trung bình' ? 'amber' : 'mint'}>
+                      {item.initials}
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-1.5">
+                        <h4 className="text-sm font-bold text-slate-800 truncate">{item.patient}</h4>
+                        <Badge tone={item.level === 'Cao' ? 'red' : item.level === 'Trung bình' ? 'yellow' : 'green'}>
+                          {item.level}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-slate-500 truncate mt-1">{item.symptoms}</p>
+                      
+                      <div className="flex items-center justify-between text-[10px] text-slate-400 mt-2">
+                        <span className="flex items-center gap-0.5"><Clock size={10} /> Chờ: {item.waitingTime}</span>
+                        <span>{item.code.startsWith('CA') ? 'Chat' : 'Video'}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                )
+              })
             ) : (
               <div className="p-8 text-center text-slate-400 text-xs mt-10">
-                Không có bệnh nhân nào trong mục này
+                {isQueueCollapsed ? 'Trống' : 'Không có bệnh nhân nào trong mục này'}
               </div>
             )}
           </div>
