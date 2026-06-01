@@ -141,35 +141,36 @@ export function PatientAppointments() {
                   : `Ngày ${new Date(`${activeDate}T00:00:00`).toLocaleDateString('vi-VN')}`}
               </h2>
               <button onClick={() => moveCalendar(1)}><ArrowRight size={20} /></button>
-              <button
-                className="today-btn"
-                type="button"
-                onClick={jumpToToday}
-                style={{
-                  border: '1px solid #dce8e7',
-                  borderRadius: '999px',
-                  background: '#fff',
-                  padding: '0 20px',
-                  color: '#0f766e',
-                  fontSize: '14px',
-                  fontWeight: '700',
-                  minHeight: '38px',
-                  cursor: 'pointer',
-                  marginLeft: '12px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: '160ms ease',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 0
-                }}
-              >
-                Hôm nay
-              </button>
-              <div className="patient-calendar-toggle">
-                <button className={viewMode === 'day' ? 'active' : ''} onClick={() => setViewMode('day')}>Ngày</button>
-                <button className={viewMode === 'week' ? 'active' : ''} onClick={() => setViewMode('week')}>Tuần</button>
-                <button className={viewMode === 'month' ? 'active' : ''} onClick={() => setViewMode('month')}>Tháng</button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto' }}>
+                <button
+                  className="today-btn"
+                  type="button"
+                  onClick={jumpToToday}
+                  style={{
+                    border: '1px solid #dce8e7',
+                    borderRadius: '999px',
+                    background: '#fff',
+                    padding: '0 20px',
+                    color: '#0f766e',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    minHeight: '38px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: '160ms ease',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}
+                >
+                  Hôm nay
+                </button>
+                <div className="patient-calendar-toggle" style={{ margin: 0 }}>
+                  <button className={viewMode === 'day' ? 'active' : ''} onClick={() => setViewMode('day')}>Ngày</button>
+                  <button className={viewMode === 'week' ? 'active' : ''} onClick={() => setViewMode('week')}>Tuần</button>
+                  <button className={viewMode === 'month' ? 'active' : ''} onClick={() => setViewMode('month')}>Tháng</button>
+                </div>
               </div>
             </div>
             {viewMode !== 'day' ? (

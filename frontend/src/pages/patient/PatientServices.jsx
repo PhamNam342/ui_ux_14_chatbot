@@ -209,7 +209,6 @@ export function PatientServices() {
     return () => window.clearTimeout(timer)
   }, [])
 
-  const isFiltering = query.trim() !== '' || category !== 'Tất cả' || type !== 'Tất cả loại dịch vụ' || priceRange !== 'all' || insuranceOnly
   const filteredServices = useMemo(() => services.filter((service) => {
     const normalized = query.trim().toLowerCase()
     const matchesQuery = !normalized || `${service.name} ${service.description}`.toLowerCase().includes(normalized)
@@ -244,38 +243,34 @@ export function PatientServices() {
           <Card><ShieldCheck size={20} /><span><small>Dịch vụ hỗ trợ BHYT</small><b>{services.filter((service) => service.insurance).length}</b></span></Card>
         </div>
 
-        {!isFiltering && (
-          <>
-            <section className="service-section">
-              <div className="service-section-head"><div><small>Dành cho bạn</small><h2>Gói dịch vụ nổi bật</h2></div><Sparkles size={20} /></div>
-              <div className="featured-service-grid">
-                {services.filter((service) => service.featured).map((service) => (
-                  <button key={service.id} className="featured-service-card-with-image" onClick={() => setSelectedService(service)}>
-                    {service.image && <img src={service.image} alt={service.name} className="featured-service-img" />}
-                    <div style={{ padding: '14px' }}>
-                      <span className="service-category-badge" style={{ display: 'inline-block', marginBottom: '8px' }}>{service.category}</span>
-                      <h3 style={{ margin: '0 0 6px', fontSize: '15px', fontWeight: '800', color: '#1f2937' }}>{service.name}</h3>
-                      <small style={{ color: '#e08c13', fontSize: '13px', fontWeight: '900' }}>Từ {formatPrice(service.price)}</small>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </section>
+        <section className="service-section">
+          <div className="service-section-head"><div><small>Dành cho bạn</small><h2>Gói dịch vụ nổi bật</h2></div><Sparkles size={20} /></div>
+          <div className="featured-service-grid">
+            {services.filter((service) => service.featured).map((service) => (
+              <button key={service.id} className="featured-service-card-with-image" onClick={() => setSelectedService(service)}>
+                {service.image && <img src={service.image} alt={service.name} className="featured-service-img" />}
+                <div style={{ padding: '14px' }}>
+                  <span className="service-category-badge" style={{ display: 'inline-block', marginBottom: '8px' }}>{service.category}</span>
+                  <h3 style={{ margin: '0 0 6px', fontSize: '15px', fontWeight: '800', color: '#1f2937' }}>{service.name}</h3>
+                  <small style={{ color: '#e08c13', fontSize: '13px', fontWeight: '900' }}>Từ {formatPrice(service.price)}</small>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
 
-            <section className="service-section">
-              <div className="service-section-head"><div><small>Được nhiều bệnh nhân lựa chọn</small><h2>Dịch vụ được đặt nhiều nhất</h2></div><BadgeCheck size={20} /></div>
-              <div className="popular-service-row">
-                {services.filter((service) => service.popular).map((service) => (
-                  <button key={service.id} onClick={() => setSelectedService(service)}>
-                    <span>{service.category}</span>
-                    <b>{service.name}</b>
-                    <small>{formatPrice(service.price)}</small>
-                  </button>
-                ))}
-              </div>
-            </section>
-          </>
-        )}
+        <section className="service-section">
+          <div className="service-section-head"><div><small>Được nhiều bệnh nhân lựa chọn</small><h2>Dịch vụ được đặt nhiều nhất</h2></div><BadgeCheck size={20} /></div>
+          <div className="popular-service-row">
+            {services.filter((service) => service.popular).map((service) => (
+              <button key={service.id} onClick={() => setSelectedService(service)}>
+                <span>{service.category}</span>
+                <b>{service.name}</b>
+                <small>{formatPrice(service.price)}</small>
+              </button>
+            ))}
+          </div>
+        </section>
 
         <section className="service-section">
           <div className="service-section-head"><div><small>Danh mục dịch vụ</small><h2>Tất cả dịch vụ y tế</h2></div><span className="service-result-count">{filteredServices.length} dịch vụ phù hợp</span></div>
