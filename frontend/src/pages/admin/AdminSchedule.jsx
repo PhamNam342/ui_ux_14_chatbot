@@ -1,4 +1,5 @@
-import { createElement, useMemo, useState } from 'react'
+import { createElement, useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import {
   Activity,
   BadgeCheck,
@@ -75,6 +76,9 @@ function Modal({ children, onClose, wide = false }) {
 }
 
 export function AdminSchedule({ showModal = false }) {
+  const location = useLocation()
+  const initialDoctor = location.state?.doctorFilter || doctors[0]
+
   const [appointments, setAppointments] = useState(defaultAppointments)
   const [rota, setRota] = useState(defaultRota)
   const [view, setView] = useState('table')
@@ -82,7 +86,7 @@ export function AdminSchedule({ showModal = false }) {
   const [date, setDate] = useState('2026-06-01')
   const [clinic, setClinic] = useState(clinics[0])
   const [spec, setSpec] = useState(specialties[0])
-  const [doctor, setDoctor] = useState(doctors[0])
+  const [doctor, setDoctor] = useState(initialDoctor)
   const [status, setStatus] = useState(statuses[0])
   const [query, setQuery] = useState('')
   const [openActions, setOpenActions] = useState(null)
@@ -93,6 +97,14 @@ export function AdminSchedule({ showModal = false }) {
   const [appointmentForm, setAppointmentForm] = useState(emptyAppointment)
   const [dutyForm, setDutyForm] = useState(emptyDuty)
   const [toast, setToast] = useState('')
+  const [confirmCancelAppointment, setConfirmCancelAppointment] = useState(null)
+
+  const selectDoctorsList = useMemo(() => {
+    if (initialDoctor && !doctors.includes(initialDoctor)) {
+      return [...doctors, initialDoctor]
+    }
+    return doctors
+  }, [initialDoctor])
 
   const notify = (message) => {
     setToast(message)
@@ -129,10 +141,24 @@ export function AdminSchedule({ showModal = false }) {
   }
 
   const updateAppointmentStatus = (item, nextStatus) => {
+    if (nextStatus === 'Đã hủy') {
+      setConfirmCancelAppointment(item)
+      return
+    }
     setAppointments((current) => current.map((appointment) => appointment.id === item.id ? { ...appointment, status: nextStatus } : appointment))
     setSelectedAppointment((current) => current?.id === item.id ? { ...current, status: nextStatus } : current)
     setOpenActions(null)
     notify(`Đã cập nhật ${item.id}: ${nextStatus}`)
+  }
+
+  const handleConfirmCancel = () => {
+    if (!confirmCancelAppointment) return
+    const item = confirmCancelAppointment
+    setAppointments((current) => current.map((appointment) => appointment.id === item.id ? { ...appointment, status: 'Đã hủy' } : appointment))
+    setSelectedAppointment((current) => current?.id === item.id ? { ...current, status: 'Đã hủy' } : current)
+    setOpenActions(null)
+    setConfirmCancelAppointment(null)
+    notify(`Đã hủy lịch khám ${item.id}`)
   }
 
   const addAppointment = (event) => {
@@ -190,7 +216,7 @@ export function AdminSchedule({ showModal = false }) {
           <div>
             <p className="admin-clinic-breadcrumb">Admin <span>/</span> Quản lý lịch khám</p>
             {/* <span className="admin-clinic-eyebrow"><CalendarDays size={15} /> ĐIỀU PHỐI CA KHÁM</span> */}
-            <h1>Quản lý lịch khám & lịch trực</h1>
+            <h1 style={{ whiteSpace: 'nowrap' }}>Quản lý lịch khám & lịch trực</h1>
             <p>Sắp xếp ca khám, phân công bác sĩ, phòng khám và theo dõi vận hành trong ngày.</p>
           </div>
           <div className="admin-clinic-head-actions admin-schedule-head-actions">
@@ -217,7 +243,7 @@ export function AdminSchedule({ showModal = false }) {
             <label><span>Chọn ngày</span><input type="date" value={date} onChange={(event) => setDate(event.target.value)} /></label>
             <label><span>Cơ sở</span><select value={clinic} onChange={(event) => setClinic(event.target.value)}>{clinics.map((item) => <option key={item}>{item}</option>)}</select></label>
             <label><span>Chuyên khoa</span><select value={spec} onChange={(event) => setSpec(event.target.value)}>{specialties.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label><span>Bác sĩ</span><select value={doctor} onChange={(event) => setDoctor(event.target.value)}>{doctors.map((item) => <option key={item}>{item}</option>)}</select></label>
+            <label><span>Bác sĩ</span><select value={doctor} onChange={(event) => setDoctor(event.target.value)}>{selectDoctorsList.map((item) => <option key={item}>{item}</option>)}</select></label>
             <label><span>Trạng thái</span><select value={status} onChange={(event) => setStatus(event.target.value)}>{statuses.map((item) => <option key={item}>{item}</option>)}</select></label>
             <label className="admin-schedule-search"><span>Tìm kiếm</span><div><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Bệnh nhân / mã lịch khám" /></div></label>
           </div>
@@ -245,6 +271,23 @@ export function AdminSchedule({ showModal = false }) {
       {appointmentOpen && <AppointmentModal form={appointmentForm} onChange={setAppointmentForm} onClose={() => setAppointmentOpen(false)} onSubmit={addAppointment} />}
       {dutyOpen && <DutyModal form={dutyForm} onChange={setDutyForm} onClose={() => setDutyOpen(false)} onSubmit={addDuty} />}
       {selectedAppointment && <AppointmentDrawer appointment={selectedAppointment} onClose={() => setSelectedAppointment(null)} onStatus={updateAppointmentStatus} />}
+
+      {confirmCancelAppointment && (
+        <div className="modal-backdrop" onMouseDown={() => setConfirmCancelAppointment(null)}>
+          <div className="modal admin-doctor-delete-modal p-6 text-center" onMouseDown={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: '16px', padding: '24px', maxWidth: '400px' }}>
+            <div className="admin-doctor-delete-icon" style={{ background: '#fee2e2', color: '#ef4444' }}><XCircle size={26} /></div>
+            <h2 style={{ fontSize: '18px', fontWeight: '800', margin: '0 0 10px' }}>Hủy lịch khám?</h2>
+            <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px', lineHeight: '1.5' }}>
+              Bạn có chắc chắn muốn hủy lịch khám <b>{confirmCancelAppointment.id}</b> của bệnh nhân <b>{confirmCancelAppointment.patient}</b> không?
+            </p>
+            <div className="modal-actions" style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+              <Button variant="outline" onClick={() => setConfirmCancelAppointment(null)}>Hủy</Button>
+              <Button onClick={handleConfirmCancel} style={{ background: '#ef4444', color: '#fff', border: 'none' }}>Xác nhận hủy</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {toast && <div className="toast"><CheckCircle2 size={18} /> {toast}</div>}
     </AppShell>
   )

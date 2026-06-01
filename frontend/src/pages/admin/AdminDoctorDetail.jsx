@@ -70,6 +70,7 @@ export function AdminDoctorDetail() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [deleteText, setDeleteText] = useState('')
+  const [confirmSuspendOpen, setConfirmSuspendOpen] = useState(false)
 
   const notify = (message) => {
     setToast(message)
@@ -101,6 +102,7 @@ export function AdminDoctorDetail() {
     try {
       const deletedDoctorIds = JSON.parse(window.localStorage.getItem(deletedDoctorsKey) || '[]')
       window.localStorage.setItem(deletedDoctorsKey, JSON.stringify([...new Set([...deletedDoctorIds, doctor.id])]))
+      window.localStorage.setItem('medconsult-admin-toast', `Đã xóa hồ sơ bác sĩ BS. ${doctor.name}`)
     } catch {
       // The route still closes cleanly if local storage is unavailable.
     }
@@ -108,10 +110,11 @@ export function AdminDoctorDetail() {
     navigate('/admin/doctors')
   }
 
-  const suspendAccount = () => {
+  const handleConfirmSuspend = () => {
     const nextStatus = doctor.status === 'Tạm ngưng' ? 'Đang làm việc' : 'Tạm ngưng'
     updateField('status', nextStatus)
     notify(nextStatus === 'Tạm ngưng' ? 'Đã tạm ngưng tài khoản bác sĩ' : 'Đã kích hoạt lại tài khoản')
+    setConfirmSuspendOpen(false)
   }
 
   return (
@@ -127,7 +130,7 @@ export function AdminDoctorDetail() {
           </div>
           <div className="admin-clinic-head-actions">
             <Button variant="outline" onClick={() => setPasswordOpen(true)}><KeyRound size={17} /> Đặt lại mật khẩu</Button>
-            <Button variant="outline" className="admin-doctor-suspend-button" onClick={suspendAccount}><ShieldAlert size={17} /> {doctor.status === 'Tạm ngưng' ? 'Kích hoạt tài khoản' : 'Tạm ngưng tài khoản'}</Button>
+            <Button variant="outline" className="admin-doctor-suspend-button" onClick={() => setConfirmSuspendOpen(true)}><ShieldAlert size={17} /> {doctor.status === 'Tạm ngưng' ? 'Kích hoạt tài khoản' : 'Tạm ngưng tài khoản'}</Button>
             <Button className="admin-doctor-delete-button" onClick={() => setDeleteOpen(true)}><Trash2 size={17} /> Xóa bác sĩ</Button>
             <Button onClick={() => notify('Đã lưu thay đổi hồ sơ bác sĩ')}><Save size={17} /> Lưu thay đổi</Button>
           </div>
@@ -194,6 +197,11 @@ export function AdminDoctorDetail() {
                 <label><span>Trạng thái nhận lịch</span><select><option>Đang nhận lịch</option><option>Chỉ nhận tái khám</option><option>Tạm khóa lịch</option></select></label>
               </div>
               <div className="admin-doctor-week-grid">{['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((day, index) => <article className={index === 6 ? 'is-off' : ''} key={day}><b>{day}</b><span>{index === 6 ? 'Nghỉ' : 'Ca sáng'}</span><span>{index > 4 ? 'Ca chiều' : 'Ca tối'}</span></article>)}</div>
+              <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+                <Button variant="outline" onClick={() => navigate('/admin/schedule', { state: { doctorFilter: 'BS. ' + doctor.name } })}>
+                  <CalendarDays size={17} /> Xem lịch khám chi tiết
+                </Button>
+              </div>
             </section>}
 
             {activeTab === 'reviews' && <section className="admin-doctor-detail-panel">
@@ -213,7 +221,7 @@ export function AdminDoctorDetail() {
                 <article><Activity size={20} /><span><small>Trạng thái</small><b>{doctor.status}</b></span></article>
                 <article><Clock3 size={20} /><span><small>Lần đăng nhập gần nhất</small><b>30/05/2026 · 20:42</b></span></article>
               </div>
-              <div className="admin-doctor-security-actions"><Button onClick={() => setPasswordOpen(true)}><KeyRound size={17} /> Đổi mật khẩu</Button><Button variant="outline" onClick={suspendAccount}><ShieldAlert size={17} /> Thay đổi trạng thái</Button></div>
+              <div className="admin-doctor-security-actions"><Button onClick={() => setPasswordOpen(true)}><KeyRound size={17} /> Đổi mật khẩu</Button><Button variant="outline" onClick={() => setConfirmSuspendOpen(true)}><ShieldAlert size={17} /> Thay đổi trạng thái</Button></div>
               <h4 className="admin-doctor-log-title">Nhật ký hoạt động</h4>
               <div className="admin-doctor-activity-log">{activityLog.map(([title, meta]) => <article key={title}><i /><div><b>{title}</b><small>{meta}</small></div></article>)}</div>
             </section>}
@@ -222,7 +230,7 @@ export function AdminDoctorDetail() {
       </main>
 
       {passwordOpen && <div className="modal-backdrop" onMouseDown={() => setPasswordOpen(false)}>
-        <form className="modal admin-doctor-password-modal" onSubmit={updatePassword} onMouseDown={(event) => event.stopPropagation()}>
+        <form className="modal admin-doctor-password-modal" onSubmit={updatePassword} onMouseDown={(event) => event.stopPropagation()} style={{ background: '#fff', borderRadius: '16px', padding: '24px', maxWidth: '400px' }}>
           <div className="modal-head"><div><span className="admin-clinic-eyebrow"><KeyRound size={14} /> BẢO MẬT TÀI KHOẢN</span><h2>Đặt lại mật khẩu</h2><p>Tạo mật khẩu mạnh để bảo vệ tài khoản bác sĩ.</p></div><button type="button" onClick={() => setPasswordOpen(false)}>×</button></div>
           <label className="admin-doctor-password-field"><span>Mật khẩu mới</span><div><input required minLength="8" type={showPassword ? 'text' : 'password'} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} /><button aria-label="Hiện hoặc ẩn mật khẩu" type="button" onClick={() => setShowPassword((value) => !value)}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div></label>
           <label className="admin-doctor-password-field"><span>Xác nhận mật khẩu</span><div><input required type={showPassword ? 'text' : 'password'} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} /></div></label>
@@ -233,14 +241,33 @@ export function AdminDoctorDetail() {
       </div>}
 
       {deleteOpen && <div className="modal-backdrop" onMouseDown={() => setDeleteOpen(false)}>
-        <section className="modal admin-doctor-delete-modal" onMouseDown={(event) => event.stopPropagation()}>
-          <div className="admin-doctor-delete-icon"><ShieldAlert size={26} /></div>
-          <h2>Xóa hồ sơ bác sĩ?</h2>
-          <p>Thao tác này sẽ xóa hồ sơ bác sĩ và không thể hoàn tác. Nhập <b>DELETE</b> để xác nhận.</p>
-          <input aria-label="Nhập DELETE để xác nhận xóa" value={deleteText} onChange={(event) => setDeleteText(event.target.value)} placeholder="Nhập DELETE" />
-          <div className="modal-actions"><Button variant="outline" onClick={() => setDeleteOpen(false)}>Hủy</Button><Button disabled={deleteText !== 'DELETE'} className="admin-doctor-delete-button" onClick={deleteDoctor}><Trash2 size={17} /> Xóa bác sĩ</Button></div>
+        <section className="modal admin-doctor-delete-modal p-6 text-center" onMouseDown={(event) => event.stopPropagation()} style={{ background: '#fff', borderRadius: '16px', padding: '24px', maxWidth: '400px' }}>
+          <div className="admin-doctor-delete-icon" style={{ background: '#fee2e2', color: '#ef4444' }}><ShieldAlert size={26} /></div>
+          <h2 style={{ fontSize: '18px', fontWeight: '800', margin: '0 0 10px' }}>Xóa hồ sơ bác sĩ?</h2>
+          <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px', lineHeight: '1.5' }}>Thao tác này sẽ xóa hồ sơ bác sĩ và không thể hoàn tác. Nhập <b>DELETE</b> để xác nhận.</p>
+          <input aria-label="Nhập DELETE để xác nhận xóa" value={deleteText} onChange={(event) => setDeleteText(event.target.value)} placeholder="Nhập DELETE" style={{ width: '100%', padding: '10px 14px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '20px', outline: 'none' }} />
+          <div className="modal-actions" style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}><Button variant="outline" onClick={() => setDeleteOpen(false)}>Hủy</Button><Button disabled={deleteText !== 'DELETE'} className="admin-doctor-delete-button" onClick={deleteDoctor} style={{ background: deleteText === 'DELETE' ? '#ef4444' : '#f1f5f9', color: deleteText === 'DELETE' ? '#fff' : '#94a3b8', border: 'none' }}><Trash2 size={17} /> Xóa bác sĩ</Button></div>
         </section>
       </div>}
+
+      {confirmSuspendOpen && (
+        <div className="modal-backdrop" onMouseDown={() => setConfirmSuspendOpen(false)}>
+          <div className="modal admin-doctor-delete-modal p-6 text-center" onMouseDown={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: '16px', padding: '24px', maxWidth: '400px' }}>
+            <div className="admin-doctor-delete-icon" style={{ background: '#e0f2fe', color: '#0369a1' }}><Activity size={26} /></div>
+            <h2 style={{ fontSize: '18px', fontWeight: '800', margin: '0 0 10px' }}>
+              {doctor.status === 'Tạm ngưng' ? 'Kích hoạt bác sĩ?' : 'Tạm ngưng bác sĩ?'}
+            </h2>
+            <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px', lineHeight: '1.5' }}>
+              Bạn có chắc chắn muốn thay đổi trạng thái hoạt động của bác sĩ <b>BS. {doctor.name}</b> không?
+            </p>
+            <div className="modal-actions" style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+              <Button variant="outline" onClick={() => setConfirmSuspendOpen(false)}>Hủy</Button>
+              <Button onClick={handleConfirmSuspend}>Xác nhận</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {toast && <div className="toast"><CheckCircle2 size={18} />{toast}</div>}
     </AppShell>
   )

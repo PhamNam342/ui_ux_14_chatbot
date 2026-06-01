@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Building2,
@@ -64,6 +64,10 @@ const facilityReviews = [
 
 export function PatientBooking() {
   const navigate = useNavigate()
+  const step2Ref = useRef(null)
+  const step3Ref = useRef(null)
+  const step4Ref = useRef(null)
+  const summaryRef = useRef(null)
   const [clinicId, setClinicId] = useState(null)
   const [specialty, setSpecialty] = useState('')
   const [selectedDoctor, setSelectedDoctor] = useState(null)
@@ -109,6 +113,9 @@ export function PatientBooking() {
     setSelectedDoctor(null)
     setSelectedDate('')
     setSelectedSlot('')
+    setTimeout(() => {
+      step2Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }, 120)
   }
 
   function selectSpecialty(nextSpecialty) {
@@ -116,12 +123,18 @@ export function PatientBooking() {
     setSelectedDoctor(null)
     setSelectedDate('')
     setSelectedSlot('')
+    setTimeout(() => {
+      step3Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }, 120)
   }
 
   function selectDoctor(doctor) {
     setSelectedDoctor(doctor)
     setSelectedDate('')
     setSelectedSlot('')
+    setTimeout(() => {
+      step4Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }, 120)
   }
 
   function openConfirmation() {
@@ -160,8 +173,9 @@ export function PatientBooking() {
     }
 
     setConfirmed(`Đã xác nhận lịch với ${confirmationDetails.doctor.doctor} lúc ${confirmationDetails.slot}.`)
+    window.localStorage.setItem('medconsult-patient-toast', 'Đặt lịch khám thành công!')
     setToast('Đặt lịch thành công')
-    window.setTimeout(() => navigate('/patient'), 1200)
+    window.setTimeout(() => navigate('/patient/appointments'), 1200)
   }
 
   return (
@@ -203,7 +217,7 @@ export function PatientBooking() {
             {confirmed && <div className="booking-confirm-success">{confirmed}</div>}
             <div className="mt-7 flex justify-end gap-3">
               {!confirmed && <Button variant="ghost" onClick={() => setConfirmationDetails(null)}>Quay lại chỉnh sửa</Button>}
-              {!confirmed ? <Button onClick={confirmBooking}>Xác nhận đặt lịch</Button> : <Button onClick={() => navigate('/patient')}>Về trang chủ</Button>}
+              {!confirmed ? <Button onClick={confirmBooking}>Xác nhận đặt lịch</Button> : <Button onClick={() => navigate('/patient/appointments')}>Về trang chủ</Button>}
             </div>
           </Card>
         ) : (
@@ -266,7 +280,7 @@ export function PatientBooking() {
                 </div>
               </Card>
 
-              <Card className={`booking-section-card ${!selectedClinic ? 'is-locked' : ''}`}>
+              <Card ref={step2Ref} className={`booking-section-card ${!selectedClinic ? 'is-locked' : ''}`}>
                 <div className="booking-section-head">
                   <span>2</span>
                   <div><h2>Chọn chuyên khoa</h2><p>Danh sách được cập nhật theo cơ sở khám bạn đã chọn.</p></div>
@@ -278,7 +292,7 @@ export function PatientBooking() {
                 ) : <p className="booking-helper">Hãy chọn bệnh viện hoặc phòng khám để tiếp tục.</p>}
               </Card>
 
-              <Card className={`booking-section-card ${!specialty ? 'is-locked' : ''}`}>
+              <Card ref={step3Ref} className={`booking-section-card ${!specialty ? 'is-locked' : ''}`}>
                 <div className="booking-section-head">
                   <span>3</span>
                   <div><h2>Chọn bác sĩ</h2><p>Xem kinh nghiệm, đánh giá và tình trạng lịch khám của bác sĩ.</p></div>
@@ -295,7 +309,7 @@ export function PatientBooking() {
                 ) : <p className="booking-helper">Hãy chọn chuyên khoa để xem bác sĩ phù hợp.</p>}
               </Card>
 
-              <Card className={`booking-section-card ${!selectedDoctor ? 'is-locked' : ''}`}>
+              <Card ref={step4Ref} className={`booking-section-card ${!selectedDoctor ? 'is-locked' : ''}`}>
                 <div className="booking-section-head">
                   <span>4</span>
                   <div><h2>Chọn lịch khám</h2><p>Chọn ngày trước, sau đó chọn khung giờ còn trống.</p></div>
@@ -317,7 +331,12 @@ export function PatientBooking() {
                             <b>{group.label}</b>
                             <div>{group.slots.map((slot) => {
                               const available = selectedDoctor.slots.includes(slot)
-                              return <button type="button" key={slot} disabled={!available} className={selectedSlot === slot ? 'active' : ''} onClick={() => setSelectedSlot(slot)}>{slot}</button>
+                              return <button type="button" key={slot} disabled={!available} className={selectedSlot === slot ? 'active' : ''} onClick={() => {
+                                setSelectedSlot(slot)
+                                setTimeout(() => {
+                                  summaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+                                }, 120)
+                              }}>{slot}</button>
                             })}</div>
                           </div>
                         ))}
@@ -328,7 +347,7 @@ export function PatientBooking() {
               </Card>
             </div>
 
-            <aside className="booking-summary-wrap">
+            <aside ref={summaryRef} className="booking-summary-wrap">
               <Card className="booking-summary">
                 <h2>Tóm tắt đặt lịch</h2>
                 <p>Thông tin được cập nhật theo lựa chọn của bạn.</p>
@@ -340,7 +359,7 @@ export function PatientBooking() {
                   <div><Clock3 size={16} /><span><small>Giờ khám</small><b>{selectedSlot || 'Chưa chọn'}</b></span></div>
                   <div><Wallet size={16} /><span><small>Phí khám ước tính</small><b>{selectedDoctor ? `${price.toLocaleString('vi-VN')} đ` : 'Chưa có'}</b></span></div>
                 </div>
-                <Button className="booking-summary-submit" disabled={!formComplete} onClick={openConfirmation}>Tiếp tục xác nhận</Button>
+                <Button className="booking-summary-submit" disabled={!formComplete} onClick={openConfirmation}>Tiếp tục</Button>
                 {!formComplete && <small className="booking-summary-note">Vui lòng hoàn tất đầy đủ các bước để tiếp tục.</small>}
               </Card>
             </aside>

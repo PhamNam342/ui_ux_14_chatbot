@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { ArrowLeft, ArrowRight, CalendarDays, Clock, MapPin } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { ArrowLeft, ArrowRight, CalendarDays, CheckCircle2, Clock, MapPin } from 'lucide-react'
 import { AppShell, Badge, Card, PageHeader, TopBar } from '../../components/ui.jsx'
 import { clinics } from '../../data/mock.js'
 
@@ -73,6 +73,24 @@ export function PatientAppointments() {
   const [activeDate, setActiveDate] = useState('2026-05-22')
   const [viewMode, setViewMode] = useState('month')
   const [appointments] = useState(() => initialAppointments())
+  const [toast, setToast] = useState('')
+
+  useEffect(() => {
+    const pending = window.localStorage.getItem('medconsult-patient-toast')
+    if (pending) {
+      setToast(pending)
+      window.localStorage.removeItem('medconsult-patient-toast')
+      const timer = window.setTimeout(() => setToast(''), 2500)
+      return () => window.clearTimeout(timer)
+    }
+  }, [])
+
+  const jumpToToday = () => {
+    const today = new Date()
+    setAnchor(today)
+    setActiveDate(toLocalISODate(today))
+  }
+
   const calendarDates = useMemo(() => viewMode === 'month' ? getMonthGrid(anchor) : getWeekGrid(new Date(`${activeDate}T00:00:00`)), [anchor, activeDate, viewMode])
   const groupedAppointments = useMemo(() => {
     const grouped = new Map()
@@ -106,6 +124,29 @@ export function PatientAppointments() {
               <button onClick={() => moveCalendar(-1)}><ArrowLeft size={20} /></button>
               <h2>{viewMode === 'month' ? `Tháng ${anchor.getMonth() + 1}, ${anchor.getFullYear()}` : `Tuần ${calendarDates[0].toLocaleDateString('vi-VN')} - ${calendarDates[6].toLocaleDateString('vi-VN')}`}</h2>
               <button onClick={() => moveCalendar(1)}><ArrowRight size={20} /></button>
+              <button
+                className="today-btn"
+                type="button"
+                onClick={jumpToToday}
+                style={{
+                  border: '1px solid #dce8e7',
+                  borderRadius: '999px',
+                  background: '#fff',
+                  padding: '0 14px',
+                  color: '#0f766e',
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  minHeight: '34px',
+                  cursor: 'pointer',
+                  marginLeft: '12px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: '160ms ease'
+                }}
+              >
+                Hôm nay
+              </button>
               <div className="patient-calendar-toggle">
                 <button className={viewMode === 'week' ? 'active' : ''} onClick={() => setViewMode('week')}>Tuần</button>
                 <button className={viewMode === 'month' ? 'active' : ''} onClick={() => setViewMode('month')}>Tháng</button>
@@ -158,6 +199,7 @@ export function PatientAppointments() {
           </Card>
         </div>
       </div>
+      {toast && <div className="toast"><CheckCircle2 size={18} /> {toast}</div>}
     </AppShell>
   )
 }

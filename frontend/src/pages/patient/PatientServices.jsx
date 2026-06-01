@@ -40,6 +40,7 @@ const services = [
     insurance: true,
     popular: true,
     featured: true,
+    image: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=300&q=80',
     hospitals: ['Phòng khám Đa khoa Tâm An', 'MedCare Family Clinic'],
     items: ['Khám nội tổng quát', 'Đo huyết áp và chỉ số cơ thể', 'Tư vấn kết quả và kế hoạch theo dõi'],
   },
@@ -56,6 +57,7 @@ const services = [
     insurance: true,
     popular: true,
     featured: true,
+    image: 'https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?auto=format&fit=crop&w=300&q=80',
     hospitals: ['Phòng khám Tim mạch An Bình'],
     items: ['Khám tim mạch', 'Điện tâm đồ', 'Siêu âm tim', 'Tư vấn chuyên sâu cùng bác sĩ'],
   },
@@ -70,6 +72,7 @@ const services = [
     duration: '30 phút',
     insurance: true,
     popular: true,
+    image: 'https://images.unsplash.com/photo-1579154204601-01588f35116f?auto=format&fit=crop&w=300&q=80',
     hospitals: ['Phòng khám Đa khoa Tâm An', 'MedCare Family Clinic'],
     items: ['Công thức máu', 'Đường huyết', 'Chức năng gan', 'Chức năng thận'],
   },
@@ -98,6 +101,7 @@ const services = [
     duration: '30 phút',
     insurance: false,
     featured: true,
+    image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=300&q=80',
     hospitals: ['Phòng khám Đa khoa Tâm An'],
     items: ['Tư vấn sàng lọc', 'Vaccine cúm mùa', 'Theo dõi sau tiêm'],
   },
@@ -139,6 +143,7 @@ const services = [
     duration: '20 - 30 phút',
     insurance: false,
     popular: true,
+    image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=300&q=80',
     hospitals: ['MedConsult Online'],
     items: ['Tư vấn video với bác sĩ', 'Tóm tắt nội dung tư vấn', 'Hướng dẫn chăm sóc ban đầu'],
   },
@@ -204,6 +209,7 @@ export function PatientServices() {
     return () => window.clearTimeout(timer)
   }, [])
 
+  const isFiltering = query.trim() !== '' || category !== 'Tất cả' || type !== 'Tất cả loại dịch vụ' || priceRange !== 'all' || insuranceOnly
   const filteredServices = useMemo(() => services.filter((service) => {
     const normalized = query.trim().toLowerCase()
     const matchesQuery = !normalized || `${service.name} ${service.description}`.toLowerCase().includes(normalized)
@@ -253,23 +259,38 @@ export function PatientServices() {
           </div>
         </Card>
 
-        <section className="service-section">
-          <div className="service-section-head"><div><small>Dành cho bạn</small><h2>Gói dịch vụ nổi bật</h2></div><Sparkles size={20} /></div>
-          <div className="featured-service-grid">
-            {services.filter((service) => service.featured).map((service) => (
-              <button key={service.id} onClick={() => setSelectedService(service)}>
-                <span>{service.category}</span><b>{service.name}</b><small>Từ {formatPrice(service.price)}</small><ArrowRight size={17} />
-              </button>
-            ))}
-          </div>
-        </section>
+        {!isFiltering && (
+          <>
+            <section className="service-section">
+              <div className="service-section-head"><div><small>Dành cho bạn</small><h2>Gói dịch vụ nổi bật</h2></div><Sparkles size={20} /></div>
+              <div className="featured-service-grid">
+                {services.filter((service) => service.featured).map((service) => (
+                  <button key={service.id} className="featured-service-card-with-image" onClick={() => setSelectedService(service)}>
+                    {service.image && <img src={service.image} alt={service.name} className="featured-service-img" />}
+                    <div style={{ padding: '14px' }}>
+                      <span className="service-category-badge" style={{ display: 'inline-block', marginBottom: '8px' }}>{service.category}</span>
+                      <h3 style={{ margin: '0 0 6px', fontSize: '15px', fontWeight: '800', color: '#1f2937' }}>{service.name}</h3>
+                      <small style={{ color: '#e08c13', fontSize: '13px', fontWeight: '900' }}>Từ {formatPrice(service.price)}</small>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
 
-        <section className="service-section">
-          <div className="service-section-head"><div><small>Được nhiều bệnh nhân lựa chọn</small><h2>Dịch vụ được đặt nhiều nhất</h2></div><BadgeCheck size={20} /></div>
-          <div className="popular-service-row">
-            {services.filter((service) => service.popular).map((service) => <button key={service.id} onClick={() => setSelectedService(service)}><span>{service.category}</span><b>{service.name}</b><small>{formatPrice(service.price)}</small></button>)}
-          </div>
-        </section>
+            <section className="service-section">
+              <div className="service-section-head"><div><small>Được nhiều bệnh nhân lựa chọn</small><h2>Dịch vụ được đặt nhiều nhất</h2></div><BadgeCheck size={20} /></div>
+              <div className="popular-service-row">
+                {services.filter((service) => service.popular).map((service) => (
+                  <button key={service.id} onClick={() => setSelectedService(service)}>
+                    <span>{service.category}</span>
+                    <b>{service.name}</b>
+                    <small>{formatPrice(service.price)}</small>
+                  </button>
+                ))}
+              </div>
+            </section>
+          </>
+        )}
 
         <section className="service-section">
           <div className="service-section-head"><div><small>Danh mục dịch vụ</small><h2>Tất cả dịch vụ y tế</h2></div><span className="service-result-count">{filteredServices.length} dịch vụ phù hợp</span></div>

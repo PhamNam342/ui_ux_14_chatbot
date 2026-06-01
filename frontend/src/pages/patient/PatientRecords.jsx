@@ -129,6 +129,20 @@ function BarChart({ values }) {
 }
 
 function LineChart({ values }) {
-  const points = values.map((value, index) => `${10 + index * 18},${88 - value * 19}`).join(' ')
-  return <div className="health-line-chart"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polyline points={points} />{values.map((value, index) => <circle key={index} cx={10 + index * 18} cy={88 - value * 19} r="2.5" />)}</svg><div>{['T1', 'T2', 'T3', 'T4', 'T5', 'T6'].map((month) => <small key={month}>{month}</small>)}</div></div>
+  const points = values.map((value, index) => `${50 + index * 100},${120 - value * 30}`).join(' ')
+  return (
+    <div className="health-line-chart">
+      <svg viewBox="0 0 600 120" style={{ width: '100%', height: '111px' }}>
+        <polyline points={points} />
+        {values.map((value, index) => (
+          <circle key={index} cx={50 + index * 100} cy={120 - value * 30} r="5.5" />
+        ))}
+      </svg>
+      <div>
+        {['T1', 'T2', 'T3', 'T4', 'T5', 'T6'].map((month) => (
+          <small key={month}>{month}</small>
+        ))}
+      </div>
+    </div>
+  )
 }

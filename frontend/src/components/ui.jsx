@@ -44,7 +44,7 @@ export function Logo() {
       </div>
       <div>
         <div className="text-lg font-black leading-5 text-teal-600">MedConsult</div>
-        <div className="text-xs text-slate-500">Hệ thống tư vấn y tế</div>
+        <div className="text-xs text-slate-500" style={{ whiteSpace: 'nowrap' }}>Hệ thống tư vấn y tế</div>
       </div>
     </div>
   )
@@ -117,11 +117,10 @@ export function TopBar({ legacy = false }) {
   ])
   const unreadCount = notifications.filter((item) => item.unread).length
   const patientProfileItems = [
-    { label: 'Thông tin cá nhân', to: '/patient/settings', icon: <CircleUserRound size={17} /> },
+    { label: 'Cài đặt & Hồ sơ', to: '/patient/settings', icon: <Settings size={17} /> },
     { label: 'Lịch khám', to: '/patient/appointments', icon: <CalendarDays size={17} /> },
     { label: 'Hóa đơn', to: '/patient/billing', icon: <Wallet size={17} /> },
     { label: 'Lịch sử khám bệnh', to: '/patient/history', icon: <ClipboardList size={17} /> },
-    { label: 'Cài đặt', to: '/patient/settings', icon: <Settings size={17} /> },
   ]
 
   function openProfileMenu() {
@@ -241,7 +240,7 @@ export function AppShell({ role, children, legacy = false }) {
   }
 
   return (
-    <div className={clsx('min-h-screen bg-slate-50 text-slate-900', collapsed && 'shell-collapsed')}>
+    <div className={clsx('min-h-screen bg-slate-50 text-slate-900', collapsed && 'shell-collapsed', `shell-${role}`)}>
       <Sidebar items={items[role]} legacy={legacy} collapsed={collapsed} onToggle={() => setCollapsed((value) => !value)} />
       <main className="app-main">
         {children}

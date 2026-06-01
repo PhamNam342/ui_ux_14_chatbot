@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   Activity,
   BriefcaseMedical,
@@ -54,6 +54,7 @@ function statusClass(status) {
 }
 
 export function AdminDashboard() {
+  const navigate = useNavigate()
   const [doctorList, setDoctorList] = useState(getAvailableDoctors)
   const [query, setQuery] = useState('')
   const [specialty, setSpecialty] = useState(adminSpecialties[0])
@@ -67,6 +68,15 @@ export function AdminDashboard() {
   const [newDoctor, setNewDoctor] = useState(emptyDoctor)
   const [toast, setToast] = useState('')
   const [syncing, setSyncing] = useState(false)
+  const [confirmSuspendDoctor, setConfirmSuspendDoctor] = useState(null)
+
+  useEffect(() => {
+    const pendingToast = window.localStorage.getItem('medconsult-admin-toast')
+    if (pendingToast) {
+      notify(pendingToast)
+      window.localStorage.removeItem('medconsult-admin-toast')
+    }
+  }, [])
 
   const notify = (message) => {
     setToast(message)
@@ -176,9 +186,16 @@ export function AdminDashboard() {
   }
 
   const toggleSuspend = (doctor) => {
+    setConfirmSuspendDoctor(doctor)
+  }
+
+  const handleConfirmSuspend = () => {
+    if (!confirmSuspendDoctor) return
+    const doctor = confirmSuspendDoctor
     const nextStatus = doctor.status === 'Tạm ngưng' ? 'Đang làm việc' : 'Tạm ngưng'
     setDoctorList((current) => current.map((item) => item.id === doctor.id ? { ...item, status: nextStatus } : item))
     notify(nextStatus === 'Tạm ngưng' ? 'Đã tạm ngưng tài khoản bác sĩ' : 'Đã kích hoạt lại tài khoản')
+    setConfirmSuspendDoctor(null)
   }
 
   return (
@@ -269,7 +286,7 @@ export function AdminDashboard() {
                   <td><div className="admin-doctor-row-actions">
                     <Link aria-label={`Xem chi tiết ${doctor.name}`} to={`/admin/doctors/${doctor.id}`}><Eye size={17} /></Link>
                     <button aria-label={`Chỉnh sửa ${doctor.name}`} type="button" onClick={() => openEditDoctor(doctor)}><Edit3 size={17} /></button>
-                    <button aria-label={`Phân lịch ${doctor.name}`} type="button" onClick={() => notify(`Đã mở lịch BS. ${doctor.name}`)}><CalendarCheck2 size={17} /></button>
+                    <button aria-label={`Phân lịch ${doctor.name}`} type="button" onClick={() => navigate('/admin/schedule', { state: { doctorFilter: 'BS. ' + doctor.name } })}><CalendarCheck2 size={17} /></button>
                     <button aria-label={`${doctor.status === 'Tạm ngưng' ? 'Kích hoạt' : 'Tạm ngưng'} ${doctor.name}`} type="button" onClick={() => toggleSuspend(doctor)}><PauseCircle size={17} /></button>
                   </div></td>
                 </tr>
@@ -293,7 +310,7 @@ export function AdminDashboard() {
               <div className="admin-doctor-skill-list">{doctor.skills.map((skill) => <span key={skill}>{skill}</span>)}</div>
               <div className="admin-doctor-card-actions">
                 <Link className="btn btn-primary" to={`/admin/doctors/${doctor.id}`}><Eye size={17} /> Xem hồ sơ</Link>
-                <button className="btn btn-outline" type="button" onClick={() => notify(`Đã mở lịch BS. ${doctor.name}`)}><CalendarCheck2 size={17} /> Phân lịch</button>
+                <button className="btn btn-outline" type="button" onClick={() => navigate('/admin/schedule', { state: { doctorFilter: 'BS. ' + doctor.name } })}><CalendarCheck2 size={17} /> Phân lịch</button>
                 <button className="admin-doctor-card-edit" aria-label={`Chỉnh sửa ${doctor.name}`} type="button" onClick={() => openEditDoctor(doctor)}><Edit3 size={17} /></button>
               </div>
             </article>
@@ -317,6 +334,25 @@ export function AdminDashboard() {
           <div className="modal-actions"><Button variant="outline" type="button" onClick={closeDoctorModal}>Hủy</Button><Button type="submit">{editingDoctorId ? <Edit3 size={17} /> : <Plus size={17} />} {editingDoctorId ? 'Lưu thay đổi' : 'Thêm bác sĩ'}</Button></div>
         </form>
       </div>}
+
+      {confirmSuspendDoctor && (
+        <div className="modal-backdrop" onMouseDown={() => setConfirmSuspendDoctor(null)}>
+          <div className="modal admin-doctor-delete-modal p-6 text-center" onMouseDown={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: '16px', padding: '24px', maxWidth: '400px' }}>
+            <div className="admin-doctor-delete-icon" style={{ background: '#e0f2fe', color: '#0369a1' }}><PauseCircle size={26} /></div>
+            <h2 style={{ fontSize: '18px', fontWeight: '800', margin: '0 0 10px' }}>
+              {confirmSuspendDoctor.status === 'Tạm ngưng' ? 'Kích hoạt bác sĩ?' : 'Tạm ngưng bác sĩ?'}
+            </h2>
+            <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px', lineHeight: '1.5' }}>
+              Bạn có chắc chắn muốn thay đổi trạng thái hoạt động của bác sĩ <b>BS. {confirmSuspendDoctor.name}</b> không?
+            </p>
+            <div className="modal-actions" style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+              <Button variant="outline" onClick={() => setConfirmSuspendDoctor(null)}>Hủy</Button>
+              <Button onClick={handleConfirmSuspend}>Xác nhận</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {toast && <div className="toast"><CheckCircle2 size={18} />{toast}</div>}
     </AppShell>
   )

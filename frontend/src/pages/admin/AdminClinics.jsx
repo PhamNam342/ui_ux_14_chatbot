@@ -57,6 +57,8 @@ const initialClinics = [
     email: 'taman@medconsult.vn',
     description: 'Cơ sở đa khoa trung tâm với đội ngũ bác sĩ giàu kinh nghiệm, quy trình khám nhanh và đầy đủ chuyên khoa thiết yếu.',
     imagePosition: '68% center',
+    image: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=600&q=80',
+    gallery: ['https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=600&q=80'],
     doctorsList: [
       { initials: 'NM', name: 'BS. Nguyễn Văn Minh', specialty: 'Nội tổng quát', schedule: '08:00 - 12:00', status: 'Đang trực tuyến' },
       { initials: 'TH', name: 'BS. Trần Thị Hoa', specialty: 'Nhi khoa', schedule: '13:00 - 17:00', status: 'Ngoại tuyến' },
@@ -98,6 +100,8 @@ const initialClinics = [
     email: 'anbinh@medconsult.vn',
     description: 'Phòng khám chuyên sâu tim mạch, nội khoa với hệ thống thiết bị chẩn đoán hiện đại và quy trình theo dõi liên tục.',
     imagePosition: '52% center',
+    image: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=600&q=80',
+    gallery: ['https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1504813184591-015578574df5?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1579684389782-64d84b5e901a?auto=format&fit=crop&w=600&q=80'],
     doctorsList: [
       { initials: 'BH', name: 'BS. Lê Bảo Huy', specialty: 'Tim mạch', schedule: '07:30 - 12:00', status: 'Đang trực tuyến' },
       { initials: 'HT', name: 'BS. Nguyễn Hoài Thương', specialty: 'Nội tổng quát', schedule: '13:00 - 18:30', status: 'Ngoại tuyến' },
@@ -136,6 +140,8 @@ const initialClinics = [
     email: 'family@medconsult.vn',
     description: 'Phòng khám gia đình thân thiện, tập trung chăm sóc sức khỏe định kỳ, dinh dưỡng và nhi khoa.',
     imagePosition: '80% center',
+    image: 'https://images.unsplash.com/photo-1516841273335-e39b37888115?auto=format&fit=crop&w=600&q=80',
+    gallery: ['https://images.unsplash.com/photo-1516841273335-e39b37888115?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1502740479091-635887520276?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&w=600&q=80'],
     doctorsList: [
       { initials: 'QA', name: 'BS. Đỗ Quốc Anh', specialty: 'Y học gia đình', schedule: '08:00 - 16:00', status: 'Đang trực tuyến' },
       { initials: 'HL', name: 'BS. Vũ Hoàng Lan', specialty: 'Dinh dưỡng', schedule: '09:00 - 17:00', status: 'Ngoại tuyến' },
@@ -222,9 +228,9 @@ function ClinicDetailDrawer({ clinic, tab, setTab, onClose }) {
           {tab === 'overview' && (
             <div className="admin-clinic-overview">
               <div className="admin-clinic-gallery">
-                <img alt={`Không gian ${clinic.name}`} src={clinicImage} style={{ objectPosition: clinic.imagePosition }} />
-                <img alt={`Khu vực tiếp nhận ${clinic.name}`} src={clinicImage} style={{ objectPosition: '42% center' }} />
-                <img alt={`Phòng khám ${clinic.name}`} src={clinicImage} style={{ objectPosition: '76% center' }} />
+                <img alt={`Không gian ${clinic.name}`} src={clinic.gallery?.[0] || clinicImage} />
+                <img alt={`Khu vực tiếp nhận ${clinic.name}`} src={clinic.gallery?.[1] || clinicImage} />
+                <img alt={`Phòng khám ${clinic.name}`} src={clinic.gallery?.[2] || clinicImage} />
               </div>
               <section className="admin-clinic-detail-section">
                 <h3>Thông tin cơ sở</h3>
@@ -364,6 +370,7 @@ export function AdminClinics() {
   const [editingClinicId, setEditingClinicId] = useState(null)
   const [toast, setToast] = useState('')
   const [newClinic, setNewClinic] = useState(emptyClinic)
+  const [toggleConfirmClinic, setToggleConfirmClinic] = useState(null)
 
   const notify = (message) => {
     setToast(message)
@@ -421,8 +428,15 @@ export function AdminClinics() {
   }
 
   const toggleClinic = (clinic) => {
+    setToggleConfirmClinic(clinic)
+  }
+
+  const handleToggleClinic = () => {
+    if (!toggleConfirmClinic) return
+    const clinic = toggleConfirmClinic
     const nextStatus = clinic.status === 'Tạm ngưng' ? 'Đang hoạt động' : 'Tạm ngưng'
     setClinicItems((items) => items.map((item) => item.id === clinic.id ? { ...item, status: nextStatus } : item))
+    setToggleConfirmClinic(null)
     notify(`${clinic.name}: ${nextStatus}`)
   }
 
@@ -593,7 +607,7 @@ export function AdminClinics() {
                 {filteredClinics.map((clinic) => (
                   <article className="admin-clinic-management-card" key={clinic.id}>
                     <div className="admin-clinic-cover">
-                      <img alt={clinic.name} src={clinicImage} style={{ objectPosition: clinic.imagePosition }} />
+                      <img alt={clinic.name} src={clinic.image || clinicImage} />
                       <span className={`admin-clinic-status ${clinicStatusClass(clinic.status)}`}>{clinic.status}</span>
                       <span className="admin-clinic-id">{clinic.id}</span>
                     </div>
@@ -627,8 +641,6 @@ export function AdminClinics() {
                       <div className="admin-clinic-card-actions">
                         <button className="is-primary" onClick={() => openClinicDetail(clinic)} type="button">Xem chi tiết</button>
                         <button onClick={() => openEditClinic(clinic)} type="button"><Edit3 size={15} /> Chỉnh sửa</button>
-                        <button onClick={() => notify(`Mở quản lý bác sĩ tại ${clinic.name}`)} type="button"><Stethoscope size={15} /> Bác sĩ</button>
-                        <button onClick={() => notify(`Mở quản lý phòng tại ${clinic.name}`)} type="button"><BedDouble size={15} /> Phòng</button>
                         <button className={clinic.status === 'Tạm ngưng' ? 'is-activate' : 'is-pause'} onClick={() => toggleClinic(clinic)} type="button">
                           {clinic.status === 'Tạm ngưng' ? <PlayCircle size={15} /> : <PauseCircle size={15} />}
                           {clinic.status === 'Tạm ngưng' ? 'Kích hoạt' : 'Tạm ngưng'}
@@ -679,6 +691,24 @@ export function AdminClinics() {
                 <Button type="submit">{editingClinicId ? <Edit3 size={17} /> : <Plus size={17} />} {editingClinicId ? 'Lưu thay đổi' : 'Thêm phòng khám'}</Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {toggleConfirmClinic && (
+        <div className="modal-backdrop" onMouseDown={() => setToggleConfirmClinic(null)}>
+          <div className="modal admin-doctor-delete-modal p-6 text-center" onMouseDown={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: '16px', padding: '24px', maxWidth: '400px' }}>
+            <div className="admin-doctor-delete-icon" style={{ background: '#e0f2fe', color: '#0369a1' }}><PauseCircle size={26} /></div>
+            <h2 style={{ fontSize: '18px', fontWeight: '800', margin: '0 0 10px' }}>
+              {toggleConfirmClinic.status === 'Tạm ngưng' ? 'Kích hoạt phòng khám?' : 'Tạm ngưng phòng khám?'}
+            </h2>
+            <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px', lineHeight: '1.5' }}>
+              Bạn có chắc chắn muốn thay đổi trạng thái hoạt động của <b>{toggleConfirmClinic.name}</b> không?
+            </p>
+            <div className="modal-actions" style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+              <Button variant="outline" onClick={() => setToggleConfirmClinic(null)}>Hủy</Button>
+              <Button onClick={handleToggleClinic}>Xác nhận</Button>
+            </div>
           </div>
         </div>
       )}
