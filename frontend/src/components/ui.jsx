@@ -29,6 +29,7 @@ import {
   HeartPulse,
   Pill,
   AlarmClockCheck,
+  Clock,
 } from 'lucide-react'
 import { patientUser } from '../data/mock.js'
 
@@ -191,11 +192,24 @@ export function TopBar({ legacy = false }) {
             <div className="profile-menu-links">
               {patientProfileItems.map((item) => <button key={item.label} onClick={() => { setOpen(false); navigate(item.to) }}><span>{item.icon}</span>{item.label}<ChevronRight size={14} /></button>)}
             </div>
+          ) : path.startsWith('/doctor') ? (
+            <div className="profile-menu-links">
+              <button onClick={() => { setOpen(false); navigate('/doctor/settings', { state: { tab: 'profile' } }) }}>
+                <span><Settings size={17} /></span>
+                Hồ sơ & Cài đặt
+                <ChevronRight size={14} />
+              </button>
+              <button onClick={() => { setOpen(false); navigate('/doctor/settings', { state: { tab: 'work' } }) }}>
+                <span><Clock size={17} /></span>
+                Lịch làm việc
+                <ChevronRight size={14} />
+              </button>
+            </div>
           ) : !isAdmin && (
             <div className="profile-menu-links">
               <button onClick={() => { setOpen(false); navigate(path.split('/').slice(0, 2).join('/') + '/settings') }}>
                 <span><Settings size={17} /></span>
-                {path.startsWith('/doctor') ? 'Hồ sơ & cài đặt' : 'Cài đặt'}
+                Cài đặt
                 <ChevronRight size={14} />
               </button>
             </div>
@@ -225,9 +239,10 @@ export function AppShell({ role, children, legacy = false }) {
     ],
     doctor: [
       { to: '/doctor', label: 'Dashboard', icon: <LayoutDashboard size={18} />, end: true },
-      { to: '/doctor/consult', label: 'Tư vấn trực tuyến', icon: <Video size={18} /> },
+      { to: '/doctor/consult', label: 'Tư vấn', icon: <Video size={18} /> },
       { to: '/doctor/schedule', label: 'Lịch khám', icon: <CalendarDays size={18} /> },
-      { to: '/doctor/history', label: 'Lịch sử khám bệnh', icon: <ClipboardList size={18} /> },
+      { to: '/doctor/patients', label: 'Bệnh nhân', icon: <Users size={18} /> },
+      { to: '/doctor/history', label: 'Hồ sơ khám', icon: <ClipboardList size={18} /> },
     ],
     advisor: [
       { to: '/advisor/data', label: 'Danh sách dữ liệu', icon: <Database size={18} /> },

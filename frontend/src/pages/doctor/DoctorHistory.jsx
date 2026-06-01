@@ -52,7 +52,7 @@ export function DoctorHistory() {
         
         {/* Header */}
         <PageHeader 
-          title="Lịch sử hồ sơ khám bệnh"
+          title="Quản lý hồ sơ khám"
           subtitle="Kho lưu trữ tra cứu toàn bộ hồ sơ khám bệnh, kết quả chẩn đoán và đơn thuốc đã phát hành."
         />
 

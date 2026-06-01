@@ -44,9 +44,9 @@ export function DoctorSchedule() {
 
   // Filter schedules for the selected day in Month View
   const selectedDaySchedules = useMemo(() => {
-    const formattedDayStr = `${String(selectedDayNumber).padStart(2, '0')}/05` // E.g., '07/05'
+    const formattedDayStr = `${String(selectedDayNumber).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}` // E.g., '07/05'
     return schedule.filter(item => item.date === formattedDayStr)
-  }, [schedule, selectedDayNumber])
+  }, [schedule, selectedDayNumber, currentDate])
 
   // All schedules for today (Day tab)
   const dayTabSchedules = useMemo(() => {
@@ -69,6 +69,11 @@ export function DoctorSchedule() {
   }
 
   const handleCancelSchedule = (id) => {
+    const matched = schedule.find(item => item.id === id)
+    const patientName = matched ? matched.patientName : ''
+    const confirmCancel = window.confirm(`Bạn có chắc chắn muốn hủy lịch khám của bệnh nhân ${patientName}?`)
+    if (!confirmCancel) return
+
     const updated = schedule.map(item => item.id === id ? { ...item, status: 'Hủy' } : item)
     setSchedule(updated)
     saveStoredSchedule(updated)
@@ -117,37 +122,63 @@ export function DoctorSchedule() {
     }
   }
 
-  // Month grid generator for reference month (May 2026)
-  // May 1st 2026 is Friday (5).
-  // Days in May = 31.
   const daysInMonthGrid = useMemo(() => {
+    const year = currentDate.getFullYear()
+    const month = currentDate.getMonth() // 0-11
+    
+    // First day of current month
+    const firstDayIndex = new Date(year, month, 1).getDay() // 0 = Sun, 1 = Mon, ...
+    // Offset for Monday start
+    const offset = (firstDayIndex + 6) % 7
+    
     const grid = []
-    const prevMonthDays = [27, 28, 29, 30] // April tail days
-    const totalDays = 31
-    const nextMonthDays = [1, 2, 3, 4, 5, 6, 7] // June head days
-
-    // April tail days
-    prevMonthDays.forEach(day => {
-      grid.push({ day, isCurrentMonth: false, fullDateStr: `${day}/04` })
-    })
-
-    // May days
-    for (let day = 1; day <= totalDays; day++) {
-      grid.push({ day, isCurrentMonth: true, fullDateStr: `${String(day).padStart(2, '0')}/05` })
+    
+    // Previous month details
+    const prevMonthDate = new Date(year, month, 0)
+    const daysInPrevMonth = prevMonthDate.getDate()
+    const prevMonth = prevMonthDate.getMonth()
+    
+    // Add previous month tail days
+    for (let i = offset - 1; i >= 0; i--) {
+      const d = daysInPrevMonth - i
+      grid.push({
+        day: d,
+        isCurrentMonth: false,
+        fullDateStr: `${String(d).padStart(2, '0')}/${String(prevMonth + 1).padStart(2, '0')}`
+      })
     }
-
-    // June head days
-    nextMonthDays.forEach(day => {
-      grid.push({ day, isCurrentMonth: false, fullDateStr: `${String(day).padStart(2, '0')}/06` })
-    })
-
+    
+    // Current month days
+    const daysInCurrentMonth = new Date(year, month + 1, 0).getDate()
+    for (let day = 1; day <= daysInCurrentMonth; day++) {
+      grid.push({
+        day,
+        isCurrentMonth: true,
+        fullDateStr: `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}`
+      })
+    }
+    
+    // Next month head days
+    const totalCells = grid.length > 35 ? 42 : 35
+    const nextMonthDaysCount = totalCells - grid.length
+    const nextMonthDate = new Date(year, month + 1, 1)
+    const nextMonth = nextMonthDate.getMonth()
+    
+    for (let day = 1; day <= nextMonthDaysCount; day++) {
+      grid.push({
+        day: day,
+        isCurrentMonth: false,
+        fullDateStr: `${String(day).padStart(2, '0')}/${String(nextMonth + 1).padStart(2, '0')}`
+      })
+    }
+    
     // Return chunks of 7 (weekly structure)
     const weeks = []
     for (let i = 0; i < grid.length; i += 7) {
       weeks.push(grid.slice(i, i + 7))
     }
     return weeks
-  }, [])
+  }, [currentDate])
 
   return (
     <AppShell role="doctor">
@@ -198,7 +229,7 @@ export function DoctorSchedule() {
                     <ChevronLeft size={16} />
                   </button>
                   <h3 className="text-base font-extrabold text-slate-800">
-                    Tháng 5, 2026
+                    Tháng {currentDate.getMonth() + 1}, {currentDate.getFullYear()}
                   </h3>
                   <button 
                     onClick={handleNextMonth}
@@ -208,7 +239,10 @@ export function DoctorSchedule() {
                   </button>
                 </div>
                 <button 
-                  onClick={() => setSelectedDayNumber(7)} // today mark: May 7
+                  onClick={() => {
+                    setCurrentDate(new Date(2026, 4, 1))
+                    setSelectedDayNumber(7)
+                  }}
                   className="px-3.5 py-1.5 rounded-full border border-teal-200 bg-teal-50/50 hover:bg-teal-50 text-xs font-bold text-teal-700 cursor-pointer"
                 >
                   Hôm nay
@@ -227,7 +261,7 @@ export function DoctorSchedule() {
               </div>
 
               {/* Calendar Grid cells */}
-              <div className="grid grid-rows-5 gap-y-2">
+              <div className="flex flex-col gap-y-2">
                 {daysInMonthGrid.map((week, weekIdx) => (
                   <div key={weekIdx} className="grid grid-cols-7 gap-1">
                     {week.map((cell, cellIdx) => {
@@ -290,7 +324,7 @@ export function DoctorSchedule() {
               <div className="border-b border-slate-100 pb-3 mb-4">
                 <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
                   <Calendar size={18} className="text-teal-600" />
-                  Hẹn khám ngày {selectedDayNumber}/05/2026
+                  Hẹn khám ngày {selectedDayNumber}/{String(currentDate.getMonth() + 1).padStart(2, '0')}/{currentDate.getFullYear()}
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">Có {selectedDaySchedules.length} lịch hẹn khám được ghi nhận.</p>
               </div>

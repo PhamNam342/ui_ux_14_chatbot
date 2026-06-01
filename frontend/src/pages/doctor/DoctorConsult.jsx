@@ -50,7 +50,7 @@ export function DoctorConsult() {
 
   // Load cases and set active selections
   useEffect(() => {
-    const list = getStoredCases()
+    const list = getStoredCases() || []
     setCases(list)
 
     if (id) {
@@ -87,7 +87,7 @@ export function DoctorConsult() {
   // Map state based on selected tab changes
   useEffect(() => {
     if (!id) {
-      const tabCases = cases.filter(c => getTabForStatus(c.status) === activeTab)
+      const tabCases = (cases || []).filter(c => getTabForStatus(c.status) === activeTab)
       if (tabCases.length > 0 && !tabCases.find(c => c.code === selectedCaseCode)) {
         setSelectedCaseCode(tabCases[0].code)
       } else if (tabCases.length === 0) {
@@ -285,17 +285,20 @@ export function DoctorConsult() {
                 {['Đang chờ', 'Đang tư vấn', 'Đã hoàn thành'].map(tab => (
                   <button
                     key={tab}
-                    className={`text-center py-1.5 px-0.5 rounded-md text-[10px] font-bold transition-all cursor-pointer ${
+                    className={`text-center py-1.5 px-0 rounded-md text-[9px] font-bold whitespace-nowrap transition-all cursor-pointer ${
                       activeTab === tab 
                         ? 'bg-white text-teal-700 shadow-sm' 
                         : 'text-slate-500 hover:text-slate-800'
                     }`}
                     onClick={() => {
                       setActiveTab(tab)
-                      if (!id) {
-                        const tabCases = cases.filter(c => getTabForStatus(c.status) === tab)
-                        if (tabCases.length > 0) setSelectedCaseCode(tabCases[0].code)
-                        else setSelectedCaseCode('')
+                      const tabCases = (cases || []).filter(c => getTabForStatus(c.status) === tab)
+                      if (tabCases.length > 0) {
+                        setSelectedCaseCode(tabCases[0].code)
+                        navigate(`/doctor/consult/chat/${tabCases[0].code}`)
+                      } else {
+                        setSelectedCaseCode('')
+                        navigate('/doctor/consult')
                       }
                     }}
                   >
@@ -767,9 +770,9 @@ export function DoctorConsult() {
         {/* Column 3 (Right): Decision Support Panel */}
         {activeCase && (
           <div className="w-full lg:w-[320px] bg-white border border-slate-200 rounded-xl overflow-y-auto p-5 space-y-5 shrink-0">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-1.5">
-              <Info size={16} className="text-teal-600" />
-              Thông tin hỗ trợ ra quyết định
+            <h3 className="text-lg font-bold text-slate-800 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-1.5">
+              <Info size={18} className="text-teal-600" />
+              Thông tin bệnh nhân
             </h3>
 
             {/* Basic metadata */}
@@ -802,7 +805,7 @@ export function DoctorConsult() {
                 <div>
                   <small className="text-[10px] text-slate-400 block">Triệu chứng khai báo:</small>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {activeCase.chatbotSummary?.symptoms.map(s => (
+                    {activeCase.chatbotSummary?.symptoms?.map(s => (
                       <span key={s} className="text-[10px] font-semibold text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-md">
                         {s}
                       </span>

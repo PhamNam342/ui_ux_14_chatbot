@@ -1,13 +1,21 @@
 import { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { Camera, CheckCircle2, Lock, Mail, Phone, Shield, User, Calendar, Clock, ClipboardList, Plus, Trash2 } from 'lucide-react'
 import { AppShell, Button, Card, PageHeader, TopBar, Badge } from '../../components/ui.jsx'
 import { getStoredProfile, saveStoredProfile, getStoredLeaves, saveStoredLeaves } from '../../data/doctorStore.js'
 
 export function DoctorSettings() {
-  const [tab, setTab] = useState('profile') // 'profile', 'work', 'leaves', 'security'
+  const location = useLocation()
+  const [tab, setTab] = useState(() => location.state?.tab || 'profile') // 'profile', 'work', 'leaves', 'security'
   const [profile, setProfile] = useState({})
   const [leaves, setLeaves] = useState([])
   const [toast, setToast] = useState('')
+
+  useEffect(() => {
+    if (location.state?.tab) {
+      setTab(location.state.tab)
+    }
+  }, [location.state?.tab])
 
   // Profile forms
   const [avatar, setAvatar] = useState('')
