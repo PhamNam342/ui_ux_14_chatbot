@@ -34,6 +34,10 @@ import { PatientAppointments } from './pages/patient/PatientAppointments.jsx'
 import { PatientBilling } from './pages/patient/PatientBilling.jsx'
 import { PatientServices } from './pages/patient/PatientServices.jsx'
 import { DoctorSettings } from './pages/doctor/DoctorSettings.jsx'
+import { DoctorProfile } from './pages/doctor/DoctorProfile.jsx'
+import { DoctorWorkSchedule } from './pages/doctor/DoctorWorkSchedule.jsx'
+import { DoctorLeave } from './pages/doctor/DoctorLeave.jsx'
+import { DoctorPatients } from './pages/doctor/DoctorPatients.jsx'
 import { AdvisorSettings } from './pages/advisor/AdvisorSettings.jsx'
 
 export default function App() {
@@ -56,14 +60,17 @@ export default function App() {
       <Route path="/doctor" element={<DoctorDashboard />} />
       <Route path="/doctor/cases" element={<DoctorDashboard />} />
       <Route path="/doctor/cases/:id" element={<DoctorDetail />} />
-      <Route path="/doctor/patients" element={<DoctorDetail />} />
-      <Route path="/doctor/patients/:id" element={<DoctorDetail />} />
+      <Route path="/doctor/patients" element={<DoctorPatients />} />
+      <Route path="/doctor/patients/:id" element={<DoctorPatients />} />
       <Route path="/doctor/consult" element={<DoctorConsult />} />
       <Route path="/doctor/consult/chat/:id" element={<DoctorConsultChat />} />
       <Route path="/doctor/medicine" element={<DoctorMedicine />} />
       <Route path="/doctor/schedule" element={<DoctorSchedule />} />
       <Route path="/doctor/history" element={<DoctorHistory />} />
       <Route path="/doctor/settings" element={<DoctorSettings />} />
+      <Route path="/doctor/profile" element={<DoctorProfile />} />
+      <Route path="/doctor/work-schedule" element={<DoctorWorkSchedule />} />
+      <Route path="/doctor/leave" element={<DoctorLeave />} />
 
       <Route path="/advisor" element={<AdvisorDataList />} />
       <Route path="/advisor/data" element={<AdvisorDataList />} />

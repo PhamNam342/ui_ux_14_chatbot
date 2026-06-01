@@ -285,14 +285,17 @@ export function DoctorConsult() {
                 {['Đang chờ', 'Đang tư vấn', 'Đã hoàn thành'].map(tab => (
                   <button
                     key={tab}
-                    className={`text-center py-1.5 px-0 rounded-md text-[9px] font-bold whitespace-nowrap transition-all cursor-pointer ${
+                    className={`text-center py-1.5 px-0 rounded-md text-[8px] font-bold whitespace-nowrap transition-all cursor-pointer ${
                       activeTab === tab 
                         ? 'bg-white text-teal-700 shadow-sm' 
                         : 'text-slate-500 hover:text-slate-800'
                     }`}
                     onClick={() => {
                       setActiveTab(tab)
-                      const tabCases = (cases || []).filter(c => getTabForStatus(c.status) === tab)
+                      // Always reload fresh from store to avoid stale state when on /chat/:id
+                      const freshCases = getStoredCases() || []
+                      setCases(freshCases)
+                      const tabCases = freshCases.filter(c => getTabForStatus(c.status) === tab)
                       if (tabCases.length > 0) {
                         setSelectedCaseCode(tabCases[0].code)
                         navigate(`/doctor/consult/chat/${tabCases[0].code}`)
@@ -770,8 +773,8 @@ export function DoctorConsult() {
         {/* Column 3 (Right): Decision Support Panel */}
         {activeCase && (
           <div className="w-full lg:w-[320px] bg-white border border-slate-200 rounded-xl overflow-y-auto p-5 space-y-5 shrink-0">
-            <h3 className="text-lg font-bold text-slate-800 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-1.5">
-              <Info size={18} className="text-teal-600" />
+            <h3 className="text-xl font-extrabold text-slate-900 pb-2 border-b border-slate-100 flex items-center gap-2">
+              <Info size={20} className="text-teal-600" />
               Thông tin bệnh nhân
             </h3>
 

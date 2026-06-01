@@ -283,31 +283,6 @@ export function DoctorDashboard() {
               )}
             </Card>
 
-            {/* Quick Link Actions */}
-            <Card className="!p-6">
-              <h2 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
-                <ClipboardList size={18} className="text-teal-600" />
-                Lối tắt thao tác
-              </h2>
-              <div className="grid gap-3">
-                <Link to="/doctor/consult" className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-teal-50/20 hover:border-teal-100 transition-colors">
-                  <span className="text-sm font-semibold text-slate-700">Vào Phòng tư vấn 3 cột</span>
-                  <ChevronRight size={16} className="text-slate-400" />
-                </Link>
-                <Link to="/doctor/schedule" className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-teal-50/20 hover:border-teal-100 transition-colors">
-                  <span className="text-sm font-semibold text-slate-700">Xem Lịch trực chi tiết</span>
-                  <ChevronRight size={16} className="text-slate-400" />
-                </Link>
-                <Link to="/doctor/history" className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-teal-50/20 hover:border-teal-100 transition-colors">
-                  <span className="text-sm font-semibold text-slate-700">Tra cứu Lịch sử khám</span>
-                  <ChevronRight size={16} className="text-slate-400" />
-                </Link>
-                <Link to="/doctor/settings" className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-teal-50/20 hover:border-teal-100 transition-colors">
-                  <span className="text-sm font-semibold text-slate-700">Chỉnh sửa Lịch làm việc</span>
-                  <ChevronRight size={16} className="text-slate-400" />
-                </Link>
-              </div>
-            </Card>
           </div>
 
         </div>

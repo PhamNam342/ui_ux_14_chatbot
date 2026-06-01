@@ -30,6 +30,7 @@ import {
   Pill,
   AlarmClockCheck,
   Clock,
+  CalendarOff,
 } from 'lucide-react'
 import { patientUser } from '../data/mock.js'
 
@@ -194,14 +195,19 @@ export function TopBar({ legacy = false }) {
             </div>
           ) : path.startsWith('/doctor') ? (
             <div className="profile-menu-links">
-              <button onClick={() => { setOpen(false); navigate('/doctor/settings', { state: { tab: 'profile' } }) }}>
+              <button onClick={() => { setOpen(false); navigate('/doctor/profile') }}>
                 <span><Settings size={17} /></span>
-                Hồ sơ & Cài đặt
+                Hồ sơ cá nhân
                 <ChevronRight size={14} />
               </button>
-              <button onClick={() => { setOpen(false); navigate('/doctor/settings', { state: { tab: 'work' } }) }}>
+              <button onClick={() => { setOpen(false); navigate('/doctor/work-schedule') }}>
                 <span><Clock size={17} /></span>
                 Lịch làm việc
+                <ChevronRight size={14} />
+              </button>
+              <button onClick={() => { setOpen(false); navigate('/doctor/leave') }}>
+                <span><CalendarOff size={17} /></span>
+                Đăng ký nghỉ phép
                 <ChevronRight size={14} />
               </button>
             </div>
