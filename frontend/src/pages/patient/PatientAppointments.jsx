@@ -71,7 +71,7 @@ function initialAppointments() {
 export function PatientAppointments() {
   const [anchor, setAnchor] = useState(() => new Date(2026, 4, 1))
   const [activeDate, setActiveDate] = useState('2026-05-22')
-  const [viewMode, setViewMode] = useState('month')
+  const viewMode = 'month'
   const [appointments] = useState(() => initialAppointments())
   const [toast, setToast] = useState('')
 
@@ -166,11 +166,6 @@ export function PatientAppointments() {
                 >
                   Hôm nay
                 </button>
-                <div className="patient-calendar-toggle" style={{ margin: 0 }}>
-                  <button className={viewMode === 'day' ? 'active' : ''} onClick={() => setViewMode('day')}>Ngày</button>
-                  <button className={viewMode === 'week' ? 'active' : ''} onClick={() => setViewMode('week')}>Tuần</button>
-                  <button className={viewMode === 'month' ? 'active' : ''} onClick={() => setViewMode('month')}>Tháng</button>
-                </div>
               </div>
             </div>
             {viewMode !== 'day' ? (
