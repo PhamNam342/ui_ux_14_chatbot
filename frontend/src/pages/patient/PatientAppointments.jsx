@@ -91,7 +91,11 @@ export function PatientAppointments() {
     setActiveDate(toLocalISODate(today))
   }
 
-  const calendarDates = useMemo(() => viewMode === 'month' ? getMonthGrid(anchor) : getWeekGrid(new Date(`${activeDate}T00:00:00`)), [anchor, activeDate, viewMode])
+  const calendarDates = useMemo(() => {
+    if (viewMode === 'month') return getMonthGrid(anchor)
+    if (viewMode === 'week') return getWeekGrid(new Date(`${activeDate}T00:00:00`))
+    return [new Date(`${activeDate}T00:00:00`)]
+  }, [anchor, activeDate, viewMode])
   const groupedAppointments = useMemo(() => {
     const grouped = new Map()
     appointments.forEach((appointment) => {
@@ -105,6 +109,13 @@ export function PatientAppointments() {
   const moveCalendar = (amount) => {
     if (viewMode === 'month') {
       setAnchor((date) => new Date(date.getFullYear(), date.getMonth() + amount, 1))
+      return
+    }
+    if (viewMode === 'day') {
+      const next = new Date(`${activeDate}T00:00:00`)
+      next.setDate(next.getDate() + amount)
+      setActiveDate(toLocalISODate(next))
+      setAnchor(new Date(next.getFullYear(), next.getMonth(), 1))
       return
     }
     const next = new Date(`${activeDate}T00:00:00`)
@@ -122,7 +133,13 @@ export function PatientAppointments() {
           <Card className="patient-month-calendar p-0">
             <div className="patient-calendar-toolbar">
               <button onClick={() => moveCalendar(-1)}><ArrowLeft size={20} /></button>
-              <h2>{viewMode === 'month' ? `Tháng ${anchor.getMonth() + 1}, ${anchor.getFullYear()}` : `Tuần ${calendarDates[0].toLocaleDateString('vi-VN')} - ${calendarDates[6].toLocaleDateString('vi-VN')}`}</h2>
+              <h2>
+                {viewMode === 'month'
+                  ? `Tháng ${anchor.getMonth() + 1}, ${anchor.getFullYear()}`
+                  : viewMode === 'week'
+                  ? `Tuần ${calendarDates[0]?.toLocaleDateString('vi-VN')} - ${calendarDates[6]?.toLocaleDateString('vi-VN')}`
+                  : `Ngày ${new Date(`${activeDate}T00:00:00`).toLocaleDateString('vi-VN')}`}
+              </h2>
               <button onClick={() => moveCalendar(1)}><ArrowRight size={20} /></button>
               <button
                 className="today-btn"
@@ -132,30 +149,43 @@ export function PatientAppointments() {
                   border: '1px solid #dce8e7',
                   borderRadius: '999px',
                   background: '#fff',
-                  padding: '0 14px',
+                  padding: '0 20px',
                   color: '#0f766e',
-                  fontSize: '13px',
+                  fontSize: '14px',
                   fontWeight: '700',
-                  minHeight: '34px',
+                  minHeight: '38px',
                   cursor: 'pointer',
                   marginLeft: '12px',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  transition: '160ms ease'
+                  transition: '160ms ease',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0
                 }}
               >
                 Hôm nay
               </button>
               <div className="patient-calendar-toggle">
+                <button className={viewMode === 'day' ? 'active' : ''} onClick={() => setViewMode('day')}>Ngày</button>
                 <button className={viewMode === 'week' ? 'active' : ''} onClick={() => setViewMode('week')}>Tuần</button>
                 <button className={viewMode === 'month' ? 'active' : ''} onClick={() => setViewMode('month')}>Tháng</button>
               </div>
             </div>
-            <div className="patient-calendar-weekdays">
-              {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((day) => <b key={day}>{day}</b>)}
-            </div>
-            <div className="patient-calendar-grid">
+            {viewMode !== 'day' ? (
+              <div className="patient-calendar-weekdays">
+                {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((day) => <b key={day}>{day}</b>)}
+              </div>
+            ) : (
+              <div className="patient-calendar-weekdays" style={{ gridTemplateColumns: '1fr' }}>
+                <b>
+                  {['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'][
+                    new Date(`${activeDate}T00:00:00`).getDay()
+                  ]}
+                </b>
+              </div>
+            )}
+            <div className="patient-calendar-grid" style={viewMode === 'day' ? { gridTemplateColumns: '1fr' } : {}}>
               {calendarDates.map((date) => {
                 const iso = toLocalISODate(date)
                 const dayAppointments = groupedAppointments.get(iso) || []

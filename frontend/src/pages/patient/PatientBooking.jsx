@@ -67,6 +67,7 @@ export function PatientBooking() {
   const step2Ref = useRef(null)
   const step3Ref = useRef(null)
   const step4Ref = useRef(null)
+  const slotsRef = useRef(null)
   const summaryRef = useRef(null)
   const [clinicId, setClinicId] = useState(null)
   const [specialty, setSpecialty] = useState('')
@@ -114,7 +115,7 @@ export function PatientBooking() {
     setSelectedDate('')
     setSelectedSlot('')
     setTimeout(() => {
-      step2Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      step2Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }, 120)
   }
 
@@ -124,7 +125,7 @@ export function PatientBooking() {
     setSelectedDate('')
     setSelectedSlot('')
     setTimeout(() => {
-      step3Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      step3Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }, 120)
   }
 
@@ -133,7 +134,7 @@ export function PatientBooking() {
     setSelectedDate('')
     setSelectedSlot('')
     setTimeout(() => {
-      step4Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      step4Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }, 120)
   }
 
@@ -320,11 +321,17 @@ export function PatientBooking() {
                     <div className="booking-date-list">
                       {dateOptions.map((date) => {
                         const iso = toLocalISODate(date)
-                        return <button type="button" key={iso} className={selectedDate === iso ? 'active' : ''} onClick={() => { setSelectedDate(iso); setSelectedSlot('') }}><small>{date.toLocaleDateString('vi-VN', { weekday: 'short' })}</small><b>{date.getDate()}</b><span>Tháng {date.getMonth() + 1}</span></button>
+                        return <button type="button" key={iso} className={selectedDate === iso ? 'active' : ''} onClick={() => {
+                          setSelectedDate(iso);
+                          setSelectedSlot('');
+                          setTimeout(() => {
+                            slotsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                          }, 120)
+                        }}><small>{date.toLocaleDateString('vi-VN', { weekday: 'short' })}</small><b>{date.getDate()}</b><span>Tháng {date.getMonth() + 1}</span></button>
                       })}
                     </div>
                     {selectedDate && (
-                      <div className="booking-slot-area">
+                      <div ref={slotsRef} className="booking-slot-area">
                         <h3 className="booking-subtitle"><Clock3 size={16} /> Chọn khung giờ khám</h3>
                         {slotGroups.map((group) => (
                           <div key={group.label} className="booking-slot-group">
@@ -334,7 +341,7 @@ export function PatientBooking() {
                               return <button type="button" key={slot} disabled={!available} className={selectedSlot === slot ? 'active' : ''} onClick={() => {
                                 setSelectedSlot(slot)
                                 setTimeout(() => {
-                                  summaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+                                  summaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
                                 }, 120)
                               }}>{slot}</button>
                             })}</div>

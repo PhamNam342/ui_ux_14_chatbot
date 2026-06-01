@@ -284,10 +284,10 @@ export function AdminDashboard() {
                   <td><span className={`admin-doctor-status ${statusClass(doctor.status)}`}>{doctor.status}</span></td>
                   <td><small>{doctor.updated}</small></td>
                   <td><div className="admin-doctor-row-actions">
-                    <Link aria-label={`Xem chi tiết ${doctor.name}`} to={`/admin/doctors/${doctor.id}`}><Eye size={17} /></Link>
-                    <button aria-label={`Chỉnh sửa ${doctor.name}`} type="button" onClick={() => openEditDoctor(doctor)}><Edit3 size={17} /></button>
-                    <button aria-label={`Phân lịch ${doctor.name}`} type="button" onClick={() => navigate('/admin/schedule', { state: { doctorFilter: 'BS. ' + doctor.name } })}><CalendarCheck2 size={17} /></button>
-                    <button aria-label={`${doctor.status === 'Tạm ngưng' ? 'Kích hoạt' : 'Tạm ngưng'} ${doctor.name}`} type="button" onClick={() => toggleSuspend(doctor)}><PauseCircle size={17} /></button>
+                    <Link data-tooltip="Xem hồ sơ chi tiết" aria-label={`Xem chi tiết ${doctor.name}`} to={`/admin/doctors/${doctor.id}`}><Eye size={17} /></Link>
+                    <button data-tooltip="Chỉnh sửa hồ sơ" aria-label={`Chỉnh sửa ${doctor.name}`} type="button" onClick={() => openEditDoctor(doctor)}><Edit3 size={17} /></button>
+                    <button data-tooltip="Xem lịch khám chi tiết" aria-label={`Phân lịch ${doctor.name}`} type="button" onClick={() => navigate(`/admin/doctors/${doctor.id}/schedule`)}><CalendarCheck2 size={17} /></button>
+                    <button data-tooltip={doctor.status === 'Tạm ngưng' ? 'Kích hoạt tài khoản' : 'Tạm ngưng hoạt động'} aria-label={`${doctor.status === 'Tạm ngưng' ? 'Kích hoạt' : 'Tạm ngưng'} ${doctor.name}`} type="button" onClick={() => toggleSuspend(doctor)}><PauseCircle size={17} /></button>
                   </div></td>
                 </tr>
               ))}</tbody>
@@ -310,8 +310,8 @@ export function AdminDashboard() {
               <div className="admin-doctor-skill-list">{doctor.skills.map((skill) => <span key={skill}>{skill}</span>)}</div>
               <div className="admin-doctor-card-actions">
                 <Link className="btn btn-primary" to={`/admin/doctors/${doctor.id}`}><Eye size={17} /> Xem hồ sơ</Link>
-                <button className="btn btn-outline" type="button" onClick={() => navigate('/admin/schedule', { state: { doctorFilter: 'BS. ' + doctor.name } })}><CalendarCheck2 size={17} /> Phân lịch</button>
-                <button className="admin-doctor-card-edit" aria-label={`Chỉnh sửa ${doctor.name}`} type="button" onClick={() => openEditDoctor(doctor)}><Edit3 size={17} /></button>
+                <button className="btn btn-outline" type="button" onClick={() => navigate(`/admin/doctors/${doctor.id}/schedule`)}><CalendarCheck2 size={17} /> Phân lịch</button>
+                <button data-tooltip="Chỉnh sửa hồ sơ" className="admin-doctor-card-edit" aria-label={`Chỉnh sửa ${doctor.name}`} type="button" onClick={() => openEditDoctor(doctor)}><Edit3 size={17} /></button>
               </div>
             </article>
           ))}</section>

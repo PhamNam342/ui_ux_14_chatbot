@@ -198,7 +198,7 @@ export function AdminDoctorDetail() {
               </div>
               <div className="admin-doctor-week-grid">{['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((day, index) => <article className={index === 6 ? 'is-off' : ''} key={day}><b>{day}</b><span>{index === 6 ? 'Nghỉ' : 'Ca sáng'}</span><span>{index > 4 ? 'Ca chiều' : 'Ca tối'}</span></article>)}</div>
               <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
-                <Button variant="outline" onClick={() => navigate('/admin/schedule', { state: { doctorFilter: 'BS. ' + doctor.name } })}>
+                <Button variant="outline" onClick={() => navigate(`/admin/doctors/${doctor.id}/schedule`)}>
                   <CalendarDays size={17} /> Xem lịch khám chi tiết
                 </Button>
               </div>

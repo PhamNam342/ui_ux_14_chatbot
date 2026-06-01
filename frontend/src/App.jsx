@@ -9,6 +9,7 @@ import { AdminSchedule } from './pages/admin/AdminSchedule.jsx'
 import { AdminQuality } from './pages/admin/AdminQuality.jsx'
 import { AdminServicePricing } from './pages/admin/AdminServicePricing.jsx'
 import { AdminDoctorDetail } from './pages/admin/AdminDoctorDetail.jsx'
+import { AdminDoctorSchedule } from './pages/admin/AdminDoctorSchedule.jsx'
 import { DoctorDashboard } from './pages/doctor/DoctorDashboard.jsx'
 import { DoctorConsult } from './pages/doctor/DoctorConsult.jsx'
 import { DoctorConsultChat } from './pages/doctor/DoctorConsultChat.jsx'
@@ -45,6 +46,7 @@ export default function App() {
       <Route path="/admin" element={<AdminClinics />} />
       <Route path="/admin/doctors" element={<AdminDashboard />} />
       <Route path="/admin/doctors/:id" element={<AdminDoctorDetail />} />
+      <Route path="/admin/doctors/:id/schedule" element={<AdminDoctorSchedule />} />
       <Route path="/admin/schedule" element={<AdminSchedule />} />
       <Route path="/admin/schedule/new" element={<AdminSchedule showModal />} />
       <Route path="/admin/revenue" element={<AdminRevenue />} />

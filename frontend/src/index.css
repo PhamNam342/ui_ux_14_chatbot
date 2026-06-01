@@ -3274,10 +3274,50 @@ textarea.input {
 .admin-doctor-row-actions { display:flex; gap:5px; }
 .admin-doctor-row-actions a,
 .admin-doctor-row-actions button,
-.admin-doctor-card-edit { display:grid; width:32px; height:32px; place-items:center; border:1px solid #e2e8f0; border-radius:9px; background:#fff; color:#64748b; cursor:pointer; transition:.2s ease; }
+.admin-doctor-card-edit { position: relative; display:grid; width:32px; height:32px; place-items:center; border:1px solid #e2e8f0; border-radius:9px; background:#fff; color:#64748b; cursor:pointer; transition:.2s ease; }
 .admin-doctor-row-actions a:hover,
 .admin-doctor-row-actions button:hover,
 .admin-doctor-card-edit:hover { border-color:#99f6e4; background:#ecfdf5; color:#0f766e; transform:translateY(-2px); }
+
+/* Custom Tooltips for Doctor Actions */
+[data-tooltip]::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 130%;
+  left: 50%;
+  transform: translateX(-50%) translateY(5px);
+  background-color: #1e293b;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+  z-index: 999;
+}
+[data-tooltip]::after {
+  content: "";
+  position: absolute;
+  bottom: 115%;
+  left: 50%;
+  transform: translateX(-50%) translateY(5px);
+  border-width: 5px;
+  border-style: solid;
+  border-color: #1e293b transparent transparent transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 999;
+}
+[data-tooltip]:hover::before,
+[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
 .admin-doctor-card-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
 .admin-doctor-card { overflow:hidden; border:1px solid #e2e8f0; border-radius:22px; background:#fff; padding:18px; box-shadow:0 12px 30px rgba(15,23,42,.05); transition:.25s ease; }
 .admin-doctor-card:hover { border-color:#5eead4; box-shadow:0 18px 36px rgba(15,118,110,.12); transform:translateY(-5px); }
@@ -5601,25 +5641,88 @@ button { cursor: pointer; }
 
 /* Antigravity Overrides and UI/UX Fixes */
 .shell-admin {
-  font-size: 15.2px !important;
-}
-.shell-admin h1 {
-  font-size: clamp(28px, 2.8vw, 36px) !important;
-}
-.shell-admin h2 {
-  font-size: 19px !important;
-}
-.shell-admin h3 {
   font-size: 16.5px !important;
 }
-.shell-admin .data-table td {
+.shell-admin h1 {
+  font-size: clamp(30px, 3.2vw, 40px) !important;
+}
+.shell-admin h2 {
+  font-size: 21px !important;
+}
+.shell-admin h3 {
+  font-size: 18.5px !important;
+}
+.shell-admin td,
+.shell-admin th,
+.shell-admin .data-table td,
+.shell-admin .data-table th,
+.shell-admin table td,
+.shell-admin table th {
+  font-size: 15.5px !important;
+}
+.shell-admin th,
+.shell-admin .data-table th,
+.shell-admin table th {
+  font-size: 13.5px !important;
+}
+.shell-admin td small,
+.shell-admin th small,
+.shell-admin small,
+.shell-admin .admin-clinic-card-title p,
+.shell-admin .admin-clinic-location-line,
+.shell-admin .admin-clinic-operations p,
+.shell-admin .admin-clinic-operations strong {
+  font-size: 13px !important;
+}
+.shell-admin td b,
+.shell-admin td strong,
+.shell-admin th b,
+.shell-admin th strong {
+  font-size: 15.5px !important;
+}
+.shell-admin input,
+.shell-admin select,
+.shell-admin textarea,
+.shell-admin button {
+  font-size: 15.5px !important;
+}
+.shell-admin label span,
+.shell-admin label {
   font-size: 15px !important;
 }
-.shell-admin .data-table th {
-  font-size: 12.5px !important;
+.shell-admin .nav-item {
+  font-size: 16.5px !important;
 }
-.shell-admin input, .shell-admin select, .shell-admin button {
+.shell-admin .admin-doctor-card h3 {
+  font-size: 19.5px !important;
+}
+.shell-admin .admin-doctor-card-spec {
+  font-size: 15.5px !important;
+}
+.shell-admin .admin-doctor-card-clinic {
   font-size: 14.5px !important;
+}
+.shell-admin .admin-doctor-card-metrics b {
+  font-size: 15.5px !important;
+}
+.shell-admin .admin-doctor-card-metrics small {
+  font-size: 13px !important;
+}
+.shell-admin .admin-doctor-skill-list span {
+  font-size: 13.5px !important;
+}
+.shell-admin .admin-clinic-card-title h2 {
+  font-size: 19px !important;
+}
+.shell-admin .admin-clinic-mini-stats strong {
+  font-size: 17.5px !important;
+}
+.shell-admin .admin-clinic-card-actions button {
+  font-size: 12px !important;
+}
+.shell-admin .admin-clinic-tags span,
+.shell-admin .admin-clinic-mini-stats span {
+  font-size: 11.5px !important;
 }
 
 .chat-warning {
@@ -5628,10 +5731,20 @@ button { cursor: pointer; }
   color: #b91c1c !important;
 }
 
+.message.with-suggestions {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  margin-bottom: 12px !important;
+}
+
 .message-suggestions {
   display: flex !important;
   flex-wrap: nowrap !important;
-  gap: 10px !important;
+  gap: 12px !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
   overflow-x: auto !important;
   width: 100% !important;
   max-width: 100% !important;
@@ -5640,6 +5753,14 @@ button { cursor: pointer; }
 }
 .message-suggestions::-webkit-scrollbar {
   display: none !important;
+}
+
+.symptom-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 16px !important;
+  white-space: nowrap !important;
 }
 
 .booking-summary-submit {
@@ -5669,5 +5790,17 @@ button { cursor: pointer; }
   background: #fff !important;
   padding: 22px !important;
   box-shadow: 0 24px 70px rgb(15 23 42 / .2) !important;
+}
+
+.admin-clinic-card-actions {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: 6px !important;
+  margin-top: 15px !important;
+}
+.admin-clinic-card-actions button {
+  flex: 1 1 0% !important;
+  white-space: nowrap !important;
+  padding: 0 4px !important;
 }
 
