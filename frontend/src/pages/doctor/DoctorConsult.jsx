@@ -285,11 +285,12 @@ export function DoctorConsult() {
                 {['Đang chờ', 'Đang tư vấn', 'Đã hoàn thành'].map(tab => (
                   <button
                     key={tab}
-                    className={`text-center py-1.5 px-1 rounded-md text-[9.5px] font-bold leading-tight transition-all cursor-pointer ${
+                    className={`text-center py-1.5 px-1 rounded-md font-bold leading-tight transition-all cursor-pointer ${
                       activeTab === tab 
                         ? 'bg-white text-teal-700 shadow-sm' 
                         : 'text-slate-500 hover:text-slate-800'
                     }`}
+                    style={{ fontSize: '10px' }}
                     onClick={() => {
                       setActiveTab(tab)
                       // Always reload fresh from store to avoid stale state when on /chat/:id

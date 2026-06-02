@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, Baby, Brain, Building2, CalendarDays, ChevronDown, Clock, HeartPulse, Lock, MapPin, Menu, MessageCircle, MessageCircleHeart, Microscope, Phone, Shield, Star, Stethoscope, Syringe, X } from 'lucide-react'
 import { Logo } from '../components/ui.jsx'
 import heroImage from '../assets/medical-ai-hero.png'
+import doctorMinh from '../assets/doctor_minh.png'
+import doctorHoa from '../assets/doctor_hoa.png'
+import doctorAnh from '../assets/doctor_anh.png'
+import doctorLan from '../assets/doctor_lan.png'
 
 const services = [
   { title: 'Tim mạch', desc: 'Tư vấn huyết áp, nhịp tim, dấu hiệu hồi hộp và theo dõi nguy cơ.', price: '350.000đ', icon: HeartPulse, tone: 'bg-rose-200', iconBg: 'bg-rose-50 text-rose-600', ring: 'hover:border-rose-200' },
@@ -37,10 +41,10 @@ const navItems = [
 ]
 
 const featuredDoctors = [
-  ['NM', 'BS. Nguyễn Văn Minh', 'Nội tổng quát', '8 năm kinh nghiệm', 'bg-teal-100 text-teal-800', '4.9', '1.240 lượt tư vấn', 'Đang trực tuyến', '36% center'],
-  ['TH', 'BS. Trần Thị Hoa', 'Tim mạch', '10 năm kinh nghiệm', 'bg-rose-100 text-rose-700', '4.8', '980 lượt tư vấn', 'Có lịch hôm nay', '56% center'],
-  ['LA', 'BS. Lê Quốc Anh', 'Tai Mũi Họng', '6 năm kinh nghiệm', 'bg-sky-100 text-sky-700', '4.7', '760 lượt tư vấn', 'Đang trực tuyến', '68% center'],
-  ['NL', 'BS. Phạm Ngọc Lan', 'Da liễu', '7 năm kinh nghiệm', 'bg-violet-100 text-violet-700', '4.9', '1.100 lượt tư vấn', 'Có lịch hôm nay', '82% center'],
+  ['NM', 'BS. Nguyễn Văn Minh', 'Nội tổng quát', '8 năm kinh nghiệm', 'bg-teal-100 text-teal-800', '4.9', '1.240 lượt tư vấn', 'Đang trực tuyến', doctorMinh],
+  ['TH', 'BS. Trần Thị Hoa', 'Tim mạch', '10 năm kinh nghiệm', 'bg-rose-100 text-rose-700', '4.8', '980 lượt tư vấn', 'Có lịch hôm nay', doctorHoa],
+  ['LA', 'BS. Lê Quốc Anh', 'Tai Mũi Họng', '6 năm kinh nghiệm', 'bg-sky-100 text-sky-700', '4.7', '760 lượt tư vấn', 'Đang trực tuyến', doctorAnh],
+  ['NL', 'BS. Phạm Ngọc Lan', 'Da liễu', '7 năm kinh nghiệm', 'bg-violet-100 text-violet-700', '4.9', '1.100 lượt tư vấn', 'Có lịch hôm nay', doctorLan],
 ]
 
 const clinics = [
@@ -199,10 +203,10 @@ export function RoleSelect() {
             <p className="max-w-xl text-base leading-7 text-slate-600">Kết nối với các bác sĩ giàu kinh nghiệm trong nhiều chuyên khoa khác nhau.</p>
           </div>
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-            {featuredDoctors.map(([initials, name, specialty, experience, tone, rating, consultations, status, imagePosition]) => (
+            {featuredDoctors.map(([initials, name, specialty, experience, tone, rating, consultations, status, img]) => (
               <article key={name} className="landing-doctor-card">
                 <div className="landing-doctor-photo">
-                  <img src={heroImage} alt={name} style={{ objectPosition: imagePosition }} />
+                  <img src={img} alt={name} />
                   <span className={status === 'Đang trực tuyến' ? 'online' : 'available'}>{status}</span>
                 </div>
                 <div className="landing-doctor-info">

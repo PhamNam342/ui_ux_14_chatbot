@@ -2,8 +2,14 @@ import { cases, consultationHistory, doctorSchedule, doctors } from './mock.js'
 
 // Helper to initialize data in localStorage if not exists
 export function initStore() {
-  // Migration check: Reset old database seeds if they contain outdated mock values
-  if (localStorage.getItem('med_cases') && (!localStorage.getItem('med_cases').includes('Nguyễn Văn An') || localStorage.getItem('med_cases').includes('Nguyễn Văn Minh'))) {
+  // Migration check: Reset old database seeds if they contain outdated mock values or under-seeded histories
+  const storedHistories = localStorage.getItem('med_histories')
+  const needsReset = !localStorage.getItem('med_cases') || 
+                     (localStorage.getItem('med_cases') && !localStorage.getItem('med_cases').includes('Nguyễn Văn An')) ||
+                     !storedHistories ||
+                     (storedHistories && JSON.parse(storedHistories).length < 10)
+  
+  if (needsReset) {
     localStorage.removeItem('med_cases')
     localStorage.removeItem('med_chats')
     localStorage.removeItem('med_histories')
@@ -297,6 +303,41 @@ export function initStore() {
         { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '13:20', text: 'Tóm tắt triệu chứng dị ứng thức ăn đã được chuyển đi.', system: true },
         { id: 3, who: 'Bác sĩ', initials: 'BS', time: '13:22', text: 'Chào chị Vy, chị có thấy ngứa họng, khó thở hay sưng môi mặt gì không? Trước đây chị đã từng bị dị ứng tôm chưa?', mine: true },
         { id: 4, who: 'Bệnh nhân', initials: 'KV', time: '13:23', text: 'Dạ không khó thở, mặt cũng bình thường bác sĩ. Hồi nhỏ tôi ăn tôm thỉnh thoảng hơi ngứa nhẹ thôi chứ chưa nổi nhiều thế này.' }
+      ],
+      'CA250602-101': [
+        { id: 1, who: 'Bệnh nhân', initials: 'TM', time: '09:00', text: 'Chào bác sĩ, mấy hôm nay tôi bị ho khan và sốt nhẹ.' },
+        { id: 2, who: 'Bác sĩ', initials: 'BS', time: '09:02', text: 'Chào chị Mai, chị đã dùng thuốc hạ sốt nào chưa? Cổ họng có đau rát nhiều không?', mine: true },
+        { id: 3, who: 'Bệnh nhân', initials: 'TM', time: '09:03', text: 'Dạ tôi chưa uống thuốc gì, họng hơi ngứa và rát.' }
+      ],
+      'CA250602-102': [
+        { id: 1, who: 'Bệnh nhân', initials: 'PM', time: '10:15', text: 'Thưa bác sĩ, tôi hay bị ợ chua và đau âm ỉ vùng thượng vị sau khi ăn.' },
+        { id: 2, who: 'Bác sĩ', initials: 'BS', time: '10:17', text: 'Chào anh Minh, triệu chứng này kéo dài bao lâu rồi? Anh có ăn đồ cay nóng hay căng thẳng nhiều không?', mine: true },
+        { id: 3, who: 'Bệnh nhân', initials: 'PM', time: '10:18', text: 'Dạ đợt này công việc áp lực nên tôi hay thức khuya và uống cà phê nhiều.' }
+      ],
+      'CA250602-103': [
+        { id: 1, who: 'Bệnh nhân', initials: 'VA', time: '11:00', text: 'Tôi bị đau đầu dữ dội vùng thái dương trái từ sáng tới giờ, đứng dậy là chóng mặt quay cuồng.' },
+        { id: 2, who: 'Bác sĩ', initials: 'BS', time: '11:02', text: 'Chào anh An, anh có cảm giác buồn nôn hay mắt nhìn mờ đi không? Hãy nằm nghỉ ngơi hoàn toàn nhé.', mine: true },
+        { id: 3, who: 'Bệnh nhân', initials: 'VA', time: '11:03', text: 'Dạ hơi buồn nôn nhẹ thôi bác sĩ. Mắt vẫn nhìn rõ.' }
+      ],
+      'CA250602-104': [
+        { id: 1, who: 'Bệnh nhân', initials: 'HV', time: '14:20', text: 'Em bị đau nhức mỏi vùng cổ vai gáy quá bác sĩ ạ, lan xuống bả vai tê cả ngón tay.' },
+        { id: 2, who: 'Bác sĩ', initials: 'BS', time: '14:22', text: 'Chào Vy, em làm văn phòng ngồi máy tính nhiều đúng không? Tê ngón tay có xảy ra thường xuyên không?', mine: true },
+        { id: 3, who: 'Bệnh nhân', initials: 'HV', time: '14:23', text: 'Dạ em ngồi máy tính 8 tiếng/ngày. Tê ngón tay thỉnh thoảng mới bị khi gõ phím lâu.' }
+      ],
+      'CA250602-105': [
+        { id: 1, who: 'Bệnh nhân', initials: 'LP', time: '15:10', text: 'Chào bác sĩ, tôi bị sốt cao đột ngột kèm rét run từ trưa nay.' },
+        { id: 2, who: 'Bác sĩ', initials: 'BS', time: '15:12', text: 'Chào anh Phong, nhiệt độ cơ thể hiện tại là bao nhiêu? Hãy uống ngay 1 viên Paracetamol hạ sốt.', mine: true },
+        { id: 3, who: 'Bệnh nhân', initials: 'LP', time: '15:13', text: 'Dạ tôi đo là 39.2 độ C, đã uống thuốc và đang chườm ấm.' }
+      ],
+      'CA250602-106': [
+        { id: 1, who: 'Bệnh nhân', initials: 'MT', time: '16:00', text: 'Chào bác sĩ, tôi ho khan kéo dài hơn 3 tuần nay rồi, đi bộ nhanh là thấy hụt hơi.' },
+        { id: 2, who: 'Bác sĩ', initials: 'BS', time: '16:03', text: 'Chào anh Tuấn, anh có hút thuốc lá nhiều năm không? Có kèm tức ngực hay khò khè không?', mine: true },
+        { id: 3, who: 'Bệnh nhân', initials: 'MT', time: '16:04', text: 'Dạ tôi hút thuốc lá 15 năm rồi, thỉnh thoảng có nặng ngực nhẹ khi ho.' }
+      ],
+      'CA250602-107': [
+        { id: 1, who: 'Bệnh nhân', initials: 'KV', time: '16:30', text: 'Tôi bị nổi đầy mẩn đỏ ngứa ngáy khắp cổ và ngực sau khi ăn cơm trưa có tôm.' },
+        { id: 2, who: 'Bác sĩ', initials: 'BS', time: '16:32', text: 'Chào chị Vy, chị có bị ngứa họng, khó thở hay sưng phù môi mắt gì không?', mine: true },
+        { id: 3, who: 'Bệnh nhân', initials: 'KV', time: '16:33', text: 'Dạ không khó thở, mắt môi bình thường chỉ bị ngứa da thôi.' }
       ]
     }
     localStorage.setItem('med_chats', JSON.stringify(initialChats))
@@ -365,23 +406,203 @@ export function initStore() {
         note: 'Đau âm ỉ vùng thượng vị, ợ chua nhiều sau ăn. Hạn chế ăn đồ cay nóng.',
         comment: 'Đơn thuốc dễ hiểu, bác sĩ nhắc kỹ các món cần tránh.',
         actionPath: 'Theo dõi tại nhà'
+      },
+      {
+        id: 'HS-004',
+        code: 'CA250602-101',
+        patient: 'Trần Thị Mai',
+        age: 42,
+        gender: 'Nữ',
+        phone: '0901 234 567',
+        date: '02/06/2026',
+        time: '09:00',
+        clinic: 'MedConsult Online',
+        diagnosis: 'Cảm cúm mùa',
+        prescription: [
+          { name: 'Paracetamol 500mg', dose: '1 viên/lần, ngày 3 lần', note: 'Uống sau ăn khi sốt trên 38.5 độ' },
+          { name: 'Vitamin C 500mg', dose: '1 viên/ngày', note: 'Uống sau ăn sáng' }
+        ],
+        rating: 5,
+        symptoms: 'Sốt nhẹ, mệt mỏi, ho khan',
+        note: 'Triệu chứng cảm cúm nhẹ, không khó thở. Khuyên uống nhiều nước ấm và bù oresol.',
+        comment: 'Bác sĩ phản hồi nhanh, giải thích dễ hiểu.',
+        actionPath: 'Theo dõi tại nhà'
+      },
+      {
+        id: 'HS-005',
+        code: 'CA250602-102',
+        patient: 'Phạm Quang Minh',
+        age: 29,
+        gender: 'Nam',
+        phone: '0917 445 882',
+        date: '01/06/2026',
+        time: '10:15',
+        clinic: 'MedConsult Online',
+        diagnosis: 'Trào ngược dạ dày thực quản (GERD)',
+        prescription: [
+          { name: 'Esomeprazole 20mg', dose: '1 viên/ngày', note: 'Uống trước ăn sáng 30 phút' },
+          { name: 'Phosphalugel', dose: '1 gói/lần, ngày 2 lần', note: 'Uống khi đau hoặc sau ăn 2 tiếng' }
+        ],
+        rating: 5,
+        symptoms: 'Ợ chua, đau thượng vị',
+        note: 'Đau thượng vị cấp tính do stress và ăn uống không điều độ. Tránh thức khuya và hạn chế cà phê.',
+        comment: 'Lời khuyên sinh hoạt rất hữu ích, triệu chứng giảm rõ rệt.',
+        actionPath: 'Theo dõi tại nhà'
+      },
+      {
+        id: 'HS-006',
+        code: 'CA250602-103',
+        patient: 'Nguyễn Văn An',
+        age: 45,
+        gender: 'Nam',
+        phone: '0988 777 666',
+        date: '30/05/2026',
+        time: '11:00',
+        clinic: 'MedConsult Online',
+        diagnosis: 'Đau đầu vận mạch',
+        prescription: [
+          { name: 'Paracetamol 500mg', dose: '1 viên/lần khi đau', note: 'Khoảng cách tối thiểu 4-6 tiếng' },
+          { name: 'Magne B6', dose: '1 viên/lần, ngày 2 lần', note: 'Uống sau ăn' }
+        ],
+        rating: 4,
+        symptoms: 'Đau đầu thái dương, chóng mặt',
+        note: 'Đau đầu dữ dội do co thắt mạch máu. Khuyên nằm nghỉ ngơi ở không gian tối và yên tĩnh.',
+        comment: 'Bác sĩ dặn dò rất kỹ về tư thế nghỉ ngơi.',
+        actionPath: 'Theo dõi tại nhà'
+      },
+      {
+        id: 'HS-007',
+        code: 'CA250602-104',
+        patient: 'Hoàng Thị Vy',
+        age: 24,
+        gender: 'Nữ',
+        phone: '0977 123 321',
+        date: '28/05/2026',
+        time: '14:20',
+        clinic: 'MedConsult Online',
+        diagnosis: 'Hội chứng cổ vai gáy cấp',
+        prescription: [
+          { name: 'Meloxicam 7.5mg', dose: '1 viên/ngày', note: 'Uống sau ăn no' },
+          { name: 'Eperisone 50mg', dose: '1 viên/lần, ngày 2 lần', note: 'Uống sau ăn' }
+        ],
+        rating: 5,
+        symptoms: 'Đau cổ vai gáy, tê ngón tay',
+        note: 'Căng cơ vùng vai cổ do ngồi làm việc máy tính sai tư thế. Hướng dẫn các bài tập kéo giãn cơ nhẹ.',
+        comment: 'Bài tập bác sĩ hướng dẫn hiệu quả tức thì.',
+        actionPath: 'Tái khám sau 2 tuần'
+      },
+      {
+        id: 'HS-008',
+        code: 'CA250602-105',
+        patient: 'Vũ Lâm Phong',
+        age: 31,
+        gender: 'Nam',
+        phone: '0912 345 678',
+        date: '24/05/2026',
+        time: '15:10',
+        clinic: 'MedConsult Online',
+        diagnosis: 'Sốt siêu vi',
+        prescription: [
+          { name: 'Paracetamol 500mg', dose: '1 viên/lần, ngày 3 lần', note: 'Uống sau ăn khi sốt trên 38.5' },
+          { name: 'Oresol 245', dose: '1 gói/ngày', note: 'Pha với 200ml nước đun sôi để nguội, uống rải rác' }
+        ],
+        rating: 5,
+        symptoms: 'Sốt cao đột ngột, rét run',
+        note: 'Sốt siêu vi gây mất nước điện giải. Theo dõi sát thân nhiệt, lau ấm liên tục.',
+        comment: 'Nhờ bác sĩ nhắc bù nước kịp thời nên tôi mau khỏe.',
+        actionPath: 'Theo dõi tại nhà'
+      },
+      {
+        id: 'HS-009',
+        code: 'CA250602-106',
+        patient: 'Bùi Minh Tuấn',
+        age: 50,
+        gender: 'Nam',
+        phone: '0903 888 999',
+        date: '20/05/2026',
+        time: '16:00',
+        clinic: 'Phòng khám Đa khoa Tâm An',
+        diagnosis: 'Viêm phế quản mạn tính đợt cấp',
+        prescription: [
+          { name: 'Acetylcysteine 200mg', dose: '1 gói/lần, ngày 3 lần', note: 'Uống sau ăn' },
+          { name: 'Salbutamol xịt', dose: '1-2 nhát khi khó thở', note: 'Tối đa không quá 8 nhát/ngày' }
+        ],
+        rating: 4,
+        symptoms: 'Ho kéo dài, tức ngực, hụt hơi',
+        note: 'Ho dai dẳng kèm co thắt phế quản nhẹ. Khuyên cai thuốc lá khẩn cấp và đi chụp X-quang phổi.',
+        comment: 'Bác sĩ cảnh báo rất nghiêm túc về tác hại của thuốc lá.',
+        actionPath: 'Đến phòng khám'
+      },
+      {
+        id: 'HS-010',
+        code: 'CA250602-107',
+        patient: 'Trịnh Khánh Vy',
+        age: 28,
+        gender: 'Nữ',
+        phone: '0938 444 555',
+        date: '15/05/2026',
+        time: '16:30',
+        clinic: 'MedConsult Online',
+        diagnosis: 'Mề đay dị ứng do thức ăn',
+        prescription: [
+          { name: 'Loratadine 10mg', dose: '1 viên/ngày', note: 'Uống tối trước khi đi ngủ' }
+        ],
+        rating: 5,
+        symptoms: 'Nổi mẩn ngứa da sau ăn hải sản',
+        note: 'Dị ứng cấp tính thể nhẹ sau khi ăn tôm. Kiêng gãi mạnh, kiêng ăn hải sản trong vòng 1 tuần.',
+        comment: 'Uống thuốc xong tối ngủ ngon, không bị ngứa nữa.',
+        actionPath: 'Theo dõi tại nhà'
       }
     ]
     localStorage.setItem('med_histories', JSON.stringify(initialHistories))
   }
 
-  if (!localStorage.getItem('med_schedule')) {
-    // Seed schedules from mock
-    // We add more schedule details to accommodate Day, Week, Month views
-    const initialSchedule = doctorSchedule.map((item, idx) => ({
-      ...item,
-      id: `SCH-${100 + idx}`,
-      patientName: idx % 2 === 0 ? 'Nguyễn Văn A' : 'Trần Thị B',
-      symptoms: idx % 2 === 0 ? 'Ho khan, sốt nhẹ' : 'Đau mỏi vai gáy',
-      priority: idx % 3 === 0 ? 'Cao' : idx % 3 === 1 ? 'Trung bình' : 'Thấp',
-      timeSlot: item.time,
-      status: item.status || 'Đã xác nhận'
-    }))
+  const existingSchedule = localStorage.getItem('med_schedule')
+  let parseSchedule = []
+  if (existingSchedule) {
+    try {
+      parseSchedule = JSON.parse(existingSchedule)
+    } catch (e) {}
+  }
+
+  const hasOldMockDates = !existingSchedule || parseSchedule.length < 10 || parseSchedule.some(item => item.date && (item.date.endsWith('/05') || item.date === '19/05' || item.id === 'SCH-100'))
+
+  if (hasOldMockDates) {
+    // Seed schedules with dynamic dates relative to today
+    const relativeSchedules = [
+      { offset: 0, timeSlot: '08:00 - 08:30', patientName: 'Nguyễn Văn Minh', type: 'Khám trực tiếp', room: 'Phòng 201', priority: 'Trung bình', status: 'Đã xác nhận', symptoms: 'Đau đầu, chóng mặt nhẹ' },
+      { offset: 0, timeSlot: '10:30 - 11:00', patientName: 'Trần Thị Mai', type: 'Tư vấn trực tuyến', room: 'Online', priority: 'Cao', status: 'Đã xác nhận', symptoms: 'Sốt cao 38.5 độ, ho khan' },
+      { offset: 0, timeSlot: '14:00 - 14:30', patientName: 'Lê Hoàng Nam', type: 'Tư vấn trực tuyến', room: 'Online', priority: 'Thấp', status: 'Chờ xác nhận', symptoms: 'Ngứa da, nổi mẩn nhẹ' },
+      { offset: 1, timeSlot: '09:00 - 09:30', patientName: 'Phạm Minh Đức', type: 'Khám trực tiếp', room: 'Phòng 105', priority: 'Trung bình', status: 'Đã xác nhận', symptoms: 'Đau mỏi khớp gối khi vận động' },
+      { offset: 1, timeSlot: '15:30 - 16:00', patientName: 'Vũ Hoàng Yến', type: 'Tư vấn trực tuyến', room: 'Online', priority: 'Cao', status: 'Đã xác nhận', symptoms: 'Đau tức ngực nhẹ sau khi chạy bộ' },
+      { offset: 2, timeSlot: '08:30 - 09:00', patientName: 'Đỗ Gia Huy', type: 'Khám trực tiếp', room: 'Phòng 201', priority: 'Thấp', status: 'Đã xác nhận', symptoms: 'Nghẹt mũi, chảy nước mũi' },
+      { offset: -1, timeSlot: '10:00 - 10:30', patientName: 'Ngô Quốc Anh', type: 'Khám trực tiếp', room: 'Phòng 203', priority: 'Trung bình', status: 'Đã xác nhận', symptoms: 'Đau bụng âm ỉ vùng thượng vị' },
+      { offset: -1, timeSlot: '16:30 - 17:00', patientName: 'Nguyễn Thị Lan', type: 'Tư vấn trực tuyến', room: 'Online', priority: 'Thấp', status: 'Đã xác nhận', symptoms: 'Tư vấn chế độ dinh dưỡng giảm cân' },
+      { offset: -2, timeSlot: '09:30 - 10:00', patientName: 'Hoàng Văn Bình', type: 'Khám trực tiếp', room: 'Phòng 102', priority: 'Cao', status: 'Đã xác nhận', symptoms: 'Tê bì tay chân kéo dài' },
+      { offset: 3, timeSlot: '11:00 - 11:30', patientName: 'Bùi Thị Dung', type: 'Tư vấn trực tuyến', room: 'Online', priority: 'Trung bình', status: 'Chờ xác nhận', symptoms: 'Ù tai, đau họng nhẹ' }
+    ]
+
+    const initialSchedule = relativeSchedules.map((item, idx) => {
+      const d = new Date()
+      d.setDate(d.getDate() + item.offset)
+      const dateStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`
+      
+      const weekdays = ['CN', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7']
+      const dayLabel = weekdays[d.getDay()]
+      
+      return {
+        id: `SCH-${101 + idx}`,
+        date: dateStr,
+        day: dayLabel,
+        patientName: item.patientName,
+        type: item.type,
+        room: item.room,
+        priority: item.priority,
+        status: item.status,
+        timeSlot: item.timeSlot,
+        symptoms: item.symptoms
+      }
+    })
     localStorage.setItem('med_schedule', JSON.stringify(initialSchedule))
   }
 
@@ -541,7 +762,7 @@ export function completeConsultation(code, resultData) {
   saveStoredHistories(histories)
 
   // If re-examination is set, add to schedule
-  if (resultData.actionPath === 'Tái khám' && resultData.reExamDate) {
+  if (resultData.actionPath.includes('Tái khám') && resultData.reExamDate) {
     const schedules = getStoredSchedule()
     const newSched = {
       id: `SCH-${Date.now()}`,

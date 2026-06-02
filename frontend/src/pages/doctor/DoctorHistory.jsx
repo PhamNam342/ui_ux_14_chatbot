@@ -136,9 +136,9 @@ export function DoctorHistory() {
                       <td className="font-semibold text-slate-700">{row.diagnosis}</td>
                       <td>
                         <Badge tone={
-                          row.actionPath === 'Tái khám' ? 'yellow' : 
+                          row.actionPath.includes('Tái khám') ? 'yellow' : 
                           row.actionPath.includes('phòng khám') ? 'blue' : 
-                          row.actionPath === 'Chuyển tuyến' ? 'red' : 'green'
+                          row.actionPath.includes('Chuyển tuyến') ? 'red' : 'green'
                         }>
                           {row.actionPath}
                         </Badge>
@@ -289,7 +289,7 @@ export function DoctorHistory() {
                   )}
 
                   {/* Re-examination & Follow-up notes */}
-                  {selectedRecord.actionPath === 'Tái khám' && selectedRecord.reExamDate && (
+                  {selectedRecord.actionPath.includes('Tái khám') && selectedRecord.reExamDate && (
                     <div className="p-4 bg-teal-50 border border-teal-100 rounded-xl flex gap-2.5">
                       <Calendar size={16} className="text-teal-600 mt-0.5 shrink-0" />
                       <div>

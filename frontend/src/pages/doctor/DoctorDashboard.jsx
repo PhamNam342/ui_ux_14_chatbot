@@ -40,6 +40,30 @@ export function DoctorDashboard() {
     return { pending, ongoing, completed }
   }, [casesList])
 
+  // Filter and sort upcoming schedules (today and future) chronologically
+  const upcomingSchedules = useMemo(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    return scheduleList.filter(event => {
+      if (!event.date) return false
+      const [d, m] = event.date.split('/').map(Number)
+      const eventDate = new Date(today.getFullYear(), m - 1, d)
+      eventDate.setHours(0, 0, 0, 0)
+      return eventDate >= today
+    }).sort((a, b) => {
+      const [da, ma] = a.date.split('/').map(Number)
+      const [db, mb] = b.date.split('/').map(Number)
+      const dateA = new Date(today.getFullYear(), ma - 1, da)
+      const dateB = new Date(today.getFullYear(), mb - 1, db)
+      
+      if (dateA.getTime() !== dateB.getTime()) {
+        return dateA.getTime() - dateB.getTime()
+      }
+      return a.timeSlot.localeCompare(b.timeSlot)
+    })
+  }, [scheduleList])
+
   // Start consultation action
   const handleStartConsult = (code) => {
     startConsultation(code)
@@ -183,50 +207,6 @@ export function DoctorDashboard() {
                 </div>
               )}
             </Card>
-
-            {/* Upcoming Appointments Timeline */}
-            <Card className="!p-6">
-              <div className="border-b border-slate-100 pb-4 mb-5">
-                <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                  <CalendarDays size={20} className="text-teal-600" />
-                  Lịch hẹn tiếp theo trong ngày
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">Lịch trình làm việc và các cuộc tư vấn đã lên lịch sẵn</p>
-              </div>
-
-              <div className="relative border-l border-slate-200 ml-4 pl-6 space-y-6 py-2">
-                {scheduleList.slice(0, 4).map((event, idx) => (
-                  <div key={event.id || idx} className="relative group">
-                    {/* Circle Indicator on timeline */}
-                    <div className="absolute -left-[31px] top-1 w-4 h-4 rounded-full border-2 border-white bg-teal-500 group-hover:scale-125 transition-transform" />
-                    
-                    <div 
-                      className="flex flex-col gap-3 rounded-lg border border-slate-100 bg-slate-50 p-4 transition-all hover:bg-white hover:shadow hover:border-slate-200 cursor-pointer"
-                      onClick={() => setSelectedAppointment(event)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded">
-                          {event.timeSlot || '08:00 - 08:30'}
-                        </span>
-                        <Badge tone={event.priority === 'Cao' ? 'red' : event.priority === 'Trung bình' ? 'yellow' : 'green'}>
-                          {event.priority || 'Trung bình'}
-                        </Badge>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <b className="text-slate-800 block">{event.patientName || 'Bệnh nhân chưa đặt tên'}</b>
-                          <small className="text-slate-400 block mt-0.5">{event.type || 'Khám trực tuyến'} · {event.room || 'Phòng khám Online'}</small>
-                        </div>
-                        <span className="text-xs text-slate-400 group-hover:text-teal-600 transition-colors flex items-center gap-1">
-                          Chi tiết <ArrowRight size={12} />
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
           </div>
 
           {/* Right Column: Notifications & Quick Actions */}
@@ -283,6 +263,49 @@ export function DoctorDashboard() {
               )}
             </Card>
 
+            {/* Upcoming Appointments Timeline */}
+            <Card className="!p-6">
+              <div className="border-b border-slate-100 pb-4 mb-5">
+                <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                  <CalendarDays size={20} className="text-teal-600" />
+                  Lịch hẹn tiếp theo trong ngày
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">Lịch trình làm việc và các cuộc tư vấn đã lên lịch sẵn</p>
+              </div>
+
+              <div className="relative border-l border-slate-200 ml-4 pl-6 space-y-6 py-2">
+                {upcomingSchedules.slice(0, 4).map((event, idx) => (
+                  <div key={event.id || idx} className="relative group">
+                    {/* Circle Indicator on timeline */}
+                    <div className="absolute -left-[31px] top-1 w-4 h-4 rounded-full border-2 border-white bg-teal-500 group-hover:scale-125 transition-transform" />
+                    
+                    <div 
+                      className="flex flex-col gap-3 rounded-lg border border-slate-100 bg-slate-50 p-4 transition-all hover:bg-white hover:shadow hover:border-slate-200 cursor-pointer"
+                      onClick={() => setSelectedAppointment(event)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded">
+                          {event.timeSlot || '08:00 - 08:30'}
+                        </span>
+                        <Badge tone={event.priority === 'Cao' ? 'red' : event.priority === 'Trung bình' ? 'yellow' : 'green'}>
+                          {event.priority || 'Trung bình'}
+                        </Badge>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <b className="text-slate-800 block">{event.patientName || 'Bệnh nhân chưa đặt tên'}</b>
+                          <small className="text-slate-400 block mt-0.5">{event.type || 'Khám trực tuyến'} · {event.room || 'Phòng khám Online'}</small>
+                        </div>
+                        <span className="text-xs text-slate-400 group-hover:text-teal-600 transition-colors flex items-center gap-1">
+                          Chi tiết <ArrowRight size={12} />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
           </div>
 
         </div>

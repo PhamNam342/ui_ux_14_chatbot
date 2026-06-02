@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Calendar, Clock, MapPin, Check, X, CalendarClock, ChevronLeft, ChevronRight, Stethoscope, Info } from 'lucide-react'
+import { Calendar, Clock, MapPin, Check, X, CalendarClock, ChevronLeft, ChevronRight, Stethoscope, Info, CalendarOff } from 'lucide-react'
 import { AppShell, Badge, Card, TopBar, Button, PageHeader } from '../../components/ui.jsx'
 import { getStoredSchedule, saveStoredSchedule, getStoredCases } from '../../data/doctorStore.js'
 
@@ -11,13 +11,14 @@ export function DoctorSchedule() {
   const [viewTab, setViewTab] = useState('month') // 'day', 'week', 'month'
   
   // Date states
-  const [currentDate, setCurrentDate] = useState(() => new Date(2026, 4, 1)) // May 2026 as reference from image
-  const [selectedDayNumber, setSelectedDayNumber] = useState(7) // default selected day: May 7, 2026
+  const [currentDate, setCurrentDate] = useState(() => new Date())
+  const [selectedDayNumber, setSelectedDayNumber] = useState(() => new Date().getDate())
   const [selectedAppt, setSelectedAppt] = useState(null)
   
   // Reschedule form states
   const [isRescheduling, setIsRescheduling] = useState(false)
   const [newDateVal, setNewDateVal] = useState('')
+  const [cancelTargetAppt, setCancelTargetAppt] = useState(null)
   const [newTimeVal, setNewTimeVal] = useState('09:00 - 09:30')
 
   // Load schedule data
@@ -50,7 +51,9 @@ export function DoctorSchedule() {
 
   // All schedules for today (Day tab)
   const dayTabSchedules = useMemo(() => {
-    return schedule.filter(item => item.date === '07/05' || item.day === 'Thứ 5')
+    const today = new Date()
+    const formattedTodayStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}`
+    return schedule.filter(item => item.date === formattedTodayStr)
   }, [schedule])
 
   // Week schedules
@@ -70,16 +73,21 @@ export function DoctorSchedule() {
 
   const handleCancelSchedule = (id) => {
     const matched = schedule.find(item => item.id === id)
-    const patientName = matched ? matched.patientName : ''
-    const confirmCancel = window.confirm(`Bạn có chắc chắn muốn hủy lịch khám của bệnh nhân ${patientName}?`)
-    if (!confirmCancel) return
+    if (matched) {
+      setCancelTargetAppt(matched)
+    }
+  }
 
+  const confirmCancelSchedule = () => {
+    if (!cancelTargetAppt) return
+    const id = cancelTargetAppt.id
     const updated = schedule.map(item => item.id === id ? { ...item, status: 'Hủy' } : item)
     setSchedule(updated)
     saveStoredSchedule(updated)
     if (selectedAppt && selectedAppt.id === id) {
       setSelectedAppt({ ...selectedAppt, status: 'Hủy' })
     }
+    setCancelTargetAppt(null)
   }
 
   const handleSaveReschedule = (id) => {
@@ -240,8 +248,9 @@ export function DoctorSchedule() {
                 </div>
                 <button 
                   onClick={() => {
-                    setCurrentDate(new Date(2026, 4, 1))
-                    setSelectedDayNumber(7)
+                    const today = new Date()
+                    setCurrentDate(today)
+                    setSelectedDayNumber(today.getDate())
                   }}
                   className="px-3.5 py-1.5 rounded-full border border-teal-200 bg-teal-50/50 hover:bg-teal-50 text-xs font-bold text-teal-700 cursor-pointer"
                 >
@@ -582,6 +591,34 @@ export function DoctorSchedule() {
               </div>
             )}
           </Card>
+        </div>
+      )}
+
+      {cancelTargetAppt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4 border border-slate-100 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center gap-2.5 text-rose-600 mb-3">
+              <CalendarOff size={22} />
+              <h3 className="text-lg font-bold text-slate-800">Xác nhận hủy lịch khám</h3>
+            </div>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Bạn có chắc chắn muốn hủy lịch khám của bệnh nhân <strong>{cancelTargetAppt.patientName}</strong> vào lúc <strong>{cancelTargetAppt.timeSlot}</strong> không?
+            </p>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setCancelTargetAppt(null)}
+                className="px-4 py-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 text-xs font-bold transition-colors cursor-pointer"
+              >
+                Quay lại
+              </button>
+              <button
+                onClick={confirmCancelSchedule}
+                className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors cursor-pointer"
+              >
+                Xác nhận hủy
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </AppShell>
