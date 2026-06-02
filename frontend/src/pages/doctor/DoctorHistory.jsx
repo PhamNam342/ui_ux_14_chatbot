@@ -238,7 +238,7 @@ export function DoctorHistory() {
                 <button
                   key={tab.id}
                   onClick={() => setDetailTab(tab.id)}
-                  className={`flex items-center gap-1.5 px-4 py-3 text-[11px] font-bold border-b-2 transition-all cursor-pointer ${
+                  className={`flex items-center gap-1.5 px-3 py-2.5 text-[10px] font-bold border-b-2 transition-all cursor-pointer ${
                     detailTab === tab.id
                       ? 'border-teal-600 text-teal-700 bg-white'
                       : 'border-transparent text-slate-500 hover:text-slate-700'
@@ -251,7 +251,7 @@ export function DoctorHistory() {
             </div>
 
             {/* Panel body */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+            <div className={`flex-1 min-h-0 p-5 ${detailTab === 'chat' ? 'flex flex-col' : 'overflow-y-auto space-y-4'}`}>
 
               {/* ── TAB: Chẩn đoán ── */}
               {detailTab === 'medical' && (
@@ -344,13 +344,13 @@ export function DoctorHistory() {
 
               {/* ── TAB: Hội thoại ── */}
               {detailTab === 'chat' && (
-                <>
+                <div className="flex-1 flex flex-col min-h-0">
                   {selectedRecordChatLogs.length > 0 ? (
-                    <div>
-                      <span className="text-[10px] text-slate-400 uppercase font-bold block mb-2">
+                    <div className="flex-1 flex flex-col min-h-0">
+                      <span className="text-[10px] text-slate-400 uppercase font-bold block mb-2 shrink-0">
                         Hội thoại chẩn đoán trong phiên
                       </span>
-                      <div className="bg-slate-900 text-white rounded-xl border border-slate-800 p-4 max-h-[380px] overflow-y-auto space-y-3.5">
+                      <div className="flex-1 bg-slate-900 text-white rounded-xl border border-slate-800 p-4 overflow-y-auto space-y-3.5 min-h-0">
                         {selectedRecordChatLogs.map((msg, idx) => (
                           <div key={idx} className={`flex flex-col ${msg.mine ? 'items-end' : 'items-start'}`}>
                             <span className="text-[9px] text-slate-500 block mb-0.5">{msg.who} • {msg.time}</span>
@@ -366,12 +366,12 @@ export function DoctorHistory() {
                       </div>
                     </div>
                   ) : (
-                    <div className="py-16 text-center text-slate-400">
+                    <div className="flex-1 flex flex-col items-center justify-center py-16 text-center text-slate-400">
                       <MessageSquare size={36} className="mx-auto text-slate-200 mb-3" />
                       <p className="text-sm">Không có cuộc hội thoại nào</p>
                     </div>
                   )}
-                </>
+                </div>
               )}
 
             </div>

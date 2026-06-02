@@ -244,7 +244,7 @@ export function DoctorDetail() {
                   <button
                     key={tab.key}
                     onClick={() => setDetailTab(tab.key)}
-                    className={`py-3 text-xs font-bold border-b-2 transition-all cursor-pointer shrink-0 ${
+                    className={`py-2 text-[10.5px] font-bold border-b-2 transition-all cursor-pointer shrink-0 ${
                       detailTab === tab.key 
                         ? 'border-teal-600 text-teal-700 font-extrabold' 
                         : 'border-transparent text-slate-500 hover:text-slate-800'
