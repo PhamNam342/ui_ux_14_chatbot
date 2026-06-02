@@ -183,12 +183,12 @@ export function DoctorPatients() {
           {/* Level filter */}
           <div className="flex items-center gap-1.5">
             <SlidersHorizontal size={15} className="text-slate-400" />
-            <span className="text-xs text-slate-500 font-medium">Mức độ:</span>
+            <span className="text-[11px] text-slate-500 font-medium">Mức độ:</span>
             {['Tất cả', 'Cao', 'Trung bình', 'Thấp'].map(lv => (
               <button
                 key={lv}
                 onClick={() => setFilterLevel(lv)}
-                className={`px-3 py-1.5 text-xs rounded-lg font-semibold border transition-all cursor-pointer ${
+                className={`px-3 py-1.5 text-[11px] rounded-lg font-semibold border transition-all cursor-pointer ${
                   filterLevel === lv
                     ? 'bg-teal-600 text-white border-teal-600'
                     : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-teal-300'
@@ -357,7 +357,7 @@ export function DoctorPatients() {
                 <button
                   key={tab.id}
                   onClick={() => setDetailTab(tab.id)}
-                  className={`flex items-center gap-1.5 px-4 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer ${
+                  className={`flex items-center gap-1.5 px-4 py-3 text-[11px] font-bold border-b-2 transition-all cursor-pointer ${
                     detailTab === tab.id
                       ? 'border-teal-600 text-teal-700 bg-white'
                       : 'border-transparent text-slate-500 hover:text-slate-700'

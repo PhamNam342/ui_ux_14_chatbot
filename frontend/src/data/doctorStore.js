@@ -3,11 +3,14 @@ import { cases, consultationHistory, doctorSchedule, doctors } from './mock.js'
 // Helper to initialize data in localStorage if not exists
 export function initStore() {
   // Migration check: Reset old database seeds if they contain outdated mock values
-  if (localStorage.getItem('med_cases') && localStorage.getItem('med_cases').includes('Nguyễn Văn Minh')) {
+  if (localStorage.getItem('med_cases') && (!localStorage.getItem('med_cases').includes('Nguyễn Văn An') || localStorage.getItem('med_cases').includes('Nguyễn Văn Minh'))) {
     localStorage.removeItem('med_cases')
     localStorage.removeItem('med_chats')
     localStorage.removeItem('med_histories')
     localStorage.removeItem('med_schedule')
+    localStorage.removeItem('med_profile')
+    localStorage.removeItem('med_leaves')
+    localStorage.removeItem('med_notifications')
   }
 
   if (!localStorage.getItem('med_cases')) {
@@ -109,6 +112,126 @@ export function initStore() {
         allergies: 'Dị ứng thời tiết, bụi phấn hoa',
         currentMeds: 'Không sử dụng thuốc điều trị thường xuyên',
         specialNotes: 'Hạn chế uống nước đá lạnh, súc họng nước muối thường xuyên.'
+      },
+      {
+        code: 'CA250602-005',
+        patient: 'Nguyễn Văn An',
+        initials: 'VA',
+        age: 45,
+        gender: 'Nam',
+        phone: '0988 777 666',
+        status: 'Mới',
+        level: 'Cao',
+        symptoms: 'Đau đầu dữ dội, chóng mặt, buồn nôn',
+        id: 'CA250602-005',
+        time: '14:05 Hôm nay',
+        doctor: 'Dr. Alexander',
+        waitingTime: '5 phút',
+        chatbotSummary: {
+          symptoms: ['Đau đầu vùng thái dương', 'Chóng mặt đột ngột', 'Buồn nôn nhẹ'],
+          duration: '1 ngày',
+          severity: 'Cao',
+          initialNote: 'Bệnh nhân nam, 45 tuổi, đau đầu dữ dội vùng thái dương bên trái từ sáng nay, kèm cảm giác chóng mặt quay cuồng khi đứng dậy và buồn nôn nhẹ. Tiền sử huyết áp bình thường.'
+        },
+        allergies: 'Không ghi nhận dị ứng',
+        currentMeds: 'Không sử dụng thuốc thường xuyên',
+        specialNotes: 'Cần kiểm tra huyết áp và nhịp tim tức thì.'
+      },
+      {
+        code: 'CA250602-006',
+        patient: 'Hoàng Thị Vy',
+        initials: 'HV',
+        age: 24,
+        gender: 'Nữ',
+        phone: '0977 123 321',
+        status: 'Đang chờ tư vấn',
+        level: 'Thấp',
+        symptoms: 'Đau mỏi vai gáy, tê bì tay chân',
+        id: 'CA250602-006',
+        time: '13:50 Hôm nay',
+        doctor: 'Dr. Alexander',
+        waitingTime: '20 phút',
+        chatbotSummary: {
+          symptoms: ['Đau vai gáy', 'Tê đầu ngón tay', 'Mỏi cổ'],
+          duration: '1 tuần',
+          severity: 'Thấp',
+          initialNote: 'Bệnh nhân nữ, nhân viên văn phòng, ngồi làm việc máy tính nhiều. Đau âm ỉ vùng cổ vai gáy lan xuống bả vai, thỉnh thoảng tê nhẹ các đầu ngón tay.'
+        },
+        allergies: 'Dị ứng phấn hoa',
+        currentMeds: 'Uống vitamin tổng hợp',
+        specialNotes: 'Hướng dẫn tập các bài vận động cổ vai gáy nhẹ nhàng tại chỗ.'
+      },
+      {
+        code: 'CA250602-007',
+        patient: 'Vũ Lâm Phong',
+        initials: 'LP',
+        age: 31,
+        gender: 'Nam',
+        phone: '0912 345 678',
+        status: 'Mới',
+        level: 'Cao',
+        symptoms: 'Sốt cao đột ngột, rét run, đau mỏi toàn thân',
+        id: 'CA250602-007',
+        time: '14:15 Hôm nay',
+        doctor: 'Dr. Alexander',
+        waitingTime: '2 phút',
+        chatbotSummary: {
+          symptoms: ['Sốt cao 39.5°C', 'Rét run từng cơn', 'Đau cơ', 'Mệt lả'],
+          duration: '6 giờ',
+          severity: 'Cao',
+          initialNote: 'Bệnh nhân sốt cao đột ngột từ trưa nay kèm rét run. Đã uống 1 viên Paracetamol 500mg nhưng chưa hạ sốt nhiều.'
+        },
+        allergies: 'Dị ứng thuốc Penicillin',
+        currentMeds: 'Không',
+        specialNotes: 'Khuyến nghị chườm ấm, theo dõi sát nhiệt độ cơ thể, uống nhiều nước điện giải.'
+      },
+      {
+        code: 'CA250602-008',
+        patient: 'Bùi Minh Tuấn',
+        initials: 'MT',
+        age: 50,
+        gender: 'Nam',
+        phone: '0903 888 999',
+        status: 'Đang chờ tư vấn',
+        level: 'Trung bình',
+        symptoms: 'Ho khan, tức ngực nhẹ kéo dài',
+        id: 'CA250602-008',
+        time: '13:30 Hôm nay',
+        doctor: 'Dr. Alexander',
+        waitingTime: '40 phút',
+        chatbotSummary: {
+          symptoms: ['Ho khan nhiều', 'Tức ngực nhẹ', 'Hụt hơi khi nói nhanh'],
+          duration: '3 tuần',
+          severity: 'Trung bình',
+          initialNote: 'Bệnh nhân có tiền sử hút thuốc lá nhiều năm. Ho khan kéo dài gần 1 tháng, thỉnh thoảng có cảm giác nghẹn tức ngực nhẹ.'
+        },
+        allergies: 'Không dị ứng',
+        currentMeds: 'Không',
+        specialNotes: 'Cần khai thác kỹ thói quen hút thuốc lá và tư vấn chụp X-quang phổi.'
+      },
+      {
+        code: 'CA250602-009',
+        patient: 'Trịnh Khánh Vy',
+        initials: 'KV',
+        age: 28,
+        gender: 'Nữ',
+        phone: '0938 444 555',
+        status: 'Đang chờ tư vấn',
+        level: 'Thấp',
+        symptoms: 'Dị ứng, nổi mẩn ngứa vùng cổ và ngực',
+        id: 'CA250602-009',
+        time: '13:20 Hôm nay',
+        doctor: 'Dr. Alexander',
+        waitingTime: '50 phút',
+        chatbotSummary: {
+          symptoms: ['Nổi mề đay ngứa', 'Mẩn đỏ cổ và ngực', 'Không khó thở'],
+          duration: '2 giờ',
+          severity: 'Thấp',
+          initialNote: 'Xuất hiện mẩn đỏ ngứa sau khi ăn cơm trưa có món tôm. Không ghi nhận triệu chứng khó thở, không sưng phù mặt hay môi.'
+        },
+        allergies: 'Nghi ngờ dị ứng tôm',
+        currentMeds: 'Không',
+        specialNotes: 'Dặn bệnh nhân không gãi, theo dõi các dấu hiệu phù nề đường thở như nghẹn họng.'
       }
     ]
     localStorage.setItem('med_cases', JSON.stringify(enrichedCases))
@@ -146,6 +269,34 @@ export function initStore() {
         { id: 4, who: 'Bệnh nhân', initials: 'NL', time: '14:33', text: 'Dạ không chảy mũi, không sốt ạ. Ho khan hoàn toàn nhưng ho nhiều về đêm làm tôi mất ngủ.' },
         { id: 5, who: 'Bác sĩ', initials: 'BS', time: '14:35', text: 'Chị đã dùng siro hay ngậm viên gì chưa? Họng chị có sưng hạch ở dưới cổ không?', mine: true },
         { id: 6, who: 'Bệnh nhân', initials: 'NL', time: '14:36', text: 'Tôi có ngậm kẹo bạc hà nhưng không ăn thua. Chưa thấy sưng hạch cổ bác sĩ ạ.' }
+      ],
+      'CA250602-005': [
+        { id: 1, who: 'Bệnh nhân', initials: 'VA', time: '14:05', text: 'Chào bác sĩ, tôi bị đau đầu dữ dội từ sáng tới giờ, đứng dậy là chóng mặt quay cuồng muốn ngã.' },
+        { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '14:05', text: 'Thông tin triệu chứng đã được ghi nhận và ưu tiên xử lý.', system: true },
+        { id: 3, who: 'Bác sĩ', initials: 'BS', time: '14:07', text: 'Chào anh An, anh đau nhiều ở vùng nào của đầu? Có cảm giác buồn nôn hay mắt nhìn mờ đi không?', mine: true },
+        { id: 4, who: 'Bệnh nhân', initials: 'VA', time: '14:08', text: 'Dạ đau nhiều bên thái dương trái bác sĩ ạ, hơi buồn nôn một chút. Mắt thì nhìn vẫn bình thường.' }
+      ],
+      'CA250602-006': [
+        { id: 1, who: 'Bệnh nhân', initials: 'HV', time: '13:50', text: 'Bác sĩ ơi em làm văn phòng suốt ngày đau nhức mỏi cổ vai gáy quá, mấy hôm nay còn tê tê đầu ngón tay.' },
+        { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '13:50', text: 'Triệu chứng cổ vai gáy đã được gửi tới bác sĩ.', system: true },
+        { id: 3, who: 'Bác sĩ', initials: 'BS', time: '13:52', text: 'Chào Vy, em bị tê ngón tay ở cả hai bàn tay hay chỉ một bên? Khi xoay cổ có nghe tiếng lục cục hay đau nhói không?', mine: true },
+        { id: 4, who: 'Bệnh nhân', initials: 'HV', time: '13:53', text: 'Dạ chủ yếu là tay phải cầm chuột thôi bác sĩ. Xoay cổ thì đau mỏi âm ỉ chứ không nhói lắm.' }
+      ],
+      'CA250602-007': [
+        { id: 1, who: 'Bệnh nhân', initials: 'LP', time: '14:15', text: 'Chào bác sĩ, tôi bị sốt cao quá, đo nhiệt kế lúc nãy lên tới 39.5 độ C, người lạnh run hết cả lên.' },
+        { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '14:15', text: 'Cảnh báo sốt cao khẩn cấp đã được gửi tới Bác sĩ.', system: true },
+        { id: 3, who: 'Bác sĩ', initials: 'BS', time: '14:16', text: 'Chào Phong, tôi đã thấy thông tin. Anh hãy uống ngay một viên hạ sốt Paracetamol và lau người bằng nước ấm nhé. Có kèm ho hay đau bụng không?', mine: true },
+        { id: 4, who: 'Bệnh nhân', initials: 'LP', time: '14:17', text: 'Dạ tôi uống thuốc lúc trưa rồi mà chưa thấy hạ nhiều. Không đau bụng, chỉ đau mỏi cơ khớp thôi bác sĩ.' }
+      ],
+      'CA250602-008': [
+        { id: 1, who: 'Bệnh nhân', initials: 'MT', time: '13:30', text: 'Chào bác sĩ, tôi bị ho khan kéo dài mấy tuần nay rồi, ngực cứ âm ỉ tức nhẹ, đi bộ nhanh là thấy hụt hơi.' },
+        { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '13:30', text: 'Triệu chứng ho kéo dài đã được chuyển đến bác sĩ chuyên khoa.', system: true }
+      ],
+      'CA250602-009': [
+        { id: 1, who: 'Bệnh nhân', initials: 'KV', time: '13:20', text: 'Chào bác sĩ, trưa nay tôi có ăn cơm với tôm, sau đó khoảng 1 tiếng thì cổ với ngực nổi đầy mẩn đỏ ngứa ngáy quá.' },
+        { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '13:20', text: 'Tóm tắt triệu chứng dị ứng thức ăn đã được chuyển đi.', system: true },
+        { id: 3, who: 'Bác sĩ', initials: 'BS', time: '13:22', text: 'Chào chị Vy, chị có thấy ngứa họng, khó thở hay sưng môi mặt gì không? Trước đây chị đã từng bị dị ứng tôm chưa?', mine: true },
+        { id: 4, who: 'Bệnh nhân', initials: 'KV', time: '13:23', text: 'Dạ không khó thở, mặt cũng bình thường bác sĩ. Hồi nhỏ tôi ăn tôm thỉnh thoảng hơi ngứa nhẹ thôi chứ chưa nổi nhiều thế này.' }
       ]
     }
     localStorage.setItem('med_chats', JSON.stringify(initialChats))

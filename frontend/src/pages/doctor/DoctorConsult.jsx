@@ -285,7 +285,7 @@ export function DoctorConsult() {
                 {['Đang chờ', 'Đang tư vấn', 'Đã hoàn thành'].map(tab => (
                   <button
                     key={tab}
-                    className={`text-center py-1.5 px-0 rounded-md text-[8px] font-bold whitespace-nowrap transition-all cursor-pointer ${
+                    className={`text-center py-1.5 px-1 rounded-md text-[10px] font-bold leading-tight transition-all cursor-pointer ${
                       activeTab === tab 
                         ? 'bg-white text-teal-700 shadow-sm' 
                         : 'text-slate-500 hover:text-slate-800'
