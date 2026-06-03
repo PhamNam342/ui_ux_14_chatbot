@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { MessageCircleMore, Search, ShieldCheck, Stethoscope, UsersRound, Video } from 'lucide-react'
-import { AppShell, Badge, Button, Card, TopBar } from '../../components/ui.jsx'
+import { MessageCircleMore, Search, ShieldCheck, Stethoscope, UsersRound } from 'lucide-react'
+import { AppShell, Badge, Card, TopBar } from '../../components/ui.jsx'
 import { patientConsultations } from '../../data/mock.js'
 
 const conversations = [
@@ -29,7 +29,6 @@ export function PatientConsult() {
             <h1>Tư vấn trực tuyến</h1>
             <p>Chọn một cuộc trò chuyện để tiếp tục trao đổi với bác sĩ và theo dõi hướng dẫn điều trị.</p>
           </div>
-          <Button><Video size={17} /> Bắt đầu tư vấn mới</Button>
         </div>
 
         <section className="consult-list-toolbar">

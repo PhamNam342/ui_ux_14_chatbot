@@ -1,9 +1,7 @@
-import { createElement, useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
   AlertTriangle,
-  BarChart3,
   CheckCircle2,
-  ClipboardList,
   Download,
   Eye,
   FileSpreadsheet,
@@ -22,9 +20,22 @@ import {
 import { AppShell, Button, TopBar } from '../../components/ui.jsx'
 
 const clinics = ['Phòng khám Đa khoa Tâm An', 'Phòng khám Tim mạch An Bình', 'MedCare Family Clinic']
+const clinicProfiles = {
+  [clinics[0]]: {
+    address: '12 Võ Văn Tần, Quận 3, TP.HCM',
+    manager: 'BS. Lê Minh Tâm',
+  },
+  [clinics[1]]: {
+    address: '81 Điện Biên Phủ, Bình Thạnh, TP.HCM',
+    manager: 'BS. Trần Thị Hoa',
+  },
+  [clinics[2]]: {
+    address: '44 Nguyễn Thị Minh Khai, Quận 1, TP.HCM',
+    manager: 'Điều phối viên MedCare',
+  },
+}
 const specialties = ['Tất cả chuyên khoa', 'Nội tổng quát', 'Tim mạch', 'Nhi khoa', 'Da liễu', 'Tai Mũi Họng', 'Chẩn đoán hình ảnh']
 const statuses = ['Tất cả trạng thái', 'Đang áp dụng', 'Tạm ngưng', 'Chờ duyệt']
-const priceRanges = ['Tất cả mức giá', 'Dưới 300.000đ', '300.000đ - 700.000đ', 'Trên 700.000đ']
 
 const defaultServices = [
   { id: 'DV-ECG-01', name: 'Đo điện tâm đồ ECG', specialty: 'Tim mạch', clinic: clinics[0], price: 250000, status: 'Đang áp dụng', updated: '15 phút trước', duration: '20 phút', description: 'Ghi nhận điện tim, hỗ trợ sàng lọc rối loạn nhịp và các dấu hiệu bất thường.', usage: 428 },
@@ -67,7 +78,6 @@ export function AdminServicePricing() {
   const [clinic, setClinic] = useState(clinics[0])
   const [specialty, setSpecialty] = useState(specialties[0])
   const [status, setStatus] = useState(statuses[0])
-  const [priceRange, setPriceRange] = useState(priceRanges[0])
   const [query, setQuery] = useState('')
   const [draftPrices, setDraftPrices] = useState({})
   const [editing, setEditing] = useState(null)
@@ -79,6 +89,7 @@ export function AdminServicePricing() {
   const [addForm, setAddForm] = useState(emptyService)
   const [selectedService, setSelectedService] = useState(null)
   const [filterOpen, setFilterOpen] = useState(false)
+  const filterRef = useRef(null)
 
   const notify = (message) => {
     setToast(message)
@@ -87,25 +98,18 @@ export function AdminServicePricing() {
 
   const visibleServices = useMemo(() => services.filter((item) => {
     const normalized = query.trim().toLowerCase()
-    const inRange = priceRange === priceRanges[0]
-      || (priceRange === priceRanges[1] && item.price < 300000)
-      || (priceRange === priceRanges[2] && item.price >= 300000 && item.price <= 700000)
-      || (priceRange === priceRanges[3] && item.price > 700000)
     return item.clinic === clinic
       && (specialty === specialties[0] || item.specialty === specialty)
       && (status === statuses[0] || item.status === status)
       && (!normalized || `${item.id} ${item.name}`.toLowerCase().includes(normalized))
-      && inRange
-  }), [clinic, priceRange, query, services, specialty, status])
+  }), [clinic, query, services, specialty, status])
 
   const clinicServices = services.filter((item) => item.clinic === clinic)
+  const clinicProfile = clinicProfiles[clinic]
   const averagePrice = clinicServices.length ? Math.round(clinicServices.reduce((sum, item) => sum + item.price, 0) / clinicServices.length) : 0
-  const kpis = [
-    ['Tổng dịch vụ', clinicServices.length, 'Theo cơ sở đang chọn', ClipboardList, 'teal'],
-    ['Đang áp dụng', clinicServices.filter((item) => item.status === 'Đang áp dụng').length, 'Có thể đặt lịch ngay', CheckCircle2, 'blue'],
-    ['Tạm ngưng', clinicServices.filter((item) => item.status === 'Tạm ngưng').length, 'Cần kiểm tra vận hành', PauseCircle, 'amber'],
-    ['Giá trung bình', currency(averagePrice), 'Cập nhật realtime', BarChart3, 'violet'],
-  ]
+  const latestUpdate = clinicServices.find((item) => item.updated === 'Vừa xong')?.updated ?? clinicServices[0]?.updated ?? 'Chưa có dữ liệu'
+  const activeServiceCount = clinicServices.filter((item) => item.status === 'Đang áp dụng').length
+  const pausedServiceCount = clinicServices.filter((item) => item.status === 'Tạm ngưng').length
 
   const makeKey = (item) => `${item.clinic}-${item.id}`
   const nextPrice = (item) => Number(draftPrices[makeKey(item)] ?? item.price)
@@ -113,9 +117,19 @@ export function AdminServicePricing() {
   const resetFilters = () => {
     setSpecialty(specialties[0])
     setStatus(statuses[0])
-    setPriceRange(priceRanges[0])
     setQuery('')
     notify('Đã bỏ bộ lọc phụ')
+  }
+
+  const changeClinic = (nextClinic) => {
+    setClinic(nextClinic)
+    setEditing(null)
+    setDraftPrices({})
+  }
+
+  const openFacilityFilter = () => {
+    setFilterOpen(true)
+    filterRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   const addHistory = (item, oldPrice, newPrice, reason) => {
@@ -217,28 +231,42 @@ export function AdminServicePricing() {
           </div>
         </section>
 
-        <section className={`service-price-toolbar ${filterOpen ? 'is-open' : ''}`}>
-          <header><div><Filter size={18} /><b>Bộ lọc bảng giá</b></div><button onClick={() => setFilterOpen((value) => !value)} type="button"><Filter size={16} /> Bộ lọc</button></header>
-          <div className="service-price-filter-grid">
-            <label><span>Cơ sở y tế</span><select value={clinic} onChange={(event) => setClinic(event.target.value)}>{clinics.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label><span>Chuyên khoa</span><select value={specialty} onChange={(event) => setSpecialty(event.target.value)}>{specialties.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label><span>Trạng thái</span><select value={status} onChange={(event) => setStatus(event.target.value)}>{statuses.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label><span>Khoảng giá</span><select value={priceRange} onChange={(event) => setPriceRange(event.target.value)}>{priceRanges.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label className="service-price-search"><span>Tìm dịch vụ</span><div><Search size={16} /><input onChange={(event) => setQuery(event.target.value)} placeholder="Tên dịch vụ / mã dịch vụ" value={query} /></div></label>
+        <section className="service-price-facility-card">
+          <div>
+            <span>Bảng giá riêng theo cơ sở</span>
+            <h2>Đang xem bảng giá tại: {clinic}</h2>
+            <p>{clinicProfile.address}</p>
           </div>
-          <footer><button onClick={() => notify(`Đang hiển thị ${visibleServices.length} dịch vụ phù hợp`)} type="button"><Filter size={15} /> Áp dụng</button><button onClick={resetFilters} type="button"><RotateCcw size={15} /> Bỏ lọc</button></footer>
+          <dl>
+            <div className="is-primary"><dt>Tổng dịch vụ</dt><dd>{clinicServices.length}</dd><small>Riêng cơ sở này</small></div>
+            <div><dt>Đang áp dụng</dt><dd>{activeServiceCount}</dd><small>Có thể đặt lịch</small></div>
+            <div><dt>Tạm ngưng</dt><dd>{pausedServiceCount}</dd><small>Cần rà soát</small></div>
+            <div><dt>Giá trung bình</dt><dd>{currency(averagePrice)}</dd><small>Cập nhật realtime</small></div>
+            {/* <div><dt>Cập nhật gần nhất</dt><dd>{latestUpdate}</dd><small>{clinicProfile.manager}</small></div> */}
+          </dl>
+          {/* <footer>
+            <Button onClick={openFacilityFilter} variant="outline">Đổi cơ sở</Button>
+            <Button onClick={() => notify(`Đang xem chi tiết ${clinic}`)} variant="outline"><Eye size={16} /> Xem chi tiết cơ sở</Button>
+          </footer> */}
         </section>
 
-        <section className="service-price-kpi-grid">
-          {kpis.map(([label, value, trend, Icon, tone]) => <article className={`service-price-kpi is-${tone}`} key={label}><span>{createElement(Icon, { size: 19 })}</span><p>{label}</p><strong>{value}</strong><small>{trend}</small></article>)}
+        <section className={`service-price-toolbar ${filterOpen ? 'is-open' : ''}`} ref={filterRef}>
+          <header><div><Filter size={18} /><b>Bộ lọc bảng giá</b></div><button onClick={() => setFilterOpen((value) => !value)} type="button"><Filter size={16} /> Bộ lọc</button></header>
+          <div className="service-price-filter-grid">
+            <label className="service-price-facility-filter"><span>Cơ sở y tế</span><select value={clinic} onChange={(event) => changeClinic(event.target.value)}>{clinics.map((item) => <option key={item}>{item}</option>)}</select></label>
+            <label><span>Chuyên khoa</span><select value={specialty} onChange={(event) => setSpecialty(event.target.value)}>{specialties.map((item) => <option key={item}>{item}</option>)}</select></label>
+            <label><span>Trạng thái</span><select value={status} onChange={(event) => setStatus(event.target.value)}>{statuses.map((item) => <option key={item}>{item}</option>)}</select></label>
+            <label className="service-price-search"><span>Tìm kiếm dịch vụ</span><div><Search size={16} /><input onChange={(event) => setQuery(event.target.value)} placeholder="Tên dịch vụ / mã dịch vụ" value={query} /></div></label>
+            <footer><button onClick={() => notify(`Đang hiển thị ${visibleServices.length} dịch vụ phù hợp`)} type="button"><Filter size={15} /> Áp dụng</button><button onClick={resetFilters} type="button"><RotateCcw size={15} /> Bỏ lọc</button></footer>
+          </div>
         </section>
 
         <section className="service-price-layout">
           <div className="service-price-table-panel">
-            <header className="service-price-panel-head"><div><span><FileSpreadsheet size={18} /></span><div><h2>Danh sách dịch vụ</h2><p>{visibleServices.length} dịch vụ tại {clinic}</p></div></div><em>Cập nhật trực tiếp giá mới trong từng dòng</em></header>
+            <header className="service-price-panel-head"><div><span><FileSpreadsheet size={18} /></span><div><h2>{visibleServices.length} dịch vụ tại {clinic}</h2><p>Bảng giá đang lọc theo cơ sở y tế đã chọn.</p></div></div><em>Giá mới chỉ hiển thị khi bấm Sửa giá</em></header>
             {visibleServices.length ? <ServiceTable draftPrices={draftPrices} editing={editing} nextPrice={nextPrice} onDraft={setDraftPrices} onEdit={setEditing} onHistory={setSelectedService} onSave={saveInlinePrice} onToggle={toggleService} services={visibleServices} /> : <EmptyState onAdd={() => setAdding(true)} />}
           </div>
-          <PriceHistory history={historyItems.filter((item) => item.clinic === clinic).slice(0, 6)} onAll={() => notify('Đã hiển thị lịch sử mới nhất của cơ sở')} />
+          <PriceHistory history={historyItems.filter((item) => item.clinic === clinic).slice(0, 3)} onAll={() => notify('Đã hiển thị lịch sử mới nhất của cơ sở')} />
         </section>
       </main>
 
@@ -251,27 +279,26 @@ export function AdminServicePricing() {
 }
 
 function ServiceTable({ services, draftPrices, editing, nextPrice, onDraft, onEdit, onHistory, onSave, onToggle }) {
-  return <div className="service-price-table-wrap"><table><thead><tr><th>Mã dịch vụ</th><th>Tên dịch vụ</th><th>Chuyên khoa</th><th>Cơ sở áp dụng</th><th>Giá hiện tại</th><th>Giá mới</th><th>Trạng thái</th><th>Cập nhật</th><th>Thao tác</th></tr></thead><tbody>{services.map((item) => {
+  return <div className="service-price-table-wrap"><table><colgroup><col className="service-price-col-code" /><col className="service-price-col-name" /><col className="service-price-col-spec" /><col className="service-price-col-duration" /><col className="service-price-col-price" /><col className="service-price-col-status" /><col className="service-price-col-actions" /></colgroup><thead><tr><th>Mã dịch vụ</th><th>Tên dịch vụ</th><th>Chuyên khoa</th><th>Thời lượng</th><th>Giá hiện tại</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>{services.map((item) => {
     const key = `${item.clinic}-${item.id}`
     const value = nextPrice(item)
     const delta = percentage(item.price, value)
     const changed = value !== item.price
+    const isEditing = editing === key
     return <tr className={changed ? 'is-changing' : ''} key={key}>
       <td><span className="service-price-code">{item.id}</span></td>
-      <td><b>{item.name}</b><small>{item.duration}</small></td>
+      <td><b>{item.name}</b></td>
       <td><span className={`service-price-spec is-${item.specialty.toLowerCase().replaceAll(' ', '-')}`}>{item.specialty}</span></td>
-      <td><span>{item.clinic}</span></td>
-      <td><b>{currency(item.price)}</b></td>
-      <td><div className="service-price-edit"><input aria-label={`Giá mới ${item.name}`} min="1" onChange={(event) => onDraft((current) => ({ ...current, [key]: event.target.value }))} onFocus={() => onEdit(key)} type="number" value={draftPrices[key] ?? item.price} />{changed && <small className={Math.abs(delta) > 20 ? 'is-warning' : ''}>{Math.abs(delta) > 20 && <AlertTriangle size={12} />}{delta > 0 ? '+' : ''}{delta.toFixed(1)}%</small>}</div></td>
+      <td><small className="service-price-duration">{item.duration}</small></td>
+      <td className="service-price-money"><b>{currency(item.price)}</b>{isEditing && <div className="service-price-edit"><input aria-label={`Giá mới ${item.name}`} min="1" onChange={(event) => onDraft((current) => ({ ...current, [key]: event.target.value }))} type="number" value={draftPrices[key] ?? item.price} />{changed && <small className={Math.abs(delta) > 20 ? 'is-warning' : ''}>{Math.abs(delta) > 20 && <AlertTriangle size={12} />}{delta > 0 ? '+' : ''}{delta.toFixed(1)}%</small>}</div>}</td>
       <td><span className={`service-price-status ${statusClass(item.status)}`}>{item.status}</span></td>
-      <td><small>{item.updated}</small></td>
-      <td><div className="service-price-row-actions"><button className={editing === key ? 'is-active' : ''} onClick={() => onEdit(key)} title="Sửa giá" type="button"><Pencil size={14} /></button><button disabled={!changed} onClick={() => onSave(item)} title="Lưu giá" type="button"><Save size={14} /></button><button onClick={() => onToggle(item)} title={item.status === 'Tạm ngưng' ? 'Kích hoạt' : 'Tạm ngưng'} type="button"><PauseCircle size={14} /></button><button onClick={() => onHistory(item)} title="Xem lịch sử" type="button"><History size={14} /></button></div></td>
+      <td><div className="service-price-row-actions"><button className={isEditing ? 'is-active' : ''} onClick={() => onEdit(key)} title="Sửa giá" type="button"><Pencil size={15} /></button>{isEditing && <button disabled={!changed} onClick={() => onSave(item)} title="Lưu giá" type="button"><Save size={15} /></button>}<button onClick={() => onToggle(item)} title={item.status === 'Tạm ngưng' ? 'Kích hoạt' : 'Tạm ngưng'} type="button"><PauseCircle size={15} /></button><button onClick={() => onHistory(item)} title="Xem lịch sử" type="button"><History size={15} /></button></div></td>
     </tr>
   })}</tbody></table></div>
 }
 
 function PriceHistory({ history, onAll }) {
-  return <aside className="service-price-history"><header><div><History size={18} /><div><h2>Lịch sử thay đổi</h2><p>Cập nhật mới nhất</p></div></div><button onClick={onAll} type="button">Xem tất cả</button></header><div>{history.length ? history.map((item) => <article key={item.id}><time>{item.time} · {item.admin}</time><h3>{item.service}</h3><p><b>{currency(item.oldPrice)}</b><span>→</span><strong>{currency(item.newPrice)}</strong></p><small>{item.reason}</small></article>) : <p className="service-price-empty-note">Chưa có lịch sử thay đổi tại cơ sở này.</p>}</div></aside>
+  return <aside className="service-price-history"><header><div><History size={18} /><div><h2>Lịch sử thay đổi</h2><p>3 cập nhật gần nhất</p></div></div><button onClick={onAll} type="button">Xem tất cả</button></header><div>{history.length ? history.map((item) => <article key={item.id}><h3>{item.service}</h3><p><b>{currency(item.oldPrice)}</b><span>→</span><strong>{currency(item.newPrice)}</strong></p><time>{item.admin} · {item.time}</time><small>{item.reason}</small></article>) : <p className="service-price-empty-note">Chưa có lịch sử thay đổi tại cơ sở này.</p>}</div></aside>
 }
 
 function BulkModal({ calculate, form, onChange, onClose, onSave, targets }) {

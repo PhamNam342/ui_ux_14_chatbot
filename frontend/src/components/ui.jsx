@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { forwardRef, useState } from 'react'
 import {
   CircleUserRound,
   BarChart3,
@@ -297,9 +297,9 @@ export function Button({ children, variant = 'primary', className, ...props }) {
   )
 }
 
-export function Card({ children, className }) {
-  return <section className={clsx('card', className)}>{children}</section>
-}
+export const Card = forwardRef(function Card({ children, className, ...props }, ref) {
+  return <section ref={ref} className={clsx('card', className)} {...props}>{children}</section>
+})
 
 export function StatCard({ label, value, tone = 'teal', delta, icon = '+' }) {
   return (

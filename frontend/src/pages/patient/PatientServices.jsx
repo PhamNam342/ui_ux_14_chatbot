@@ -238,9 +238,9 @@ export function PatientServices() {
         </section>
 
         <div className="service-stats">
-          <Card><ReceiptText size={20} /><span><small>Tổng số dịch vụ</small><b>{services.length}</b></span></Card>
-          <Card><Stethoscope size={20} /><span><small>Số chuyên khoa</small><b>{categories.length - 1}</b></span></Card>
-          <Card><ShieldCheck size={20} /><span><small>Dịch vụ hỗ trợ BHYT</small><b>{services.filter((service) => service.insurance).length}</b></span></Card>
+          <Card className="is-mint"><i><ReceiptText size={20} /></i><span><small>Tổng số dịch vụ</small><b>{services.length}</b></span></Card>
+          <Card className="is-blue"><i><Stethoscope size={20} /></i><span><small>Số chuyên khoa</small><b>{categories.length - 1}</b></span></Card>
+          <Card className="is-green"><i><ShieldCheck size={20} /></i><span><small>Dịch vụ hỗ trợ BHYT</small><b>{services.filter((service) => service.insurance).length}</b></span></Card>
         </div>
 
         <section className="service-section">
@@ -259,7 +259,7 @@ export function PatientServices() {
           </div>
         </section>
 
-        <section className="service-section">
+        {/* <section className="service-section">
           <div className="service-section-head"><div><small>Được nhiều bệnh nhân lựa chọn</small><h2>Dịch vụ được đặt nhiều nhất</h2></div><BadgeCheck size={20} /></div>
           <div className="popular-service-row">
             {services.filter((service) => service.popular).map((service) => (
@@ -270,7 +270,7 @@ export function PatientServices() {
               </button>
             ))}
           </div>
-        </section>
+        </section> */}
 
         <section className="service-section">
           <div className="service-section-head"><div><small>Danh mục dịch vụ</small><h2>Tất cả dịch vụ y tế</h2></div><span className="service-result-count">{filteredServices.length} dịch vụ phù hợp</span></div>
