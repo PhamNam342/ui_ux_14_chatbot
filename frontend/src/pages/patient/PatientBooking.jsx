@@ -83,6 +83,7 @@ export function PatientBooking() {
   const [reviewSort, setReviewSort] = useState('Mới nhất')
   const [showConfirmPopup, setShowConfirmPopup] = useState(false)
   const [activeHighlight, setActiveHighlight] = useState('')
+  const [showAllReviews, setShowAllReviews] = useState(false)
 
   const selectedClinic = clinics.find((clinic) => clinic.id === clinicId)
   const clinicDoctors = useMemo(
