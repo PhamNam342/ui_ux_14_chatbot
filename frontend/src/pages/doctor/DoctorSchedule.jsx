@@ -15,6 +15,10 @@ export function DoctorSchedule() {
   const [selectedDayNumber, setSelectedDayNumber] = useState(() => new Date().getDate())
   const [selectedAppt, setSelectedAppt] = useState(null)
   
+  // Custom date picker states
+  const [isPickerOpen, setIsPickerOpen] = useState(false)
+  const [pickerMonthDate, setPickerMonthDate] = useState(() => new Date())
+  
   // Reschedule form states
   const [isRescheduling, setIsRescheduling] = useState(false)
   const [newDateVal, setNewDateVal] = useState('')
@@ -43,23 +47,85 @@ export function DoctorSchedule() {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))
   }
 
+  // Day/Week navigation helpers
+  const handlePrevDay = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 1))
+  }
+
+  const handleNextDay = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1))
+  }
+
+  const handlePrevWeek = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 7))
+  }
+
+  const handleNextWeek = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 7))
+  }
+
+  const handleGoToToday = () => {
+    const today = new Date()
+    setCurrentDate(today)
+    setSelectedDayNumber(today.getDate())
+  }
+
+  // Week range helper (Monday - Sunday)
+  const getWeekRange = (date) => {
+    const current = new Date(date)
+    const day = current.getDay()
+    const distanceToMonday = day === 0 ? -6 : 1 - day
+    const monday = new Date(current)
+    monday.setDate(current.getDate() + distanceToMonday)
+    const sunday = new Date(monday)
+    sunday.setDate(monday.getDate() + 6)
+    return { monday, sunday }
+  }
+
+  // Parse DD/MM string to Date object
+  const parseScheduleDate = (dateStr) => {
+    if (!dateStr) return new Date()
+    const [d, m] = dateStr.split('/').map(Number)
+    const year = currentDate.getFullYear()
+    return new Date(year, m - 1, d)
+  }
+
+  // Format Date object to YYYY-MM-DD
+  const getYYYYMMDD = (date) => {
+    if (!date) return ''
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   // Filter schedules for the selected day in Month View
   const selectedDaySchedules = useMemo(() => {
     const formattedDayStr = `${String(selectedDayNumber).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}` // E.g., '07/05'
     return schedule.filter(item => item.date === formattedDayStr)
   }, [schedule, selectedDayNumber, currentDate])
 
-  // All schedules for today (Day tab)
+  // All schedules for active day (Day tab)
   const dayTabSchedules = useMemo(() => {
-    const today = new Date()
-    const formattedTodayStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}`
-    return schedule.filter(item => item.date === formattedTodayStr)
-  }, [schedule])
+    const formattedDayStr = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}`
+    return schedule.filter(item => item.date === formattedDayStr)
+  }, [schedule, currentDate])
 
   // Week schedules
   const weekTabSchedules = useMemo(() => {
-    return schedule
-  }, [schedule])
+    const { monday, sunday } = getWeekRange(currentDate)
+    const start = new Date(monday)
+    start.setHours(0, 0, 0, 0)
+    const end = new Date(sunday)
+    end.setHours(23, 59, 59, 999)
+
+    return schedule.filter(item => {
+      if (!item.date) return false
+      const itemDate = parseScheduleDate(item.date)
+      itemDate.setHours(0, 0, 0, 0)
+      return itemDate >= start && itemDate <= end
+    })
+  }, [schedule, currentDate])
 
   // Quick Action functions
   const handleConfirmSchedule = (id) => {
@@ -130,9 +196,10 @@ export function DoctorSchedule() {
     }
   }
 
-  const daysInMonthGrid = useMemo(() => {
-    const year = currentDate.getFullYear()
-    const month = currentDate.getMonth() // 0-11
+  // Helper to generate monthly grid
+  const getDaysInMonthGrid = (targetDate) => {
+    const year = targetDate.getFullYear()
+    const month = targetDate.getMonth() // 0-11
     
     // First day of current month
     const firstDayIndex = new Date(year, month, 1).getDay() // 0 = Sun, 1 = Mon, ...
@@ -152,7 +219,8 @@ export function DoctorSchedule() {
       grid.push({
         day: d,
         isCurrentMonth: false,
-        fullDateStr: `${String(d).padStart(2, '0')}/${String(prevMonth + 1).padStart(2, '0')}`
+        fullDateStr: `${String(d).padStart(2, '0')}/${String(prevMonth + 1).padStart(2, '0')}`,
+        dateObj: new Date(year, prevMonth, d)
       })
     }
     
@@ -162,7 +230,8 @@ export function DoctorSchedule() {
       grid.push({
         day,
         isCurrentMonth: true,
-        fullDateStr: `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}`
+        fullDateStr: `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}`,
+        dateObj: new Date(year, month, day)
       })
     }
     
@@ -176,7 +245,8 @@ export function DoctorSchedule() {
       grid.push({
         day: day,
         isCurrentMonth: false,
-        fullDateStr: `${String(day).padStart(2, '0')}/${String(nextMonth + 1).padStart(2, '0')}`
+        fullDateStr: `${String(day).padStart(2, '0')}/${String(nextMonth + 1).padStart(2, '0')}`,
+        dateObj: new Date(year, nextMonth, day)
       })
     }
     
@@ -186,7 +256,121 @@ export function DoctorSchedule() {
       weeks.push(grid.slice(i, i + 7))
     }
     return weeks
+  }
+
+  const daysInMonthGrid = useMemo(() => {
+    return getDaysInMonthGrid(currentDate)
   }, [currentDate])
+
+  const openDatePicker = (e) => {
+    e.stopPropagation()
+    setPickerMonthDate(new Date(currentDate))
+    setIsPickerOpen(true)
+  }
+
+  const renderDatePicker = () => {
+    if (!isPickerOpen) return null
+
+    const pickerWeeks = getDaysInMonthGrid(pickerMonthDate)
+    const pickerMonth = pickerMonthDate.getMonth()
+    const pickerYear = pickerMonthDate.getFullYear()
+
+    const handlePrevPickerMonth = (e) => {
+      e.stopPropagation()
+      setPickerMonthDate(new Date(pickerYear, pickerMonth - 1, 1))
+    }
+
+    const handleNextPickerMonth = (e) => {
+      e.stopPropagation()
+      setPickerMonthDate(new Date(pickerYear, pickerMonth + 1, 1))
+    }
+
+    const handleSelectDate = (dateObj, e) => {
+      e.stopPropagation()
+      setCurrentDate(dateObj)
+      setSelectedDayNumber(dateObj.getDate())
+      setIsPickerOpen(false)
+    }
+
+    return (
+      <>
+        <div 
+          className="fixed inset-0 z-40 bg-transparent cursor-default" 
+          onClick={(e) => {
+            e.stopPropagation()
+            setIsPickerOpen(false)
+          }}
+        />
+        <div 
+          className="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 z-50 bg-white border border-slate-200/80 rounded-2xl shadow-xl p-4 w-[280px] pointer-events-auto cursor-default animate-in fade-in slide-in-from-top-2 duration-150"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Picker Header */}
+          <div className="flex items-center justify-between mb-3">
+            <button 
+              type="button"
+              onClick={handlePrevPickerMonth}
+              className="p-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer text-slate-600 transition-colors flex items-center justify-center"
+            >
+              <ChevronLeft size={13} />
+            </button>
+            <span className="text-xs font-black text-slate-800">
+              Tháng {pickerMonth + 1}, {pickerYear}
+            </span>
+            <button 
+              type="button"
+              onClick={handleNextPickerMonth}
+              className="p-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer text-slate-600 transition-colors flex items-center justify-center"
+            >
+              <ChevronRight size={13} />
+            </button>
+          </div>
+
+          {/* Day Names Row */}
+          <div className="grid grid-cols-7 text-center text-[10px] font-black text-slate-400 mb-1 py-1 border-b border-slate-100">
+            <span>T2</span>
+            <span>T3</span>
+            <span>T4</span>
+            <span>T5</span>
+            <span>T6</span>
+            <span>T7</span>
+            <span>CN</span>
+          </div>
+
+          {/* Calendar Cells Grid */}
+          <div className="grid grid-cols-7 gap-1 mt-1">
+            {pickerWeeks.flatMap(week => week).map((cell, idx) => {
+              const isSelected = getYYYYMMDD(cell.dateObj) === getYYYYMMDD(currentDate)
+              const isToday = getYYYYMMDD(cell.dateObj) === getYYYYMMDD(new Date())
+
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={(e) => {
+                    if (cell.isCurrentMonth) {
+                      handleSelectDate(cell.dateObj, e)
+                    }
+                  }}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold transition-all cursor-pointer ${
+                    cell.isCurrentMonth 
+                      ? isSelected 
+                        ? 'bg-teal-600 text-white shadow-sm shadow-teal-600/20' 
+                        : isToday
+                          ? 'border border-teal-500 text-teal-700 bg-teal-50/30 hover:bg-teal-50'
+                          : 'text-slate-800 hover:bg-slate-100'
+                      : 'text-slate-300 bg-slate-50/20 opacity-30 pointer-events-none'
+                  }`}
+                >
+                  {cell.day}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </>
+    )
+  }
 
   return (
     <AppShell role="doctor">
@@ -232,16 +416,20 @@ export function DoctorSchedule() {
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={handlePrevMonth}
-                    className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer"
+                    className="h-11 w-11 flex items-center justify-center rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer text-slate-700 transition-colors"
                   >
                     <ChevronLeft size={16} />
                   </button>
-                  <h3 className="text-base font-extrabold text-slate-800">
+                  <div 
+                    onClick={openDatePicker}
+                    className="relative h-11 px-5 flex items-center justify-center rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer text-slate-800 transition-colors font-bold text-sm sm:text-base"
+                  >
                     Tháng {currentDate.getMonth() + 1}, {currentDate.getFullYear()}
-                  </h3>
+                    {renderDatePicker()}
+                  </div>
                   <button 
                     onClick={handleNextMonth}
-                    className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer"
+                    className="h-11 w-11 flex items-center justify-center rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer text-slate-700 transition-colors"
                   >
                     <ChevronRight size={16} />
                   </button>
@@ -329,7 +517,7 @@ export function DoctorSchedule() {
             </Card>
 
             {/* Selected day's appointment list */}
-            <Card className="!p-6 flex flex-col h-[520px]">
+            <Card className="!p-6 flex flex-col h-full">
               <div className="border-b border-slate-100 pb-3 mb-4">
                 <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
                   <Calendar size={18} className="text-teal-600" />
@@ -385,59 +573,156 @@ export function DoctorSchedule() {
 
         {viewTab === 'day' && (
           <div className="space-y-4 max-w-4xl">
+            {/* Day navigator */}
+            <div className="flex items-center justify-between mb-4 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={handlePrevDay}
+                  className="h-11 w-11 flex items-center justify-center rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer text-slate-700 transition-colors"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <div 
+                  onClick={openDatePicker}
+                  className="relative h-11 px-5 flex items-center justify-center rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer text-slate-800 transition-colors font-bold text-sm sm:text-base"
+                >
+                  {currentDate.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                  {renderDatePicker()}
+                </div>
+                <button 
+                  onClick={handleNextDay}
+                  className="h-11 w-11 flex items-center justify-center rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer text-slate-700 transition-colors"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+              <button 
+                onClick={handleGoToToday}
+                className="px-3.5 py-1.5 rounded-full border border-teal-200 bg-teal-50/50 hover:bg-teal-50 text-xs font-bold text-teal-700 cursor-pointer"
+              >
+                Hôm nay
+              </button>
+            </div>
+
             <Card className="!p-6">
               <h3 className="text-base font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">Danh sách lịch hẹn trong ngày</h3>
               <div className="divide-y divide-slate-100">
-                {dayTabSchedules.map((appt) => (
-                  <div key={appt.id} className="py-4 flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex items-start gap-4">
-                      <span className="text-sm font-bold text-teal-700 bg-teal-50 px-3 py-1 rounded-lg self-start">
-                        {appt.timeSlot}
-                      </span>
-                      <div>
-                        <h4 className="font-bold text-slate-800">{appt.patientName}</h4>
-                        <p className="text-xs text-slate-500 mt-1">{appt.type} · {appt.room} • Lịch trình: {appt.day}</p>
+                {dayTabSchedules.length > 0 ? (
+                  dayTabSchedules.map((appt) => (
+                    <div key={appt.id} className="py-4 flex flex-wrap items-center justify-between gap-4">
+                      <div className="flex items-start gap-4">
+                        <span className="text-sm font-bold text-teal-700 bg-teal-50 px-3 py-1 rounded-lg self-start">
+                          {appt.timeSlot}
+                        </span>
+                        <div>
+                          <h4 className="font-bold text-slate-800">{appt.patientName}</h4>
+                          <p className="text-xs text-slate-500 mt-1">{appt.type} · {appt.room} • Lịch trình: {appt.day}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <Badge tone={appt.priority === 'Cao' ? 'red' : appt.priority === 'Trung bình' ? 'yellow' : 'green'}>
+                          Ưu tiên: {appt.priority}
+                        </Badge>
+                        <Button variant="ghost" className="btn-compact" onClick={() => setSelectedAppt(appt)}>
+                          Chi tiết
+                        </Button>
                       </div>
                     </div>
-                    
-                    <div className="flex items-center gap-3">
-                      <Badge tone={appt.priority === 'Cao' ? 'red' : appt.priority === 'Trung bình' ? 'yellow' : 'green'}>
-                        Ưu tiên: {appt.priority}
-                      </Badge>
-                      <Button variant="ghost" className="btn-compact" onClick={() => setSelectedAppt(appt)}>
-                        Chi tiết
-                      </Button>
-                    </div>
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-16 text-center text-slate-400">
+                    <Calendar size={32} className="opacity-40 mb-2" />
+                    <p className="text-sm">Bác sĩ không có lịch trực hay hẹn tư vấn nào vào ngày này.</p>
                   </div>
-                ))}
+                )}
               </div>
             </Card>
           </div>
         )}
 
         {viewTab === 'week' && (
-          <Card className="!p-6 overflow-hidden">
-            <h3 className="text-base font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">Tổng quan lịch trình tuần</h3>
-            <div className="grid grid-cols-7 gap-3 text-center min-w-[700px]">
-              {['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'].map((day, idx) => {
-                const dayAppts = weekTabSchedules.filter(item => item.day === day)
-                return (
-                  <div key={day} className="bg-slate-50 p-3 rounded-xl border border-slate-100 min-h-[180px]">
-                    <span className="text-xs font-black text-slate-800 block border-b border-slate-200 pb-1.5 mb-2">{day}</span>
-                    <div className="space-y-2">
-                      {dayAppts.map(appt => (
-                        <div key={appt.id} className="bg-white p-2 rounded-lg border border-slate-200/60 text-left text-[11px] shadow-sm">
-                          <b className="text-slate-800 block truncate">{appt.patientName}</b>
-                          <span className="text-teal-700 block mt-0.5 font-bold">{appt.timeSlot}</span>
-                          <span className="text-slate-400 block truncate mt-0.5">{appt.room}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )
-              })}
+          <div className="space-y-4">
+            {/* Week navigator */}
+            <div className="flex items-center justify-between mb-4 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={handlePrevWeek}
+                  className="h-11 w-11 flex items-center justify-center rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer text-slate-700 transition-colors"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <div 
+                  onClick={openDatePicker}
+                  className="relative h-11 px-5 flex items-center justify-center rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer text-slate-800 transition-colors font-bold text-sm sm:text-base"
+                >
+                  {(() => {
+                    const { monday, sunday } = getWeekRange(currentDate)
+                    return `Tuần: ${monday.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })} - ${sunday.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}`
+                  })()}
+                  {renderDatePicker()}
+                </div>
+                <button 
+                  onClick={handleNextWeek}
+                  className="h-11 w-11 flex items-center justify-center rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer text-slate-700 transition-colors"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+              <button 
+                onClick={handleGoToToday}
+                className="px-3.5 py-1.5 rounded-full border border-teal-200 bg-teal-50/50 hover:bg-teal-50 text-xs font-bold text-teal-700 cursor-pointer"
+              >
+                Hôm nay
+              </button>
             </div>
-          </Card>
+
+            <Card className="!p-6 overflow-hidden">
+              <h3 className="text-base font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">Tổng quan lịch trình tuần</h3>
+              <div className="grid grid-cols-7 gap-3 text-center min-w-[700px]">
+                {['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'].map((day, idx) => {
+                  const { monday } = getWeekRange(currentDate)
+                  const colDate = new Date(monday)
+                  colDate.setDate(monday.getDate() + idx)
+                  const colDateStr = `${String(colDate.getDate()).padStart(2, '0')}/${String(colDate.getMonth() + 1).padStart(2, '0')}`
+
+                  // Filter by exact date matching the column
+                  const dayAppts = weekTabSchedules.filter(item => item.date === colDateStr)
+
+                  return (
+                    <div key={day} className="bg-slate-50 p-3 rounded-xl border border-slate-100 min-h-[220px] flex flex-col">
+                      <div className="border-b border-slate-200 pb-1.5 mb-2">
+                        <span className="text-xs font-black text-slate-800 block">{day}</span>
+                        <span className="text-[10px] text-slate-400 block font-semibold mt-0.5">{colDateStr}</span>
+                      </div>
+                      <div className="space-y-2 flex-1 overflow-y-auto">
+                        {dayAppts.length > 0 ? (
+                          dayAppts.map(appt => (
+                            <div 
+                              key={appt.id} 
+                              onClick={() => {
+                                setSelectedAppt(appt)
+                                setIsRescheduling(false)
+                              }}
+                              className="bg-white p-2 rounded-lg border border-slate-200/60 text-left text-[11px] shadow-sm hover:border-teal-400 hover:shadow transition-all cursor-pointer"
+                            >
+                              <b className="text-slate-800 block truncate">{appt.patientName}</b>
+                              <span className="text-teal-700 block mt-0.5 font-bold">{appt.timeSlot}</span>
+                              <span className="text-slate-400 block truncate mt-0.5">{appt.room}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="h-full flex items-center justify-center text-[10px] text-slate-300 italic pt-6">
+                            Trống
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </Card>
+          </div>
         )}
 
       </div>

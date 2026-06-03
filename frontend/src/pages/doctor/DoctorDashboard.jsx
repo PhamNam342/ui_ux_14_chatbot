@@ -86,13 +86,7 @@ export function DoctorDashboard() {
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-teal-600">Bảng điều khiển bác sĩ</span>
             <h1 className="text-3xl font-black text-slate-900 mt-1">Hôm nay tôi cần làm gì?</h1>
-            <p className="mt-1 text-slate-500">Chào buổi sáng, Bác sĩ Alexander. Hãy xem qua danh sách các việc cần xử lý hôm nay.</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link to="/doctor/consult" className="btn btn-primary">
-              <Stethoscope size={18} />
-              Vào phòng tư vấn
-            </Link>
+            <p className="mt-1 text-slate-500">Chào buổi sáng, Bác sĩ Nguyễn Văn An. Hãy xem qua danh sách các việc cần xử lý hôm nay.</p>
           </div>
         </div>
 
@@ -142,7 +136,7 @@ export function DoctorDashboard() {
 
               {pendingCases.length > 0 ? (
                 <div className="space-y-4">
-                  {pendingCases.map((item) => (
+                  {pendingCases.slice(0, 3).map((item) => (
                     <div 
                       key={item.code} 
                       className="group flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-teal-200 hover:shadow-md sm:flex-row sm:items-center sm:justify-between"
@@ -196,6 +190,20 @@ export function DoctorDashboard() {
                       </div>
                     </div>
                   ))}
+                  
+                  {pendingCases.length > 3 && (
+                    <div className="flex flex-col items-center justify-between gap-3 rounded-xl bg-teal-50/40 p-4 border border-dashed border-teal-200 sm:flex-row">
+                      <div className="text-sm font-semibold text-slate-700">
+                        Còn <b className="text-teal-600 font-extrabold">{pendingCases.length - 3}</b> bệnh nhân khác đang xếp hàng chờ...
+                      </div>
+                      <Link 
+                        to="/doctor/consult" 
+                        className="btn btn-outline btn-compact text-xs flex items-center gap-1 font-bold shadow-none"
+                      >
+                        Xem tất cả <ArrowRight size={14} />
+                      </Link>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -211,57 +219,6 @@ export function DoctorDashboard() {
 
           {/* Right Column: Notifications & Quick Actions */}
           <div className="space-y-7">
-            {/* Important Notifications */}
-            <Card className="!p-6">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
-                <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                  <Bell size={18} className="text-amber-500" />
-                  Thông báo quan trọng
-                </h2>
-                {notifications.filter(n => n.unread).length > 0 && (
-                  <span className="w-2 h-2 rounded-full bg-rose-500" />
-                )}
-              </div>
-
-              {notifications.length > 0 ? (
-                <div className="space-y-3.5">
-                  {notifications.map((notif) => (
-                    <div 
-                      key={notif.id} 
-                      className={`relative p-3.5 rounded-xl border transition-all ${
-                        notif.unread 
-                          ? 'bg-amber-50/50 border-amber-100' 
-                          : 'bg-white border-slate-100'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-start gap-2.5">
-                          <span className="mt-0.5 text-amber-600 shrink-0">
-                            <AlertCircle size={16} />
-                          </span>
-                          <div>
-                            <h4 className="text-sm font-bold text-slate-800">{notif.title}</h4>
-                            <p className="text-xs text-slate-600 mt-1 leading-5">{notif.detail}</p>
-                            <span className="text-[10px] text-slate-400 block mt-1.5">{notif.time}</span>
-                          </div>
-                        </div>
-                        <button 
-                          onClick={() => handleDismissNotification(notif.id)}
-                          className="text-slate-400 hover:text-slate-600 text-lg leading-none p-1 -mt-1 cursor-pointer"
-                          title="Đóng thông báo"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="py-6 text-center text-slate-400 text-sm">
-                  Không có thông báo mới nào
-                </div>
-              )}
-            </Card>
 
             {/* Upcoming Appointments Timeline */}
             <Card className="!p-6">

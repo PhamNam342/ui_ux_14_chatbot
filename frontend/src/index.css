@@ -358,22 +358,33 @@ select {
 
 .content-narrow {
   max-width: 980px;
+  transition: max-width 220ms ease;
 }
 
 .content-wide {
   max-width: 1180px;
+  transition: max-width 220ms ease;
 }
 
 .content-advisor {
   max-width: 1120px;
   margin-inline: auto;
   padding-top: 20px;
+  transition: max-width 220ms ease;
 }
 
 .content-form {
   max-width: 860px;
   margin-inline: auto;
   padding-top: 20px;
+  transition: max-width 220ms ease;
+}
+
+.shell-collapsed .content-narrow,
+.shell-collapsed .content-wide,
+.shell-collapsed .content-advisor,
+.shell-collapsed .content-form {
+  max-width: 100%;
 }
 
 .card {
@@ -730,8 +741,7 @@ textarea.input {
   gap: 14px;
 }
 
-.tabs button,
-.segmented button {
+.tabs button {
   min-height: 24px;
   border: 0;
   border-radius: 7px;
@@ -743,20 +753,39 @@ textarea.input {
   transition: 160ms ease;
 }
 
-.tabs .active,
-.segmented .active {
+.tabs .active {
   background: #dff4ef;
   color: #0f766e;
 }
 
 .segmented {
   display: flex;
-  gap: 8px;
+  gap: 12px;
+  align-items: center;
+}
+
+.segmented button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  padding: 0 20px;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 700;
+  transition: 160ms ease;
+  cursor: pointer;
+}
+
+.segmented button:hover {
+  color: #0f766e;
+  background: rgba(8, 173, 140, 0.05);
 }
 
 .segmented .active {
-  background: #dff4ef;
+  background: #e8f7f4;
   color: #0f766e;
+  font-weight: 800;
 }
 
 .segmented .is-disabled {
@@ -4627,7 +4656,7 @@ table tbody td {
 .consult-list-tabs button { border-radius: 9px; padding: 6px 10px; color: #78918f; font-size: 9.5px; font-weight: 850; transition: 160ms ease; }
 .consult-list-tabs button:hover,
 .consult-list-tabs button.active { background: #fff; color: #0f766e; box-shadow: 0 3px 9px rgb(36 78 74 / .08); }
-.consult-list-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.consult-list-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .consult-list-summary .card { display: flex; align-items: center; gap: 10px; padding: 12px; }
 .consult-list-summary span { display: grid; height: 34px; width: 34px; place-items: center; border-radius: 10px; background: #e7f8f5; color: #0f766e; }
 .consult-list-summary b { display: block; color: #365d59; font-size: 15px; font-weight: 950; }
@@ -5803,5 +5832,32 @@ button { cursor: pointer; }
   flex: 1 1 0% !important;
   white-space: nowrap !important;
   padding: 0 4px !important;
+}
+
+/* Responsive Consultation Header using CSS Container Queries */
+.consult-workspace-col {
+  container-type: inline-size;
+}
+
+@container (max-width: 580px) {
+  .consult-header-actions {
+    gap: 6px !important;
+  }
+  .consult-header-actions .btn-label {
+    display: none !important;
+  }
+  .consult-header-actions .btn {
+    width: 38px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    min-width: 38px !important;
+    padding: 0 !important;
+    border-radius: 999px !important;
+    justify-content: center !important;
+    gap: 0 !important;
+  }
+  .consult-header-actions .btn svg {
+    margin: 0 !important;
+  }
 }
 

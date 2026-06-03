@@ -108,7 +108,7 @@ export function TopBar({ legacy = false }) {
               .toUpperCase(),
             email: patientUser.email,
           }
-        : { name: 'Dr. Alexander', subtitle: 'Bác sĩ tư vấn', initials: 'DA', email: 'alexander@medconsult.vn' }
+        : { name: 'BS. Nguyễn Văn An', subtitle: 'Bác sĩ tư vấn', initials: 'VA', email: 'an.nguyen@medconsult.vn' }
   const [open, setOpen] = useState(false)
   const [notifyOpen, setNotifyOpen] = useState(false)
   const [toast, setToast] = useState('')
@@ -200,11 +200,6 @@ export function TopBar({ legacy = false }) {
                 Hồ sơ cá nhân
                 <ChevronRight size={14} />
               </button>
-              <button onClick={() => { setOpen(false); navigate('/doctor/work-schedule') }}>
-                <span><Clock size={17} /></span>
-                Lịch làm việc
-                <ChevronRight size={14} />
-              </button>
               <button onClick={() => { setOpen(false); navigate('/doctor/leave') }}>
                 <span><CalendarOff size={17} /></span>
                 Đăng ký nghỉ phép
@@ -248,7 +243,7 @@ export function AppShell({ role, children, legacy = false }) {
       { to: '/doctor/consult', label: 'Tư vấn', icon: <Video size={18} /> },
       { to: '/doctor/schedule', label: 'Lịch khám', icon: <CalendarDays size={18} /> },
       { to: '/doctor/patients', label: 'Bệnh nhân', icon: <Users size={18} /> },
-      { to: '/doctor/history', label: 'Hồ sơ khám', icon: <ClipboardList size={18} /> },
+      { to: '/doctor/history', label: 'Hồ sơ khám bệnh', icon: <ClipboardList size={18} /> },
     ],
     advisor: [
       { to: '/advisor/data', label: 'Danh sách dữ liệu', icon: <Database size={18} /> },
@@ -297,8 +292,8 @@ export function Button({ children, variant = 'primary', className, ...props }) {
   )
 }
 
-export function Card({ children, className }) {
-  return <section className={clsx('card', className)}>{children}</section>
+export function Card({ children, className, ...props }) {
+  return <section className={clsx('card', className)} {...props}>{children}</section>
 }
 
 export function StatCard({ label, value, tone = 'teal', delta, icon = '+' }) {

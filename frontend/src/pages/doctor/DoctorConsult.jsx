@@ -103,11 +103,20 @@ export function DoctorConsult() {
       if (!stored[selectedCaseCode]) {
         // Initial mock seeding
         const matched = cases.find(c => c.code === selectedCaseCode)
-        stored[selectedCaseCode] = [
-          { id: 1, who: 'Bệnh nhân', initials: matched?.initials || 'BN', time: '10:02', text: `Chào bác sĩ, tôi bị triệu chứng ${matched?.symptoms || 'khó chịu'} từ hôm qua.` },
-          { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '10:02', text: `Chào anh/chị, bản tóm tắt triệu chứng y khoa đã được chuyển đến Bác sĩ Alexander.`, system: true },
-          { id: 3, who: 'Bác sĩ', initials: 'BS', time: '10:03', text: `Chào anh/chị, tôi đã xem qua các triệu chứng sơ bộ. Anh/chị có thể cung cấp thêm thông tin về nhiệt độ cơ thể hiện tại không?`, mine: true }
-        ]
+        const isWaiting = matched && (matched.status === 'Mới' || matched.status === 'Đang chờ tư vấn' || matched.status === 'Đang chờ')
+        
+        if (isWaiting) {
+          stored[selectedCaseCode] = [
+            { id: 1, who: 'Bệnh nhân', initials: matched?.initials || 'BN', time: '10:02', text: `Chào bác sĩ, tôi bị triệu chứng ${matched?.symptoms || 'khó chịu'} từ hôm qua.` },
+            { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '10:02', text: `Chào anh/chị, bản tóm tắt triệu chứng y khoa đã được chuyển đến Bác sĩ Nguyễn Văn An.`, system: true }
+          ]
+        } else {
+          stored[selectedCaseCode] = [
+            { id: 1, who: 'Bệnh nhân', initials: matched?.initials || 'BN', time: '10:02', text: `Chào bác sĩ, tôi bị triệu chứng ${matched?.symptoms || 'khó chịu'} từ hôm qua.` },
+            { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '10:02', text: `Chào anh/chị, bản tóm tắt triệu chứng y khoa đã được chuyển đến Bác sĩ Nguyễn Văn An.`, system: true },
+            { id: 3, who: 'Bác sĩ', initials: 'BS', time: '10:03', text: `Chào anh/chị, tôi đã xem qua các triệu chứng sơ bộ. Anh/chị có thể cung cấp thêm thông tin về nhiệt độ cơ thể hiện tại không?`, mine: true }
+          ]
+        }
         localStorage.setItem('med_chats', JSON.stringify(stored))
       }
       setChatMessages(stored[selectedCaseCode])
@@ -285,7 +294,7 @@ export function DoctorConsult() {
                 {['Đang chờ', 'Đang tư vấn', 'Đã hoàn thành'].map(tab => (
                   <button
                     key={tab}
-                    className={`text-center py-1.5 px-1 rounded-md font-bold leading-tight transition-all cursor-pointer ${
+                    className={`text-center py-1.5 px-1 rounded-md font-black leading-tight transition-all cursor-pointer ${
                       activeTab === tab 
                         ? 'bg-white text-teal-700 shadow-sm' 
                         : 'text-slate-500 hover:text-slate-800'
@@ -368,25 +377,25 @@ export function DoctorConsult() {
         </div>
 
         {/* Column 2 (Center): Chat / Video feeds / Medical Record Form */}
-        <div className="flex-1 flex flex-col bg-white border border-slate-200 rounded-xl overflow-hidden min-w-0">
+        <div className="flex-1 flex flex-col bg-white border border-slate-200 rounded-xl overflow-hidden min-w-0 consult-workspace-col">
           
           {activeCase ? (
             <>
               {/* Header */}
-              <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
-                <div className="flex items-center gap-3">
+              <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/30 gap-4 consult-header">
+                <div className="flex items-center gap-3 min-w-0">
                   <Avatar tone={activeCase.level === 'Cao' ? 'rose' : activeCase.level === 'Trung bình' ? 'amber' : 'mint'}>
                     {activeCase.initials}
                   </Avatar>
-                  <div>
-                    <h2 className="text-base font-bold text-slate-800">{activeCase.patient}</h2>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                  <div className="min-w-0">
+                    <h2 className="text-base font-bold text-slate-800 truncate">{activeCase.patient}</h2>
+                    <p className="text-xs text-slate-500 mt-0.5 truncate">
                       {activeCase.gender} • {activeCase.age} tuổi • Mã số: {activeCase.code}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0 consult-header-actions">
                   {activeCase.status !== 'Hoàn tất' && (
                     <>
                       {activeCase.status === 'Đang tư vấn' ? (
@@ -394,12 +403,14 @@ export function DoctorConsult() {
                           {!isEndingConsult && (
                             <button
                               onClick={() => setIsVideoCall(v => !v)}
-                              className={`btn btn-compact cursor-pointer ${
+                              className={`btn btn-compact cursor-pointer whitespace-nowrap ${
                                 isVideoCall ? 'btn-dark' : 'btn-outline'
                               }`}
+                              style={{ whiteSpace: 'nowrap' }}
+                              title={isVideoCall ? 'Trở lại Chat' : 'Bắt đầu gọi video'}
                             >
                               <Video size={15} />
-                              {isVideoCall ? 'Trở lại Chat' : 'Bắt đầu gọi video'}
+                              <span className="btn-label">{isVideoCall ? 'Trở lại Chat' : 'Bắt đầu gọi video'}</span>
                             </button>
                           )}
                           <button
@@ -407,27 +418,31 @@ export function DoctorConsult() {
                               setIsEndingConsult(v => !v)
                               setIsVideoCall(false)
                             }}
-                            className={`btn btn-compact cursor-pointer ${
+                            className={`btn btn-compact cursor-pointer whitespace-nowrap ${
                               isEndingConsult ? 'btn-ghost' : 'btn-danger'
                             }`}
+                            style={{ whiteSpace: 'nowrap' }}
+                            title={isEndingConsult ? 'Xem hội thoại' : 'Kết thúc & Kê đơn'}
                           >
                             <ClipboardCheck size={15} />
-                            {isEndingConsult ? 'Xem hội thoại' : 'Kết thúc & Kê đơn'}
+                            <span className="btn-label">{isEndingConsult ? 'Xem hội thoại' : 'Kết thúc & Kê đơn'}</span>
                           </button>
                         </>
                       ) : (
                         <button
                           onClick={() => handleAcceptPatient(activeCase.code)}
-                          className="btn btn-primary btn-compact cursor-pointer"
+                          className="btn btn-primary btn-compact cursor-pointer whitespace-nowrap"
+                          style={{ whiteSpace: 'nowrap' }}
+                          title="Tiếp nhận ca bệnh"
                         >
                           <Stethoscope size={15} />
-                          Tiếp nhận ca bệnh
+                          <span className="btn-label">Tiếp nhận ca bệnh</span>
                         </button>
                       )}
                     </>
                   )}
                   {activeCase.status === 'Hoàn tất' && (
-                    <Badge tone="green">Đã hoàn tất khám</Badge>
+                    <Badge tone="green" className="whitespace-nowrap" style={{ whiteSpace: 'nowrap' }}>Đã hoàn tất khám</Badge>
                   )}
                 </div>
               </div>
@@ -824,7 +839,13 @@ export function DoctorConsult() {
                   </div>
                   <div>
                     <small className="text-[10px] text-slate-400 block">Đánh giá nguy cơ:</small>
-                    <b className="text-rose-600">{activeCase.chatbotSummary?.severity || 'Trung bình'}</b>
+                    <b className={
+                      (activeCase.chatbotSummary?.severity || 'Trung bình') === 'Cao' ? 'text-rose-600' :
+                      (activeCase.chatbotSummary?.severity || 'Trung bình') === 'Trung bình' ? 'text-amber-500' :
+                      'text-teal-600'
+                    }>
+                      {activeCase.chatbotSummary?.severity || 'Trung bình'}
+                    </b>
                   </div>
                 </div>
 
@@ -857,6 +878,17 @@ export function DoctorConsult() {
               </div>
             </div>
 
+            {/* Special Doctor's Notes */}
+            <div className="bg-amber-50 p-3.5 rounded-xl border border-amber-200 flex gap-2">
+              <Info size={15} className="text-amber-500 mt-0.5 shrink-0" />
+              <div>
+                <span className="text-[10px] uppercase font-bold text-amber-800 block">Lưu ý đặc biệt</span>
+                <p className="text-xs text-amber-900 mt-1 font-semibold leading-relaxed">
+                  {activeCase.specialNotes}
+                </p>
+              </div>
+            </div>
+
             {/* Medical History (3 Recent Visits) */}
             <div>
               <span className="text-[10px] uppercase font-bold text-slate-400 block mb-2">3 ca khám gần nhất</span>
@@ -874,14 +906,6 @@ export function DoctorConsult() {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Special Doctor's Notes */}
-            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block">Lưu ý đặc biệt</span>
-              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                {activeCase.specialNotes}
-              </p>
             </div>
           </div>
         )}

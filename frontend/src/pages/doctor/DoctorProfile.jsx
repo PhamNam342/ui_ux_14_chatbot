@@ -1,254 +1,417 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   Camera, CheckCircle2, Lock, User, Phone, Mail,
-  Stethoscope, BadgeCheck, Shield, Eye, EyeOff,
-  Award, Building2, Star,
+  Stethoscope, BadgeCheck, Shield, Eye, EyeOff, Check,
+  Award, Building2, Star, KeyRound, ShieldCheck, X, Pencil, Save
 } from 'lucide-react'
-import { AppShell, TopBar } from '../../components/ui.jsx'
+import { AppShell, TopBar, PageHeader, Card, Button } from '../../components/ui.jsx'
 import { getStoredProfile, saveStoredProfile } from '../../data/doctorStore.js'
+
+const sections = [
+  { label: 'Thông tin chuyên môn', icon: <Stethoscope size={16} /> },
+  { label: 'Liên hệ', icon: <Mail size={16} /> },
+  { label: 'Bảo mật', icon: <Shield size={16} /> },
+  { label: 'Thông tin tài khoản', icon: <BadgeCheck size={16} /> }
+]
 
 export function DoctorProfile() {
   const [profile, setProfile] = useState({})
   const [avatar, setAvatar] = useState('')
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState({})
+  const [saved, setSaved] = useState(false)
+  const [passwordOpen, setPasswordOpen] = useState(false)
+  const [password, setPassword] = useState({ current: '', next: '', confirm: '' })
   const [toast, setToast] = useState('')
-  const [passForm, setPassForm] = useState({ oldPass: '', newPass: '', confirmPass: '' })
-  const [passError, setPassError] = useState('')
-  const [showOld, setShowOld] = useState(false)
-  const [showNew, setShowNew] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
 
   useEffect(() => {
-    setProfile(getStoredProfile())
+    const prof = getStoredProfile()
+    if (prof) {
+      setProfile(prof)
+      setDraft(prof)
+      if (prof.avatar) {
+        setAvatar(prof.avatar)
+      }
+    }
   }, [])
 
-  const showToast = (msg) => {
-    setToast(msg)
-    setTimeout(() => setToast(''), 2500)
+  const passwordRules = useMemo(() => [
+    { label: 'Tối thiểu 8 ký tự', ok: password.next.length >= 8 },
+    { label: 'Có chữ hoa', ok: /[A-Z]/.test(password.next) },
+    { label: 'Có chữ thường', ok: /[a-z]/.test(password.next) },
+    { label: 'Có chữ số', ok: /\d/.test(password.next) },
+    { label: 'Có ký tự đặc biệt', ok: /[^A-Za-z0-9]/.test(password.next) }
+  ], [password.next])
+
+  const strength = passwordRules.filter((rule) => rule.ok).length
+  const passwordValid = strength === passwordRules.length && password.current && password.next === password.confirm
+
+  function notify(message) {
+    setToast(message)
+    window.setTimeout(() => setToast(''), 1800)
   }
 
-  const handleSaveProfile = (e) => {
-    e.preventDefault()
-    saveStoredProfile(profile)
-    showToast('Đã cập nhật hồ sơ cá nhân thành công!')
+  function update(field, value) {
+    setDraft((current) => ({ ...current, [field]: value }))
   }
 
-  const handleChangePassword = (e) => {
-    e.preventDefault()
-    setPassError('')
-    if (!passForm.oldPass || !passForm.newPass || !passForm.confirmPass) {
-      setPassError('Vui lòng nhập đầy đủ các trường mật khẩu.')
-      return
-    }
-    if (passForm.oldPass !== 'doctor') {
-      setPassError('Mật khẩu cũ không chính xác.')
-      return
-    }
-    if (passForm.newPass !== passForm.confirmPass) {
-      setPassError('Mật khẩu xác nhận không trùng khớp.')
-      return
-    }
-    setPassForm({ oldPass: '', newPass: '', confirmPass: '' })
-    showToast('Đã cập nhật mật khẩu tài khoản thành công!')
+  function saveProfile() {
+    const updated = { ...draft, avatar }
+    saveStoredProfile(updated)
+    setProfile(updated)
+    setEditing(false)
+    setSaved(true)
+    window.setTimeout(() => setSaved(false), 2200)
   }
+
+  function cancelEdit() {
+    setDraft(profile)
+    setEditing(false)
+  }
+
+  function changePassword() {
+    if (!passwordValid) return
+    if (password.current !== 'doctor') {
+      notify('Mật khẩu hiện tại không chính xác.')
+      return
+    }
+    setPasswordOpen(false)
+    setPassword({ current: '', next: '', confirm: '' })
+    notify('Đổi mật khẩu thành công')
+  }
+
+  const handleAvatarChange = (event) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      const url = URL.createObjectURL(file)
+      setAvatar(url)
+      // Save avatar to store immediately to persist it
+      const updated = { ...profile, avatar: url }
+      saveStoredProfile(updated)
+      setProfile(updated)
+      setDraft(updated)
+      notify('Đã cập nhật ảnh đại diện')
+    }
+  }
+
+  const initials = useMemo(() => {
+    if (!profile.name) return 'VA'
+    return profile.name
+      .split(' ')
+      .slice(-2)
+      .map((part) => part[0])
+      .join('')
+      .toUpperCase()
+  }, [profile.name])
 
   return (
     <AppShell role="doctor">
       <TopBar />
-
-      <div className="px-6 pb-8 max-w-5xl space-y-6">
-
-        {/* Page header */}
-        <div className="pt-1">
-          <h1 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
-            <User size={24} className="text-teal-600" />
-            Hồ sơ bác sĩ
-          </h1>
-          <p className="text-sm text-slate-500 mt-0.5">Quản lý thông tin cá nhân, chuyên khoa và bảo mật tài khoản</p>
-        </div>
-
-        {/* Profile card with avatar */}
-        <div className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-2xl p-6 text-white flex flex-col sm:flex-row items-center sm:items-start gap-5">
-          {/* Avatar */}
-          <div className="relative shrink-0">
-            <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center text-3xl font-extrabold overflow-hidden shadow-lg border-4 border-white/30">
-              {avatar
-                ? <img src={avatar} alt="avatar" className="w-full h-full object-cover" />
-                : <span>{(profile.name || 'DA').split(' ').map(w => w[0]).slice(-2).join('').toUpperCase()}</span>
-              }
-            </div>
-            <label className="absolute -bottom-1 -right-1 w-8 h-8 bg-white text-teal-700 rounded-full flex items-center justify-center cursor-pointer hover:bg-teal-50 transition shadow-md">
-              <Camera size={14} />
-              <input hidden type="file" accept="image/*" onChange={e => {
-                const f = e.target.files?.[0]
-                if (f) setAvatar(URL.createObjectURL(f))
-              }} />
-            </label>
+      <div className="content-wide patient-profile-page">
+        <PageHeader 
+          eyebrow="Thông tin bác sĩ" 
+          title="Hồ sơ cá nhân" 
+          subtitle="Cập nhật thông tin chuyên khoa, học hàm học vị, thông tin liên hệ và bảo mật tài khoản." 
+        />
+        
+        {saved && (
+          <div className="profile-save-notice">
+            <CheckCircle2 size={17} /> Thông tin cá nhân đã được cập nhật.
           </div>
+        )}
 
-          {/* Info */}
-          <div className="flex-1 text-center sm:text-left">
-            <h2 className="text-2xl font-extrabold">{profile.name || 'Dr. Alexander'}</h2>
-            <p className="text-teal-100 mt-0.5 text-sm">{profile.spec || 'Chuyên khoa Nội tổng hợp'}</p>
-            <div className="flex flex-wrap gap-3 mt-3 justify-center sm:justify-start">
-              {profile.degree && (
-                <span className="flex items-center gap-1.5 bg-white/15 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                  <Award size={12} /> {profile.degree}
-                </span>
-              )}
-              {profile.exp && (
-                <span className="flex items-center gap-1.5 bg-white/15 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                  <Star size={12} /> {profile.exp}
-                </span>
-              )}
-              {profile.clinic && (
-                <span className="flex items-center gap-1.5 bg-white/15 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                  <Building2 size={12} /> {profile.clinic}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Rating */}
-          <div className="text-center bg-white/10 rounded-xl px-5 py-3">
-            <div className="text-3xl font-extrabold">4.9</div>
-            <div className="text-amber-300 text-sm">★★★★★</div>
-            <div className="text-teal-100 text-xs mt-0.5">Đánh giá</div>
-          </div>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-2">
-
-          {/* Left: Profile form */}
-          <div className="space-y-6">
-            <div className="bg-white border border-slate-200 rounded-2xl p-6">
-              <h3 className="text-base font-extrabold text-slate-900 mb-4 flex items-center gap-2 pb-3 border-b border-slate-100">
-                <Stethoscope size={18} className="text-teal-600" />
-                Thông tin chuyên khoa
-              </h3>
-              <form onSubmit={handleSaveProfile} className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="field-label text-xs">Họ và tên bác sĩ</label>
-                    <input className="input" value={profile.name || ''} onChange={e => setProfile({ ...profile, name: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className="field-label text-xs">Chuyên khoa</label>
-                    <input className="input" value={profile.spec || ''} onChange={e => setProfile({ ...profile, spec: e.target.value })} />
-                  </div>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="field-label text-xs">Học vị / Học hàm</label>
-                    <input className="input" value={profile.degree || ''} onChange={e => setProfile({ ...profile, degree: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className="field-label text-xs">Mã chứng chỉ hành nghề</label>
-                    <input className="input" value={profile.certificate || ''} disabled onChange={e => setProfile({ ...profile, certificate: e.target.value })} />
-                  </div>
-                </div>
-                <div>
-                  <label className="field-label text-xs">Kinh nghiệm lâm sàng</label>
-                  <input className="input" value={profile.exp || ''} onChange={e => setProfile({ ...profile, exp: e.target.value })} placeholder="VD: 8 năm kinh nghiệm" />
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="field-label text-xs"><Phone size={11} className="inline mr-1" />SĐT liên hệ</label>
-                    <input className="input" value={profile.phone || ''} onChange={e => setProfile({ ...profile, phone: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className="field-label text-xs"><Mail size={11} className="inline mr-1" />Email</label>
-                    <input className="input" type="email" value={profile.email || ''} onChange={e => setProfile({ ...profile, email: e.target.value })} />
-                  </div>
-                </div>
-                <div className="pt-2 border-t border-slate-100 flex justify-end">
-                  <button type="submit" className="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold rounded-lg transition-colors cursor-pointer">
-                    Lưu hồ sơ
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          {/* Right: Security */}
-          <div className="space-y-6">
-            <div className="bg-white border border-slate-200 rounded-2xl p-6">
-              <h3 className="text-base font-extrabold text-slate-900 mb-4 flex items-center gap-2 pb-3 border-b border-slate-100">
-                <Lock size={18} className="text-teal-600" />
-                Bảo mật tài khoản
-              </h3>
-
-              <div className="bg-teal-50 border border-teal-100 rounded-xl px-4 py-3 text-xs text-teal-800 mb-5 flex items-start gap-2">
-                <Shield size={14} className="text-teal-600 shrink-0 mt-0.5" />
-                <span>Mật khẩu mặc định: <code className="bg-white px-1.5 py-0.5 rounded font-mono font-bold">doctor</code></span>
-              </div>
-
-              <form onSubmit={handleChangePassword} className="space-y-4">
-                {[
-                  { label: 'Mật khẩu hiện tại', field: 'oldPass', show: showOld, toggle: setShowOld },
-                  { label: 'Mật khẩu mới', field: 'newPass', show: showNew, toggle: setShowNew },
-                  { label: 'Xác nhận mật khẩu mới', field: 'confirmPass', show: showConfirm, toggle: setShowConfirm },
-                ].map(({ label, field, show, toggle }) => (
-                  <div key={field}>
-                    <label className="field-label text-xs">{label}</label>
-                    <div className="relative">
-                      <input
-                        type={show ? 'text' : 'password'}
-                        className="input pr-10"
-                        placeholder="••••••••"
-                        value={passForm[field]}
-                        onChange={e => setPassForm({ ...passForm, [field]: e.target.value })}
-                      />
-                      <button
-                        type="button"
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
-                        onClick={() => toggle(v => !v)}
-                      >
-                        {show ? <EyeOff size={15} /> : <Eye size={15} />}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-
-                {passError && (
-                  <p className="text-xs text-rose-600 font-semibold bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">
-                    ⚠ {passError}
-                  </p>
+        <div className="patient-profile-layout">
+          {/* Side Stack */}
+          <div className="profile-side-stack">
+            <Card className="patient-profile-card">
+              <div className="profile-avatar-wrap">
+                {avatar ? (
+                  <img src={avatar} alt="Avatar bác sĩ" />
+                ) : (
+                  <span>{initials}</span>
                 )}
+                <label title="Thay ảnh đại diện">
+                  <Camera size={15} />
+                  <input hidden type="file" accept="image/*" onChange={handleAvatarChange} />
+                </label>
+              </div>
+              <h2>{profile.name || 'BS. Nguyễn Văn An'}</h2>
+              <p>{profile.spec || 'Chuyên khoa Nội tổng quát'}</p>
+              <span className="profile-member-since">Mã CCHN: {profile.certificate}</span>
+              <div className="profile-active-badge"><i /> Tài khoản đang hoạt động</div>
+              
+              <div className="profile-contact-list">
+                <span><Mail size={15} /> {profile.email}</span>
+                <span><Phone size={15} /> {profile.phone}</span>
+                <span><Building2 size={15} /> {profile.clinic || 'Phòng khám Đa khoa Tâm An'}</span>
+              </div>
+            </Card>
 
-                <div className="pt-2 border-t border-slate-100 flex justify-end">
-                  <button type="submit" className="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold rounded-lg transition-colors cursor-pointer">
-                    Đổi mật khẩu
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            {/* Account info card */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-3">
-              <h4 className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Thông tin tài khoản</h4>
-              {[
-                { label: 'Email đăng nhập', value: profile.email || 'alexander@medconsult.vn', icon: <Mail size={13} /> },
-                { label: 'Phòng khám', value: profile.clinic || 'MedConsult Online', icon: <Building2 size={13} /> },
-                { label: 'Chứng chỉ hành nghề', value: profile.certificate || 'VN-BS-2019-5821', icon: <BadgeCheck size={13} /> },
-              ].map(item => (
-                <div key={item.label} className="flex items-center gap-3">
-                  <span className="text-teal-500">{item.icon}</span>
-                  <div>
-                    <div className="text-[10px] text-slate-400 font-semibold uppercase">{item.label}</div>
-                    <div className="text-sm text-slate-700 font-semibold">{item.value}</div>
-                  </div>
-                </div>
+            <Card className="profile-nav-card">
+              {sections.map((section) => (
+                <button 
+                  key={section.label} 
+                  onClick={() => document.getElementById(`setting-${section.label}`)?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                  {section.icon}
+                  {section.label}
+                </button>
               ))}
-            </div>
+            </Card>
+          </div>
+
+          {/* Main Content Column */}
+          <div className="patient-profile-main">
+            {/* 1. Thông tin chuyên môn */}
+            <Card className="profile-detail-card" id="setting-Thông tin chuyên môn">
+              <SectionHead 
+                icon={<Stethoscope size={18} />} 
+                title="Thông tin chuyên môn" 
+                text="Cập nhật trình độ học vị, chuyên khoa lâm sàng và kinh nghiệm lâm sàng của bác sĩ." 
+                action={!editing && (
+                  <Button onClick={() => setEditing(true)}>
+                    <Pencil size={15} /> Chỉnh sửa thông tin
+                  </Button>
+                )} 
+              />
+              <div className="profile-form-grid">
+                <ProfileField 
+                  label="Họ và tên bác sĩ" 
+                  value={editing ? draft.name : profile.name} 
+                  editing={editing} 
+                  onChange={(value) => update('name', value)} 
+                />
+                <ProfileField 
+                  label="Chuyên khoa" 
+                  value={editing ? draft.spec : profile.spec} 
+                  editing={editing} 
+                  onChange={(value) => update('spec', value)} 
+                />
+                <ProfileField 
+                  label="Học vị / Học hàm" 
+                  value={editing ? draft.degree : profile.degree} 
+                  editing={editing} 
+                  onChange={(value) => update('degree', value)} 
+                />
+                <ProfileField 
+                  label="Kinh nghiệm lâm sàng" 
+                  value={editing ? draft.exp : profile.exp} 
+                  editing={editing} 
+                  onChange={(value) => update('exp', value)} 
+                />
+                <ProfileField 
+                  label="Mã chứng chỉ hành nghề" 
+                  value={profile.certificate} 
+                  editing={false} 
+                />
+              </div>
+              {editing && (
+                <div className="profile-edit-actions">
+                  <Button variant="ghost" onClick={cancelEdit}>
+                    <X size={15} /> Hủy
+                  </Button>
+                  <Button onClick={saveProfile}>
+                    <Save size={15} /> Lưu thay đổi
+                  </Button>
+                </div>
+              )}
+            </Card>
+
+            {/* 2. Thông tin liên hệ */}
+            <Card className="profile-detail-card" id="setting-Liên hệ">
+              <SectionHead 
+                icon={<Mail size={18} />} 
+                title="Liên hệ" 
+                text="Thông tin dùng để nhận thông tin ca khám và lịch làm việc." 
+                action={!editing && (
+                  <Button onClick={() => setEditing(true)}>
+                    <Pencil size={15} /> Chỉnh sửa
+                  </Button>
+                )}
+              />
+              <div className="profile-form-grid">
+                <ProfileField 
+                  label="Số điện thoại" 
+                  value={editing ? draft.phone : profile.phone} 
+                  editing={editing} 
+                  onChange={(value) => update('phone', value)} 
+                />
+                <ProfileField 
+                  label="Email" 
+                  value={editing ? draft.email : profile.email} 
+                  editing={editing} 
+                  onChange={(value) => update('email', value)} 
+                />
+                <ProfileField 
+                  label="Cơ sở phòng khám" 
+                  value={editing ? draft.clinic : profile.clinic} 
+                  editing={editing} 
+                  onChange={(value) => update('clinic', value)} 
+                  wide 
+                />
+              </div>
+              {editing && (
+                <div className="profile-edit-actions">
+                  <Button variant="ghost" onClick={cancelEdit}>
+                    <X size={15} /> Hủy
+                  </Button>
+                  <Button onClick={saveProfile}>
+                    <Save size={15} /> Lưu thay đổi
+                  </Button>
+                </div>
+              )}
+            </Card>
+
+            {/* 3. Bảo mật */}
+            <Card className="profile-security-card" id="setting-Bảo mật">
+              <SectionHead 
+                icon={<Shield size={18} />} 
+                title="Bảo mật tài khoản" 
+                text="Thay đổi mật khẩu đăng nhập để bảo vệ không gian làm việc của bác sĩ." 
+              />
+              <div className="profile-security-row">
+                <span><KeyRound size={17} /></span>
+                <div>
+                  <h3>Mật khẩu đăng nhập</h3>
+                  <p>Thay đổi mật khẩu định kỳ để tăng mức độ bảo mật.</p>
+                  <small>Cập nhật lần cuối: 3 tháng trước</small>
+                </div>
+                <Button variant="outline" onClick={() => setPasswordOpen(true)}>
+                  <KeyRound size={15} /> Đổi mật khẩu
+                </Button>
+              </div>
+            </Card>
+
+            {/* 4. Thông tin tài khoản */}
+            <Card className="profile-detail-card" id="setting-Thông tin tài khoản">
+              <SectionHead 
+                icon={<BadgeCheck size={18} />} 
+                title="Thông tin tài khoản hệ thống" 
+                text="Trạng thái phân quyền và hồ sơ bác sĩ được xác thực." 
+              />
+              <div className="profile-form-grid">
+                <ProfileField 
+                  label="Tên tài khoản" 
+                  value={profile.email} 
+                />
+                <ProfileField 
+                  label="Vai trò" 
+                  value="Bác sĩ khám tư vấn (Doctor)" 
+                />
+                <ProfileField 
+                  label="Trạng thái xác thực" 
+                  value="Đã xác minh chứng chỉ hành nghề" 
+                />
+                <ProfileField 
+                  label="Đánh giá trung bình" 
+                  value="4.9 / 5.0 ★★★★★" 
+                />
+              </div>
+            </Card>
           </div>
         </div>
       </div>
 
+      {passwordOpen && (
+        <PasswordModal 
+          password={password} 
+          setPassword={setPassword} 
+          rules={passwordRules} 
+          strength={strength} 
+          valid={passwordValid} 
+          onClose={() => setPasswordOpen(false)} 
+          onSave={changePassword} 
+        />
+      )}
+
       {toast && (
-        <div className="toast toast-green">
-          <CheckCircle2 size={18} /> {toast}
+        <div className="toast">
+          <span>✓</span> {toast}
         </div>
       )}
     </AppShell>
+  )
+}
+
+function SectionHead({ icon, title, text, action }) { 
+  return (
+    <div className="profile-section-head">
+      <div>
+        <h2>{icon}{title}</h2>
+        <p>{text}</p>
+      </div>
+      {action}
+    </div>
+  ) 
+}
+
+function ProfileField({ label, value, editing = false, onChange, icon, wide = false }) { 
+  return (
+    <label className={`profile-field ${wide ? 'wide' : ''}`}>
+      <small>{label}</small>
+      {editing ? (
+        <input value={value || ''} onChange={(event) => onChange(event.target.value)} />
+      ) : (
+        <b>{icon}{value || '---'}</b>
+      )}
+    </label>
+  ) 
+}
+
+function PasswordModal({ password, setPassword, rules, strength, valid, onClose, onSave }) {
+  const update = (field, value) => setPassword((current) => ({ ...current, [field]: value }))
+  return (
+    <div className="modal-backdrop">
+      <Card className="account-dialog">
+        <button className="dialog-close" onClick={onClose}><X size={18} /></button>
+        <span className="dialog-security-icon"><ShieldCheck size={21} /></span>
+        <h2>Đổi mật khẩu</h2>
+        <p>Tạo mật khẩu mạnh để bảo vệ tài khoản chuyên môn bác sĩ.</p>
+        
+        <div className="password-form">
+          <label>
+            <small>Mật khẩu hiện tại</small>
+            <input type="password" value={password.current} onChange={(event) => update('current', event.target.value)} />
+          </label>
+          <label>
+            <small>Mật khẩu mới</small>
+            <input type="password" value={password.next} onChange={(event) => update('next', event.target.value)} />
+          </label>
+          <label>
+            <small>Xác nhận mật khẩu mới</small>
+            <input type="password" value={password.confirm} onChange={(event) => update('confirm', event.target.value)} />
+          </label>
+        </div>
+        
+        <div className="password-strength">
+          <div>
+            <span style={{ width: `${strength * 20}%` }} />
+          </div>
+          <b>
+            {strength < 3 ? 'Mật khẩu yếu' : strength < 5 ? 'Mật khẩu khá' : 'Mật khẩu mạnh'}
+          </b>
+        </div>
+        
+        <div className="password-rules">
+          {rules.map((rule) => (
+            <span className={rule.ok ? 'ok' : ''} key={rule.label}>
+              {rule.ok ? <Check size={13} /> : <Eye size={13} />}
+              {rule.label}
+            </span>
+          ))}
+        </div>
+        
+        {password.confirm && password.next !== password.confirm && (
+          <small className="password-error">
+            Mật khẩu xác nhận chưa khớp.
+          </small>
+        )}
+        
+        <div className="account-dialog-actions">
+          <Button variant="ghost" onClick={onClose}>Hủy</Button>
+          <Button disabled={!valid} onClick={onSave}>Cập nhật mật khẩu</Button>
+        </div>
+      </Card>
+    </div>
   )
 }

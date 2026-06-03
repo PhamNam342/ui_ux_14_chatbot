@@ -4,10 +4,19 @@ import { cases, consultationHistory, doctorSchedule, doctors } from './mock.js'
 export function initStore() {
   // Migration check: Reset old database seeds if they contain outdated mock values or under-seeded histories
   const storedHistories = localStorage.getItem('med_histories')
+  const storedChats = localStorage.getItem('med_chats')
+  let chatsParsed = null
+  try {
+    if (storedChats) chatsParsed = JSON.parse(storedChats)
+  } catch (e) {}
+
   const needsReset = !localStorage.getItem('med_cases') || 
-                     (localStorage.getItem('med_cases') && !localStorage.getItem('med_cases').includes('Nguyễn Văn An')) ||
+                     (localStorage.getItem('med_cases') && !localStorage.getItem('med_cases').includes('BS. Nguyễn Văn An')) ||
                      !storedHistories ||
-                     (storedHistories && JSON.parse(storedHistories).length < 10)
+                     (storedHistories && JSON.parse(storedHistories).length < 10) ||
+                     (storedHistories && !storedHistories.includes('Chuyển tuyến')) ||
+                     !storedChats ||
+                     (chatsParsed && chatsParsed['CA250501-001'] && chatsParsed['CA250501-001'].length > 2)
   
   if (needsReset) {
     localStorage.removeItem('med_cases')
@@ -35,7 +44,7 @@ export function initStore() {
         symptoms: 'Sốt, đau đầu, ho',
         id: 'CA250501-001',
         time: '09:20 Hôm nay',
-        doctor: 'Dr. Alexander',
+        doctor: 'BS. Nguyễn Văn An',
         waitingTime: '10 phút',
         chatbotSummary: {
           symptoms: ['Sốt', 'Đau đầu', 'Ho khan', 'Mệt mỏi'],
@@ -59,7 +68,7 @@ export function initStore() {
         symptoms: 'Đau ngực, khó thở',
         id: 'CA250501-002',
         time: '09:35 Hôm nay',
-        doctor: 'Dr. Alexander',
+        doctor: 'BS. Nguyễn Văn An',
         waitingTime: '18 phút',
         chatbotSummary: {
           symptoms: ['Đau tức ngực trái', 'Khó thở khi gắng sức', 'Mệt mỏi'],
@@ -83,7 +92,7 @@ export function initStore() {
         symptoms: 'Đau bụng, buồn nôn',
         id: 'CA250501-003',
         time: '09:50 Hôm nay',
-        doctor: 'Dr. Alexander',
+        doctor: 'BS. Nguyễn Văn An',
         waitingTime: '26 phút',
         chatbotSummary: {
           symptoms: ['Đau quặn bụng vùng thượng vị', 'Ợ chua', 'Buồn nôn'],
@@ -107,7 +116,7 @@ export function initStore() {
         symptoms: 'Ho, đau họng',
         id: 'CA250501-004',
         time: '10:05 Hôm nay',
-        doctor: 'Dr. Alexander',
+        doctor: 'BS. Nguyễn Văn An',
         waitingTime: '34 phút',
         chatbotSummary: {
           symptoms: ['Ho khan nhiều về đêm', 'Đau rát họng', 'Khản tiếng nhẹ'],
@@ -131,7 +140,7 @@ export function initStore() {
         symptoms: 'Đau đầu dữ dội, chóng mặt, buồn nôn',
         id: 'CA250602-005',
         time: '14:05 Hôm nay',
-        doctor: 'Dr. Alexander',
+        doctor: 'BS. Nguyễn Văn An',
         waitingTime: '5 phút',
         chatbotSummary: {
           symptoms: ['Đau đầu vùng thái dương', 'Chóng mặt đột ngột', 'Buồn nôn nhẹ'],
@@ -155,7 +164,7 @@ export function initStore() {
         symptoms: 'Đau mỏi vai gáy, tê bì tay chân',
         id: 'CA250602-006',
         time: '13:50 Hôm nay',
-        doctor: 'Dr. Alexander',
+        doctor: 'BS. Nguyễn Văn An',
         waitingTime: '20 phút',
         chatbotSummary: {
           symptoms: ['Đau vai gáy', 'Tê đầu ngón tay', 'Mỏi cổ'],
@@ -179,7 +188,7 @@ export function initStore() {
         symptoms: 'Sốt cao đột ngột, rét run, đau mỏi toàn thân',
         id: 'CA250602-007',
         time: '14:15 Hôm nay',
-        doctor: 'Dr. Alexander',
+        doctor: 'BS. Nguyễn Văn An',
         waitingTime: '2 phút',
         chatbotSummary: {
           symptoms: ['Sốt cao 39.5°C', 'Rét run từng cơn', 'Đau cơ', 'Mệt lả'],
@@ -203,7 +212,7 @@ export function initStore() {
         symptoms: 'Ho khan, tức ngực nhẹ kéo dài',
         id: 'CA250602-008',
         time: '13:30 Hôm nay',
-        doctor: 'Dr. Alexander',
+        doctor: 'BS. Nguyễn Văn An',
         waitingTime: '40 phút',
         chatbotSummary: {
           symptoms: ['Ho khan nhiều', 'Tức ngực nhẹ', 'Hụt hơi khi nói nhanh'],
@@ -227,7 +236,7 @@ export function initStore() {
         symptoms: 'Dị ứng, nổi mẩn ngứa vùng cổ và ngực',
         id: 'CA250602-009',
         time: '13:20 Hôm nay',
-        doctor: 'Dr. Alexander',
+        doctor: 'BS. Nguyễn Văn An',
         waitingTime: '50 phút',
         chatbotSummary: {
           symptoms: ['Nổi mề đay ngứa', 'Mẩn đỏ cổ và ngực', 'Không khó thở'],
@@ -247,19 +256,11 @@ export function initStore() {
     const initialChats = {
       'CA250501-001': [
         { id: 1, who: 'Bệnh nhân', initials: 'TM', time: '10:00', text: 'Chào bác sĩ, tôi bị sốt cao từ tối qua, người mệt mỏi rã rời, đau buốt đầu nữa.' },
-        { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '10:00', text: 'Bản tóm tắt triệu chứng đã được chuyển đến Bác sĩ chuyên khoa.', system: true },
-        { id: 3, who: 'Bác sĩ', initials: 'BS', time: '10:02', text: 'Chào chị Mai, tôi đã nhận được thông tin. Hiện tại nhiệt độ cơ thể chị đo được là bao nhiêu? Chị có đo huyết áp không?', mine: true },
-        { id: 4, who: 'Bệnh nhân', initials: 'TM', time: '10:03', text: 'Dạ tôi vừa đo là 38.6 độ C. Đầu đau giật từng cơn rất khó chịu bác sĩ ạ. Có ho khan nữa.' },
-        { id: 5, who: 'Bác sĩ', initials: 'BS', time: '10:05', text: 'Chị có cảm thấy tức ngực hay khó thở khi ho không? Chị đã uống thuốc hạ sốt nào chưa?', mine: true },
-        { id: 6, who: 'Bệnh nhân', initials: 'TM', time: '10:06', text: 'Dạ không khó thở, chỉ thấy đau họng thôi. Tôi có uống 1 viên sủi hạ sốt lúc sáng sớm nhưng giờ lại nóng lại.' }
+        { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '10:00', text: 'Bản tóm tắt triệu chứng đã được chuyển đến Bác sĩ chuyên khoa.', system: true }
       ],
       'CA250501-002': [
         { id: 1, who: 'Bệnh nhân', initials: 'LH', time: '08:15', text: 'Chào bác sĩ, từ sáng tới giờ tôi thấy ngực trái nặng trĩu, thi thoảng hơi nhói lên và hơi khó thở khi đi lại.' },
-        { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '08:15', text: 'Thông tin cảnh báo đỏ (Cao) đã được gửi trực tiếp đến Bác sĩ Alexander.', system: true },
-        { id: 3, who: 'Bác sĩ', initials: 'BS', time: '08:17', text: 'Chào anh Hùng, tình trạng đau ngực có lan ra vai hay cánh tay trái không anh? Anh có cảm giác vã mồ hôi hay chóng mặt không?', mine: true },
-        { id: 4, who: 'Bệnh nhân', initials: 'LH', time: '08:18', text: 'Dạ có nhói ra sau bả vai trái bác sĩ ạ. Người hơi mệt nhưng chưa bị chóng mặt. Huyết áp đo lúc nãy là 145/90 mmHg.' },
-        { id: 5, who: 'Bác sĩ', initials: 'BS', time: '08:20', text: 'Anh hãy ngồi nghỉ ngơi hoàn toàn tại chỗ kín gió, không đi lại vận động. Anh đã uống viên thuốc huyết áp định kỳ của ngày hôm nay chưa?', mine: true },
-        { id: 6, who: 'Bệnh nhân', initials: 'LH', time: '08:21', text: 'Tôi đã uống thuốc huyết áp lúc 7h sáng rồi. Giờ đang nằm nghỉ trên ghế.' }
+        { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '08:15', text: 'Thông tin cảnh báo đỏ (Cao) đã được gửi trực tiếp đến Bác sĩ Nguyễn Văn An.', system: true }
       ],
       'CA250501-003': [
         { id: 1, who: 'Bệnh nhân', initials: 'PM', time: '11:20', text: 'Chào bác sĩ, mấy ngày nay bụng em cứ đau âm ỉ vùng trên rốn, ợ chua nhiều và hơi buồn nôn sau khi ăn.' },
@@ -278,21 +279,15 @@ export function initStore() {
       ],
       'CA250602-005': [
         { id: 1, who: 'Bệnh nhân', initials: 'VA', time: '14:05', text: 'Chào bác sĩ, tôi bị đau đầu dữ dội từ sáng tới giờ, đứng dậy là chóng mặt quay cuồng muốn ngã.' },
-        { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '14:05', text: 'Thông tin triệu chứng đã được ghi nhận và ưu tiên xử lý.', system: true },
-        { id: 3, who: 'Bác sĩ', initials: 'BS', time: '14:07', text: 'Chào anh An, anh đau nhiều ở vùng nào của đầu? Có cảm giác buồn nôn hay mắt nhìn mờ đi không?', mine: true },
-        { id: 4, who: 'Bệnh nhân', initials: 'VA', time: '14:08', text: 'Dạ đau nhiều bên thái dương trái bác sĩ ạ, hơi buồn nôn một chút. Mắt thì nhìn vẫn bình thường.' }
+        { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '14:05', text: 'Thông tin triệu chứng đã được ghi nhận và ưu tiên xử lý.', system: true }
       ],
       'CA250602-006': [
         { id: 1, who: 'Bệnh nhân', initials: 'HV', time: '13:50', text: 'Bác sĩ ơi em làm văn phòng suốt ngày đau nhức mỏi cổ vai gáy quá, mấy hôm nay còn tê tê đầu ngón tay.' },
-        { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '13:50', text: 'Triệu chứng cổ vai gáy đã được gửi tới bác sĩ.', system: true },
-        { id: 3, who: 'Bác sĩ', initials: 'BS', time: '13:52', text: 'Chào Vy, em bị tê ngón tay ở cả hai bàn tay hay chỉ một bên? Khi xoay cổ có nghe tiếng lục cục hay đau nhói không?', mine: true },
-        { id: 4, who: 'Bệnh nhân', initials: 'HV', time: '13:53', text: 'Dạ chủ yếu là tay phải cầm chuột thôi bác sĩ. Xoay cổ thì đau mỏi âm ỉ chứ không nhói lắm.' }
+        { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '13:50', text: 'Triệu chứng cổ vai gáy đã được gửi tới bác sĩ.', system: true }
       ],
       'CA250602-007': [
         { id: 1, who: 'Bệnh nhân', initials: 'LP', time: '14:15', text: 'Chào bác sĩ, tôi bị sốt cao quá, đo nhiệt kế lúc nãy lên tới 39.5 độ C, người lạnh run hết cả lên.' },
-        { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '14:15', text: 'Cảnh báo sốt cao khẩn cấp đã được gửi tới Bác sĩ.', system: true },
-        { id: 3, who: 'Bác sĩ', initials: 'BS', time: '14:16', text: 'Chào Phong, tôi đã thấy thông tin. Anh hãy uống ngay một viên hạ sốt Paracetamol và lau người bằng nước ấm nhé. Có kèm ho hay đau bụng không?', mine: true },
-        { id: 4, who: 'Bệnh nhân', initials: 'LP', time: '14:17', text: 'Dạ tôi uống thuốc lúc trưa rồi mà chưa thấy hạ nhiều. Không đau bụng, chỉ đau mỏi cơ khớp thôi bác sĩ.' }
+        { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '14:15', text: 'Cảnh báo sốt cao khẩn cấp đã được gửi tới Bác sĩ.', system: true }
       ],
       'CA250602-008': [
         { id: 1, who: 'Bệnh nhân', initials: 'MT', time: '13:30', text: 'Chào bác sĩ, tôi bị ho khan kéo dài mấy tuần nay rồi, ngực cứ âm ỉ tức nhẹ, đi bộ nhanh là thấy hụt hơi.' },
@@ -300,9 +295,7 @@ export function initStore() {
       ],
       'CA250602-009': [
         { id: 1, who: 'Bệnh nhân', initials: 'KV', time: '13:20', text: 'Chào bác sĩ, trưa nay tôi có ăn cơm với tôm, sau đó khoảng 1 tiếng thì cổ với ngực nổi đầy mẩn đỏ ngứa ngáy quá.' },
-        { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '13:20', text: 'Tóm tắt triệu chứng dị ứng thức ăn đã được chuyển đi.', system: true },
-        { id: 3, who: 'Bác sĩ', initials: 'BS', time: '13:22', text: 'Chào chị Vy, chị có thấy ngứa họng, khó thở hay sưng môi mặt gì không? Trước đây chị đã từng bị dị ứng tôm chưa?', mine: true },
-        { id: 4, who: 'Bệnh nhân', initials: 'KV', time: '13:23', text: 'Dạ không khó thở, mặt cũng bình thường bác sĩ. Hồi nhỏ tôi ăn tôm thỉnh thoảng hơi ngứa nhẹ thôi chứ chưa nổi nhiều thế này.' }
+        { id: 2, who: 'Trợ lý AI', initials: 'AI', time: '13:20', text: 'Tóm tắt triệu chứng dị ứng thức ăn đã được chuyển đi.', system: true }
       ],
       'CA250602-101': [
         { id: 1, who: 'Bệnh nhân', initials: 'TM', time: '09:00', text: 'Chào bác sĩ, mấy hôm nay tôi bị ho khan và sốt nhẹ.' },
@@ -385,7 +378,7 @@ export function initStore() {
         symptoms: 'Đau ngực nhẹ khi vận động',
         note: 'Đau ngực nhẹ khi vận động gắng sức, đo huyết áp mỗi sáng.',
         comment: 'Thời gian chờ hơi lâu nhưng phần giải thích bệnh rất chi tiết.',
-        actionPath: 'Tái khám sau 2 tuần'
+        actionPath: 'Tái khám'
       },
       {
         id: 'HS-003',
@@ -489,7 +482,7 @@ export function initStore() {
         symptoms: 'Đau cổ vai gáy, tê ngón tay',
         note: 'Căng cơ vùng vai cổ do ngồi làm việc máy tính sai tư thế. Hướng dẫn các bài tập kéo giãn cơ nhẹ.',
         comment: 'Bài tập bác sĩ hướng dẫn hiệu quả tức thì.',
-        actionPath: 'Tái khám sau 2 tuần'
+        actionPath: 'Tái khám'
       },
       {
         id: 'HS-008',
@@ -531,7 +524,7 @@ export function initStore() {
         symptoms: 'Ho kéo dài, tức ngực, hụt hơi',
         note: 'Ho dai dẳng kèm co thắt phế quản nhẹ. Khuyên cai thuốc lá khẩn cấp và đi chụp X-quang phổi.',
         comment: 'Bác sĩ cảnh báo rất nghiêm túc về tác hại của thuốc lá.',
-        actionPath: 'Đến phòng khám'
+        actionPath: 'Chuyển tuyến'
       },
       {
         id: 'HS-010',
@@ -609,8 +602,8 @@ export function initStore() {
   if (!localStorage.getItem('med_profile')) {
     // Seed doctor profile from mock
     const initialProfile = {
-      name: 'Dr. Alexander',
-      email: 'alexander@medconsult.vn',
+      name: 'BS. Nguyễn Văn An',
+      email: 'an.nguyen@medconsult.vn',
       phone: '0909 555 221',
       spec: 'Nội tổng quát',
       degree: 'Thạc sĩ, Bác sĩ Chuyên khoa I',

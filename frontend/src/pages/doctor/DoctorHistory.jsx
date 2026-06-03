@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Search, Calendar, Star, Eye, Pill, ClipboardList, Info, MessageSquare, AlertTriangle, ArrowRight, User, X } from 'lucide-react'
+import { Search, Calendar, Star, Eye, Pill, ClipboardList, Info, MessageSquare, AlertTriangle, ArrowRight, User, X, SlidersHorizontal, ArrowUpDown } from 'lucide-react'
 import { AppShell, Badge, Card, TopBar, PageHeader, Button } from '../../components/ui.jsx'
 import { getStoredHistories } from '../../data/doctorStore.js'
 
@@ -10,6 +10,8 @@ export function DoctorHistory() {
   const [endDate, setEndDate] = useState('')
   const [selectedRecord, setSelectedRecord] = useState(null)
   const [detailTab, setDetailTab] = useState('medical')
+  const [filterAction, setFilterAction] = useState('Tất cả')
+  const [sortBy, setSortBy] = useState('date-desc')
   
   // Storage load
   useEffect(() => {
@@ -22,7 +24,7 @@ export function DoctorHistory() {
     return () => window.removeEventListener('storage', handleStorage)
   }, [])
 
-  // Filter histories based on search query & date range
+  // Filter histories based on search query, date range, action, and sorting
   const filteredHistories = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
     
@@ -32,7 +34,8 @@ export function DoctorHistory() {
     let end = endDate ? new Date(endDate) : null
     if (end) end.setHours(23, 59, 59, 999)
 
-    return histories.filter(item => {
+    // 1. Filtering
+    let list = histories.filter(item => {
       const matchesSearch = 
         !query || 
         item.patient.toLowerCase().includes(query) || 
@@ -47,9 +50,44 @@ export function DoctorHistory() {
         if (end && recordDate > end) matchesDate = false
       }
 
-      return matchesSearch && matchesDate
+      let matchesAction = true
+      if (filterAction !== 'Tất cả') {
+        if (filterAction === 'Tái khám') {
+          matchesAction = item.actionPath.includes('Tái khám')
+        } else if (filterAction === 'Chuyển tuyến') {
+          matchesAction = item.actionPath.includes('Chuyển tuyến')
+        } else if (filterAction === 'Theo dõi tại nhà') {
+          matchesAction = item.actionPath.includes('Theo dõi tại nhà')
+        }
+      }
+
+      return matchesSearch && matchesDate && matchesAction
     })
-  }, [histories, searchQuery, startDate, endDate])
+
+    // 2. Sorting
+    list = [...list].sort((a, b) => {
+      if (sortBy.startsWith('date')) {
+        const [d1, m1, y1] = a.date.split('/').map(Number)
+        const [h1, min1] = (a.time || '00:00').split(':').map(Number)
+        const dateA = new Date(y1, m1 - 1, d1, h1, min1)
+
+        const [d2, m2, y2] = b.date.split('/').map(Number)
+        const [h2, min2] = (b.time || '00:00').split(':').map(Number)
+        const dateB = new Date(y2, m2 - 1, d2, h2, min2)
+
+        return sortBy === 'date-desc' ? dateB - dateA : dateA - dateB
+      }
+      if (sortBy === 'name-asc') {
+        return a.patient.localeCompare(b.patient, 'vi')
+      }
+      if (sortBy === 'diag-asc') {
+        return a.diagnosis.localeCompare(b.diagnosis, 'vi')
+      }
+      return 0
+    })
+
+    return list
+  }, [histories, searchQuery, startDate, endDate, filterAction, sortBy])
 
   // Get active chat logs for selected record
   const selectedRecordChatLogs = useMemo(() => {
@@ -70,41 +108,74 @@ export function DoctorHistory() {
         />
 
         {/* Filters Panel */}
-        <Card className="mb-7 !p-5">
-          <div className="grid gap-4 md:grid-cols-[1.5fr_1fr_1fr] items-end">
-            <div>
-              <label className="field-label text-xs">Tìm kiếm hồ sơ</label>
-              <label className="search !min-h-[40px] !h-[40px]">
-                <Search size={16} />
-                <input 
-                  placeholder="Nhập tên bệnh nhân, chẩn đoán, mã ca..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                />
-              </label>
-            </div>
-            
-            <div>
-              <label className="field-label text-xs">Từ ngày</label>
-              <input 
-                type="date"
-                className="input !h-[40px]" 
-                value={startDate}
-                onChange={e => setStartDate(e.target.value)}
-              />
-            </div>
+        <Card className="mb-5 !p-3 flex flex-wrap items-center gap-3">
+          {/* Search Input */}
+          <label className="search flex-1 min-w-[200px] !min-h-[38px] !h-[38px] !rounded-lg !py-0 !px-3">
+            <Search size={14} className="text-slate-400 shrink-0" />
+            <input 
+              placeholder="Tìm theo tên bệnh nhân, chẩn đoán, mã ca..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              style={{ fontSize: '12px' }}
+            />
+          </label>
 
-            <div>
-              <label className="field-label text-xs">Đến ngày</label>
-              <input 
-                type="date"
-                className="input !h-[40px]" 
-                value={endDate}
-                onChange={e => setEndDate(e.target.value)}
-              />
-            </div>
+          {/* Hướng xử lý filter */}
+          <div className="flex items-center gap-1.5">
+            <SlidersHorizontal size={14} className="text-slate-400 shrink-0" />
+            <span className="text-slate-500 font-semibold whitespace-nowrap" style={{ fontSize: '12px' }}>Hướng xử lý:</span>
+            <select
+              value={filterAction}
+              onChange={e => setFilterAction(e.target.value)}
+              className="border border-slate-200 bg-white text-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-400 transition-all rounded-lg font-semibold"
+              style={{ fontSize: '12px', height: '38px', padding: '0 12px', minWidth: '130px' }}
+            >
+              <option value="Tất cả">Tất cả</option>
+              <option value="Theo dõi tại nhà">Theo dõi tại nhà</option>
+              <option value="Tái khám">Tái khám</option>
+              <option value="Chuyển tuyến">Chuyển tuyến</option>
+            </select>
+          </div>
+
+          {/* Date Range filters */}
+          <div className="flex items-center gap-2">
+            <Calendar size={14} className="text-slate-400 shrink-0" />
+            <span className="text-slate-500 font-semibold whitespace-nowrap" style={{ fontSize: '12px' }}>Từ:</span>
+            <input 
+              type="date"
+              className="border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400 transition-all rounded-lg" 
+              value={startDate}
+              onChange={e => setStartDate(e.target.value)}
+              style={{ fontSize: '12px', height: '38px', padding: '0 10px' }}
+            />
+            <span className="text-slate-500 font-semibold whitespace-nowrap" style={{ fontSize: '12px' }}>Đến:</span>
+            <input 
+              type="date"
+              className="border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400 transition-all rounded-lg" 
+              value={endDate}
+              onChange={e => setEndDate(e.target.value)}
+              style={{ fontSize: '12px', height: '38px', padding: '0 10px' }}
+            />
+          </div>
+
+          {/* Sort Dropdown */}
+          <div className="flex items-center gap-1.5 sm:ml-auto">
+            <ArrowUpDown size={14} className="text-slate-400 shrink-0" />
+            <span className="text-slate-500 font-semibold whitespace-nowrap" style={{ fontSize: '12px' }}>Sắp xếp:</span>
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              className="border border-slate-200 bg-white text-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-400 transition-all rounded-lg font-semibold"
+              style={{ fontSize: '12px', height: '38px', padding: '0 12px', minWidth: '135px' }}
+            >
+              <option value="date-desc">Mới nhất</option>
+              <option value="date-asc">Cũ nhất</option>
+              <option value="name-asc">Bệnh nhân A-Z</option>
+              <option value="diag-asc">Chẩn đoán A-Z</option>
+            </select>
           </div>
         </Card>
+
 
         {/* Data Table */}
         <Card className="overflow-hidden p-0 border border-slate-200">
@@ -112,29 +183,28 @@ export function DoctorHistory() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Mã hồ sơ</th>
-                  <th>Bệnh nhân</th>
-                  <th>Ngày khám</th>
-                  <th>Chẩn đoán chính</th>
-                  <th>Hướng xử lý</th>
-                  <th>Đánh giá</th>
-                  <th className="text-right">Hành động</th>
+                  <th className="whitespace-nowrap">Mã hồ sơ</th>
+                  <th className="whitespace-nowrap">Bệnh nhân</th>
+                  <th className="whitespace-nowrap">Ngày khám</th>
+                  <th className="whitespace-nowrap">Chẩn đoán chính</th>
+                  <th className="whitespace-nowrap">Hướng xử lý</th>
+                  <th className="text-center whitespace-nowrap">Hành động</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredHistories.length > 0 ? (
                   filteredHistories.map((row) => (
                     <tr key={row.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="font-bold text-teal-600">{row.code}</td>
-                      <td>
-                        <div className="flex items-center gap-2">
+                      <td className="font-bold text-teal-600 whitespace-nowrap">{row.code}</td>
+                      <td className="whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
                           <b className="text-slate-800">{row.patient}</b>
                           <span className="text-xs text-slate-400">({row.gender} • {row.age}T)</span>
                         </div>
                       </td>
-                      <td className="text-slate-500 font-medium">{row.date} · {row.time}</td>
-                      <td className="font-semibold text-slate-700">{row.diagnosis}</td>
-                      <td>
+                      <td className="text-slate-500 font-medium whitespace-nowrap">{row.date} · {row.time}</td>
+                      <td className="font-semibold text-slate-700 whitespace-nowrap truncate max-w-[200px]" title={row.diagnosis}>{row.diagnosis}</td>
+                      <td className="whitespace-nowrap">
                         <Badge tone={
                           row.actionPath.includes('Tái khám') ? 'yellow' : 
                           row.actionPath.includes('phòng khám') ? 'blue' : 
@@ -143,25 +213,20 @@ export function DoctorHistory() {
                           {row.actionPath}
                         </Badge>
                       </td>
-                      <td>
-                        <span className="text-amber-500 font-bold" aria-label={`${row.rating} sao`}>
-                          {'★'.repeat(row.rating)}{'☆'.repeat(5 - row.rating)}
-                        </span>
-                      </td>
-                      <td className="text-right">
+                      <td className="text-center whitespace-nowrap">
                         <button 
                           onClick={() => { setSelectedRecord(row); setDetailTab('medical'); }}
-                          className="mini-btn teal cursor-pointer inline-flex items-center gap-1"
+                          className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-teal-600 hover:border-teal-300 cursor-pointer inline-flex items-center justify-center transition-colors"
+                          title="Xem chi tiết"
                         >
-                          <Eye size={13} />
-                          Xem chi tiết
+                          <Eye size={15} />
                         </button>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400 text-sm">
+                    <td colSpan={6} className="py-12 text-center text-slate-400 text-sm">
                       Không tìm thấy kết quả hồ sơ bệnh án nào
                     </td>
                   </tr>
@@ -204,9 +269,14 @@ export function DoctorHistory() {
                   <div>
                     <h2 className="text-xl font-extrabold">{selectedRecord.patient}</h2>
                     <p className="text-teal-100 text-sm mt-0.5">{selectedRecord.gender} • {selectedRecord.age} tuổi</p>
-                    <span className="inline-block mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-500/60 text-white">
-                      Mã HS: {selectedRecord.code}
-                    </span>
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                      <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-500/60 text-white">
+                        Mã HS: {selectedRecord.code}
+                      </span>
+                      <span className="text-amber-400 font-extrabold text-xs flex items-center" title={`${selectedRecord.rating} sao`}>
+                        {'★'.repeat(selectedRecord.rating)}{'☆'.repeat(5 - selectedRecord.rating)}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <button

@@ -182,17 +182,17 @@ export function DoctorPatients() {
 
           {/* Level filter */}
           <div className="flex items-center gap-1.5">
-            <SlidersHorizontal size={15} className="text-slate-400" />
-            <span className="text-[11px] text-slate-500 font-medium">Mức độ:</span>
+            <SlidersHorizontal size={14} className="text-slate-400" />
+            <span className="text-slate-500 font-semibold" style={{ fontSize: '12px' }}>Mức độ:</span>
             {['Tất cả', 'Cao', 'Trung bình', 'Thấp'].map(lv => (
               <button
                 key={lv}
                 onClick={() => setFilterLevel(lv)}
-                className={`px-3 py-1.5 text-[11px] rounded-lg font-semibold border transition-all cursor-pointer ${
-                  filterLevel === lv
+                className={`border transition-all cursor-pointer font-semibold ${filterLevel === lv
                     ? 'bg-teal-600 text-white border-teal-600'
                     : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-teal-300'
-                }`}
+                  }`}
+                style={{ fontSize: '12px', padding: '5px 12px', borderRadius: '6px' }}
               >
                 {lv}
               </button>
@@ -202,11 +202,12 @@ export function DoctorPatients() {
           {/* Sort */}
           <div className="flex items-center gap-1.5 ml-auto">
             <ArrowUpDown size={14} className="text-slate-400" />
-            <span className="text-xs text-slate-500 font-medium">Sắp xếp:</span>
+            <span className="text-slate-500 font-semibold" style={{ fontSize: '12px' }}>Sắp xếp:</span>
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              className="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-400"
+              className="border border-slate-200 bg-white text-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-400"
+              style={{ fontSize: '12px', padding: '5px 12px', borderRadius: '6px' }}
             >
               <option value="name">Tên A–Z</option>
               <option value="visits">Nhiều lượt khám nhất</option>
@@ -225,9 +226,8 @@ export function DoctorPatients() {
                 <div
                   key={p.name}
                   onClick={() => { setSelectedPatient(p.name); setDetailTab('info') }}
-                  className={`bg-white border rounded-xl p-4 cursor-pointer transition-all hover:shadow-md hover:border-teal-200 group ${
-                    isSelected ? 'border-teal-500 shadow-md ring-1 ring-teal-200' : 'border-slate-200'
-                  }`}
+                  className={`bg-white border rounded-xl p-4 cursor-pointer transition-all hover:shadow-md hover:border-teal-200 group ${isSelected ? 'border-teal-500 shadow-md ring-1 ring-teal-200' : 'border-slate-200'
+                    }`}
                 >
                   {/* Header row */}
                   <div className="flex items-start gap-3 mb-3">
@@ -309,11 +309,10 @@ export function DoctorPatients() {
                   <div>
                     <h2 className="text-xl font-extrabold">{selPatient.name}</h2>
                     <p className="text-teal-100 text-sm mt-0.5">{selPatient.gender} • {selPatient.age} tuổi</p>
-                    <span className={`inline-block mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      selPatient.level === 'Cao' ? 'bg-rose-500/80 text-white' :
-                      selPatient.level === 'Trung bình' ? 'bg-amber-400/80 text-white' :
-                      'bg-teal-500/60 text-white'
-                    }`}>
+                    <span className={`inline-block mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full ${selPatient.level === 'Cao' ? 'bg-rose-500/80 text-white' :
+                        selPatient.level === 'Trung bình' ? 'bg-amber-400/80 text-white' :
+                          'bg-teal-500/60 text-white'
+                      }`}>
                       Mức độ: {selPatient.level}
                     </span>
                   </div>
@@ -357,11 +356,10 @@ export function DoctorPatients() {
                 <button
                   key={tab.id}
                   onClick={() => setDetailTab(tab.id)}
-                  className={`flex items-center gap-1.5 px-3 py-2.5 text-[10px] font-bold border-b-2 transition-all cursor-pointer ${
-                    detailTab === tab.id
+                  className={`flex items-center gap-1.5 px-3 py-2.5 text-[10px] font-bold border-b-2 transition-all cursor-pointer ${detailTab === tab.id
                       ? 'border-teal-600 text-teal-700 bg-white'
                       : 'border-transparent text-slate-500 hover:text-slate-700'
-                  }`}
+                    }`}
                 >
                   {tab.icon}
                   {tab.label}
@@ -446,9 +444,8 @@ export function DoctorPatients() {
                           <span className="text-xs font-bold text-slate-700">{h.date}</span>
                           {h.time && <span className="text-xs text-slate-400">• {h.time}</span>}
                         </div>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          h.rating >= 5 ? 'bg-teal-100 text-teal-700' : 'bg-amber-100 text-amber-700'
-                        }`}>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${h.rating >= 5 ? 'bg-teal-100 text-teal-700' : 'bg-amber-100 text-amber-700'
+                          }`}>
                           ★ {h.rating}/5
                         </span>
                       </div>
@@ -511,11 +508,10 @@ export function DoctorPatients() {
                           <MessageSquare size={13} className="text-teal-600" />
                           <span className="text-xs font-bold text-slate-700">{c.time}</span>
                         </div>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          c.status === 'Hoàn tất' ? 'bg-teal-100 text-teal-700' :
-                          c.status === 'Đang tư vấn' ? 'bg-sky-100 text-sky-700' :
-                          'bg-amber-100 text-amber-700'
-                        }`}>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${c.status === 'Hoàn tất' ? 'bg-teal-100 text-teal-700' :
+                            c.status === 'Đang tư vấn' ? 'bg-sky-100 text-sky-700' :
+                              'bg-amber-100 text-amber-700'
+                          }`}>
                           {c.status}
                         </span>
                       </div>
