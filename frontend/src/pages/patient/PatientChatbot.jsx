@@ -1,10 +1,38 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Accessibility, AlertTriangle, ArrowRight, Bot, Clock3, ImagePlus, LockKeyhole, Mic, MicOff, Send, ShieldCheck, Stethoscope, UserRoundCheck, Volume2 } from 'lucide-react'
+import { AlertTriangle, Bot, CalendarDays, ImagePlus, LockKeyhole, MapPin, Mic, MicOff, Send, Stethoscope, Volume2 } from 'lucide-react'
 import { AppShell, Button, Card, TopBar } from '../../components/ui.jsx'
 
-const symptoms = ['Sốt / Ớn lạnh', 'Đau đầu / Chóng mặt', 'Ho / Sổ mũi', 'Đau bụng', 'Đau ngực / Khó thở', 'Mệt mỏi', 'Vấn đề khác']
-const painAreas = ['Đầu', 'Ngực', 'Bụng', 'Lưng', 'Tay', 'Chân']
+const symptoms = ['Sốt / Ớn lạnh', 'Đau đầu / Chóng mặt', 'Ho / Sổ mũi', 'Đau bụng', 'Đau ngực / Khó thở', 'Mệt mỏi', 'Tê yếu tay chân', 'Da nổi mẩn / ngứa', 'Vấn đề khác']
+const otherIssues = ['Mất ngủ kéo dài', 'Buồn nôn / nôn', 'Tiểu buốt', 'Chấn thương nhẹ', 'Căng thẳng / lo âu', 'Cần kiểm tra sức khỏe tổng quát']
+const painAreas = [
+  { id: 'head', label: 'Đầu', note: 'Đau đầu, chóng mặt, buồn nôn, nhìn mờ', level: 'urgent', specialty: 'Thần kinh', clinic: 'Phòng khám Đa khoa Tâm An', position: 'head' },
+  { id: 'throat', label: 'Cổ / Họng', note: 'Đau họng, ho, khó nuốt, sốt', level: 'routine', specialty: 'Tai Mũi Họng', clinic: 'MedCare Family Clinic', position: 'throat' },
+  { id: 'chest', label: 'Ngực', note: 'Đau tức ngực, khó thở, hồi hộp', level: 'urgent', specialty: 'Tim mạch', clinic: 'Phòng khám Tim mạch An Bình', position: 'chest' },
+  { id: 'belly', label: 'Bụng', note: 'Đau bụng, buồn nôn, rối loạn tiêu hóa', level: 'watch', specialty: 'Tiêu hóa', clinic: 'Phòng khám Đa khoa Tâm An', position: 'belly' },
+  { id: 'back', label: 'Lưng', note: 'Đau lưng, đau lan xuống chân, mỏi cơ', level: 'routine', specialty: 'Cơ xương khớp', clinic: 'Phòng khám Đa khoa Tâm An', position: 'back' },
+  { id: 'arm', label: 'Tay', note: 'Đau, tê, yếu tay hoặc sau chấn thương', level: 'watch', specialty: 'Cơ xương khớp', clinic: 'MedCare Family Clinic', position: 'arm' },
+  { id: 'leg', label: 'Chân', note: 'Đau, sưng, tê hoặc khó đi lại', level: 'watch', specialty: 'Cơ xương khớp', clinic: 'MedCare Family Clinic', position: 'leg' },
+]
+
+const symptomRecommendations = {
+  'Sốt / Ớn lạnh': { level: 'watch', specialty: 'Nội tổng quát', clinic: 'Phòng khám Đa khoa Tâm An', reason: 'Theo dõi sốt, dấu hiệu nhiễm trùng và tình trạng mất nước.' },
+  'Ho / Sổ mũi': { level: 'routine', specialty: 'Tai Mũi Họng', clinic: 'MedCare Family Clinic', reason: 'Phù hợp kiểm tra hô hấp trên, viêm họng, viêm mũi xoang.' },
+  'Đau bụng': { level: 'watch', specialty: 'Tiêu hóa', clinic: 'Phòng khám Đa khoa Tâm An', reason: 'Cần đánh giá vị trí đau, tiêu hóa và dấu hiệu cấp tính.' },
+  'Đau ngực / Khó thở': { level: 'urgent', specialty: 'Tim mạch', clinic: 'Phòng khám Tim mạch An Bình', reason: 'Đau ngực hoặc khó thở cần bác sĩ đánh giá sớm.' },
+  'Mệt mỏi': { level: 'routine', specialty: 'Nội tổng quát', clinic: 'Phòng khám Đa khoa Tâm An', reason: 'Có thể cần khám tổng quát và xét nghiệm cơ bản.' },
+  'Tê yếu tay chân': { level: 'urgent', specialty: 'Thần kinh', clinic: 'Phòng khám Đa khoa Tâm An', reason: 'Tê yếu đột ngột cần được phân loại nguy cơ thần kinh.' },
+  'Da nổi mẩn / ngứa': { level: 'routine', specialty: 'Da liễu', clinic: 'MedCare Family Clinic', reason: 'Phù hợp khám da liễu, dị ứng hoặc viêm da.' },
+}
+
+const levelMeta = {
+  urgent: { label: 'Cần tư vấn bác sĩ sớm', tone: 'is-urgent', description: 'Triệu chứng có thể liên quan nguy cơ cao. Nếu đau dữ dội, khó thở, yếu liệt, ngất hoặc đau ngực kéo dài, hãy gọi 115 hoặc đến cấp cứu.', action: 'Ưu tiên tư vấn bác sĩ ngay để được phân loại nguy cơ. Nếu triệu chứng dữ dội hoặc kéo dài, hãy đến cấp cứu.' },
+  watch: { label: 'Nên đặt lịch khám', tone: 'is-watch', description: 'Triệu chứng cần được bác sĩ kiểm tra để xác định nguyên nhân và hướng xử trí phù hợp.', action: 'Nên đặt lịch khám đúng chuyên khoa trong thời gian gần, đồng thời theo dõi dấu hiệu tăng nặng.' },
+  routine: { label: 'Theo dõi và đặt lịch khi cần', tone: 'is-routine', description: 'Bạn có thể tiếp tục theo dõi. Nếu kéo dài hoặc nặng hơn, nên đặt lịch khám đúng chuyên khoa.', action: 'Theo dõi tại nhà, nghỉ ngơi và đặt lịch nếu triệu chứng không cải thiện hoặc xuất hiện dấu hiệu bất thường.' },
+}
+const durationReplies = ['Mới hôm nay', '1 - 3 ngày', 'Trên 3 ngày', 'Không nhớ rõ']
+const severityReplies = ['Nhẹ', 'Vừa', 'Nặng', 'Có khó thở / đau ngực', 'Có tê yếu / ngất']
+const urgentReplies = ['Nặng', 'Có kèm khó thở', 'Có kèm chóng mặt', 'Có khó thở / đau ngực', 'Có tê yếu / ngất']
 
 const initialMessages = [
   {
@@ -25,7 +53,9 @@ export function PatientChatbot() {
   const [attachment, setAttachment] = useState('')
   const [listening, setListening] = useState(false)
   const [showBodyMap, setShowBodyMap] = useState(false)
-  const [showTransfer, setShowTransfer] = useState(false)
+  const [assessment, setAssessment] = useState(null)
+  const [pendingAssessment, setPendingAssessment] = useState(null)
+  const [pendingDuration, setPendingDuration] = useState('')
   const [typing, setTyping] = useState(false)
   const chatBodyRef = useRef(null)
 
@@ -33,7 +63,7 @@ export function PatientChatbot() {
     const body = chatBodyRef.current
     if (!body) return
     body.scrollTo({ top: body.scrollHeight, behavior: 'smooth' })
-  }, [messages, typing, showBodyMap, showTransfer])
+  }, [messages, typing, showBodyMap, assessment])
 
   function readText(text) {
     if (!window.speechSynthesis) return
@@ -53,17 +83,50 @@ export function PatientChatbot() {
     setMessages((current) => [...current, { from: 'user', text: symptom }])
     if (symptom.toLowerCase().includes('đau')) {
       setShowBodyMap(true)
-      addBot('Bạn đang đau ở vị trí nào? Nếu khó mô tả, hãy chạm vào vùng tương ứng trên hình cơ thể bên dưới.')
+      setAssessment(null)
+      setPendingAssessment(null)
+      addBot('Bạn đang đau chủ yếu ở vùng nào? Bạn có thể chọn nhanh bên dưới hoặc nhập mô tả riêng nếu không đúng các lựa chọn có sẵn.')
+      return
+    }
+    if (symptom === 'Vấn đề khác') {
+      addBot('Bạn có thể chọn nhóm vấn đề gần đúng nhất bên dưới hoặc mô tả thêm trong ô nhập.', otherIssues)
+      return
+    }
+    const recommendation = symptomRecommendations[symptom]
+    if (recommendation) {
+      beginAssessmentFlow({
+        title: symptom,
+        ...recommendation,
+      })
       return
     }
     addBot('Bạn đã gặp triệu chứng này bao lâu? Triệu chứng đang nhẹ, vừa hay nặng?', ['Mới hôm nay', '1 - 3 ngày', 'Trên 3 ngày', 'Không nhớ rõ'])
   }
 
   function choosePainArea(area) {
+    const selectedArea = typeof area === 'string' ? painAreas.find((item) => item.label === area) : area
+    if (!selectedArea) {
+      setShowBodyMap(false)
+      setMessages((current) => [...current, { from: 'user', text: 'Vị trí khác' }])
+      setPendingAssessment({
+        title: 'Đau ở vị trí khác',
+        level: 'routine',
+        specialty: 'Nội tổng quát',
+        clinic: 'Phòng khám Đa khoa Tâm An',
+        reason: 'Vị trí đau do bệnh nhân tự mô tả cần được hỏi thêm để phân loại.',
+      })
+      addBot('Bạn mô tả rõ hơn vị trí đau, cảm giác đau và có lan sang vùng nào không. Sau đó tôi sẽ hỏi thêm để phân loại mức độ.')
+      return
+    }
     setShowBodyMap(false)
-    setMessages((current) => [...current, { from: 'user', text: `Tôi đau vùng ${area.toLowerCase()}.` }])
-    addBot(`Tôi đã ghi nhận đau vùng ${area.toLowerCase()}. Cơn đau có tăng khi vận động hoặc kèm khó thở, chóng mặt không?`, ['Không', 'Có, khi vận động', 'Có kèm chóng mặt', 'Có kèm khó thở'])
-    if (area === 'Ngực' || area === 'Đầu') setShowTransfer(true)
+    setMessages((current) => [...current, { from: 'user', text: `Tôi đau vùng ${selectedArea.label.toLowerCase()}.` }])
+    beginAssessmentFlow({
+      title: `Đau vùng ${selectedArea.label.toLowerCase()}`,
+      level: selectedArea.level,
+      specialty: selectedArea.specialty,
+      clinic: selectedArea.clinic,
+      reason: selectedArea.note,
+    })
   }
 
   function chooseQuickReply(reply) {
@@ -71,12 +134,79 @@ export function PatientChatbot() {
       chooseSymptom(reply)
       return
     }
+    if (otherIssues.includes(reply)) {
+      setMessages((current) => [...current, { from: 'user', text: reply }])
+      const recommendation = reply === 'Căng thẳng / lo âu'
+        ? { level: 'routine', specialty: 'Tâm lý / Nội tổng quát', clinic: 'MedCare Family Clinic', reason: 'Bác sĩ có thể đánh giá stress, giấc ngủ và triệu chứng cơ thể đi kèm.' }
+        : reply === 'Tiểu buốt'
+          ? { level: 'watch', specialty: 'Tiết niệu', clinic: 'Phòng khám Đa khoa Tâm An', reason: 'Cần kiểm tra nhiễm khuẩn tiết niệu hoặc viêm đường tiểu.' }
+          : { level: 'routine', specialty: 'Nội tổng quát', clinic: 'Phòng khám Đa khoa Tâm An', reason: 'Khám tổng quát giúp định hướng nguyên nhân ban đầu.' }
+      beginAssessmentFlow({ title: reply, ...recommendation })
+      return
+    }
+    if (reply === 'Tư vấn bác sĩ') {
+      setMessages((current) => [...current, { from: 'user', text: reply }])
+      transferToDoctor()
+      return
+    }
+    if (reply === 'Đặt lịch khám') {
+      setMessages((current) => [...current, { from: 'user', text: reply }])
+      goToBooking()
+      return
+    }
+    if (reply === 'Tôi muốn mô tả thêm') {
+      setMessages((current) => [...current, { from: 'user', text: reply }])
+      addBot('Bạn có thể mô tả thêm: vị trí đau, thời điểm bắt đầu, mức độ đau và các dấu hiệu đi kèm như sốt, khó thở, chóng mặt hoặc tê yếu.')
+      return
+    }
+    if (pendingAssessment && durationReplies.includes(reply)) {
+      setMessages((current) => [...current, { from: 'user', text: reply }])
+      setPendingDuration(reply)
+      addBot('Mức độ hiện tại thế nào? Có dấu hiệu nguy hiểm như khó thở, đau ngực, tê yếu hoặc ngất không?', severityReplies)
+      return
+    }
+    if (pendingAssessment && severityReplies.includes(reply)) {
+      setMessages((current) => [...current, { from: 'user', text: reply }])
+      const hasDangerSign = urgentReplies.includes(reply)
+      const nextLevel = hasDangerSign ? 'urgent' : reply === 'Vừa' && pendingAssessment.level === 'routine' ? 'watch' : pendingAssessment.level
+      showRecommendation({
+        ...pendingAssessment,
+        level: nextLevel,
+        reason: `${pendingAssessment.reason} Thời gian: ${pendingDuration || 'chưa rõ'}. Mức độ/dấu hiệu: ${reply}.`,
+      })
+      setPendingAssessment(null)
+      setPendingDuration('')
+      return
+    }
     setMessages((current) => [...current, { from: 'user', text: reply }])
-    if (['Mới hôm nay', '1 - 3 ngày', 'Trên 3 ngày', 'Không nhớ rõ'].includes(reply)) {
-      addBot('Mức độ triệu chứng hiện tại của bạn như thế nào?', ['Nhẹ', 'Vừa', 'Nặng'])
+    if (durationReplies.includes(reply)) {
+      addBot('Mức độ triệu chứng hiện tại của bạn như thế nào?', severityReplies)
+      return
+    }
+    if (urgentReplies.includes(reply)) {
+      showRecommendation({
+        title: 'Triệu chứng cần đánh giá sớm',
+        level: 'urgent',
+        specialty: 'Nội tổng quát',
+        clinic: 'Phòng khám Đa khoa Tâm An',
+        reason: 'Có dấu hiệu đi kèm cần bác sĩ phân loại nguy cơ và tư vấn sớm.',
+      })
       return
     }
     addBot('Cảm ơn bạn, tôi đã ghi nhận. Nếu triệu chứng tăng lên hoặc có dấu hiệu bất thường, bạn nên chuyển sang tư vấn trực tuyến với bác sĩ.')
+  }
+
+  function beginAssessmentFlow(nextAssessment) {
+    setAssessment(null)
+    setPendingAssessment(nextAssessment)
+    setPendingDuration('')
+    addBot('Tôi cần hỏi thêm một chút để phân loại chính xác hơn. Triệu chứng bắt đầu từ khi nào?', durationReplies)
+  }
+
+  function showRecommendation(nextAssessment) {
+    const meta = levelMeta[nextAssessment.level] ?? levelMeta.routine
+    setAssessment({ ...nextAssessment, meta })
+    addBot(`${meta.label}: ${meta.description}`, ['Tư vấn bác sĩ', 'Đặt lịch khám', 'Tôi muốn mô tả thêm'])
   }
 
   function sendMessage() {
@@ -85,17 +215,41 @@ export function PatientChatbot() {
     setMessages((current) => [...current, { from: 'user', text }])
     setInput('')
     setAttachment('')
+    if (pendingAssessment) {
+      addBot('Tôi đã ghi nhận mô tả thêm. Triệu chứng bắt đầu từ khi nào?', durationReplies)
+      return
+    }
     if (text.toLowerCase().includes('đau')) {
       setShowBodyMap(true)
-      addBot('Bạn có thể chọn vị trí đau trên hình bên dưới để tôi ghi nhận chính xác hơn.')
+      setAssessment(null)
+      setPendingAssessment(null)
+      addBot('Bạn có thể chọn vùng đau gần đúng bên dưới hoặc tiếp tục nhập mô tả nếu vị trí không có trong danh sách.')
     } else {
-      addBot('Cảm ơn bạn. Bạn vui lòng cho biết triệu chứng bắt đầu từ khi nào và mức độ hiện tại.', ['Mới hôm nay', '1 - 3 ngày', 'Trên 3 ngày', 'Không nhớ rõ'])
+      setPendingAssessment({
+        title: text,
+        level: 'routine',
+        specialty: 'Nội tổng quát',
+        clinic: 'Phòng khám Đa khoa Tâm An',
+        reason: 'Triệu chứng do bệnh nhân tự mô tả cần được hỏi thêm để phân loại.',
+      })
+      addBot('Cảm ơn bạn. Bạn vui lòng cho biết triệu chứng bắt đầu từ khi nào?', durationReplies)
     }
   }
 
   function transferToDoctor() {
     localStorage.setItem('medconsult-doctor-request', 'active')
     navigate('/patient/consult')
+  }
+
+  function goToBooking() {
+    if (assessment) {
+      localStorage.setItem('medconsult-booking-suggestion', JSON.stringify({
+        specialty: assessment.specialty,
+        clinic: assessment.clinic,
+        reason: assessment.title,
+      }))
+    }
+    navigate('/patient/booking')
   }
 
   return (
@@ -139,49 +293,55 @@ export function PatientChatbot() {
               )}
               {showBodyMap && (
                 <div className="body-picker">
-                  <div className="body-picker-figure">
-                    <Accessibility size={142} strokeWidth={1.15} />
-                    <span className="body-point head">Đầu</span>
-                    <span className="body-point chest">Ngực</span>
-                    <span className="body-point belly">Bụng</span>
-                    <span className="body-point legs">Chân</span>
-                  </div>
                   <div>
-                    <b>Chọn vị trí đau</b>
-                    <p>Chạm vào vùng gần đúng nhất. Bạn có thể bổ sung mô tả sau.</p>
+                    <b>Chọn vùng đau gần đúng</b>
+                    <p>Nếu không có lựa chọn phù hợp, hãy chọn “Vị trí khác” hoặc nhập mô tả chi tiết vào ô chat.</p>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {painAreas.map((area) => <button key={area} className="symptom-chip" onClick={() => choosePainArea(area)}>{area}</button>)}
+                      {painAreas.map((area) => <button key={area.id} className="symptom-chip" onClick={() => choosePainArea(area)}>{area.label}</button>)}
+                      <button className="symptom-chip" onClick={() => choosePainArea('other')}>Vị trí khác</button>
                     </div>
                   </div>
                 </div>
               )}
-            </div>
-            {showTransfer && (
-              <div className="chat-transfer">
-                <div className="chat-transfer-main">
-                  <div className="chat-transfer-heading">
-                    <span className="chat-transfer-icon"><AlertTriangle size={22} /></span>
+              {assessment && (
+                <div className={`chat-assessment ${assessment.meta.tone}`}>
+                  <div className="chat-assessment-head">
+                    <span><AlertTriangle size={18} /></span>
                     <div>
-                      <div className="chat-transfer-title-row">
-                        <h3>Khuyến nghị từ MedConsult AI</h3>
-                        <span className="chat-transfer-badge">Cần bác sĩ đánh giá</span>
-                      </div>
-                      <p>Triệu chứng hiện tại có dấu hiệu cần được bác sĩ đánh giá sớm.</p>
+                      <small>Đánh giá sơ bộ</small>
+                      <h3>{assessment.meta.label}</h3>
                     </div>
                   </div>
-                  <p className="chat-transfer-description">Để đảm bảo an toàn và nhận được tư vấn chính xác hơn, hệ thống khuyến nghị kết nối với bác sĩ chuyên môn.</p>
-                  <div className="chat-transfer-support">
-                    <span><Clock3 size={16} /> Ước tính kết nối: 1 - 3 phút</span>
-                    <span><ShieldCheck size={16} /> Thông tin được mã hóa và bảo mật</span>
-                    <span><UserRoundCheck size={16} /> Bác sĩ tiếp nhận toàn bộ lịch sử hội thoại</span>
+                  <p>{assessment.meta.description}</p>
+                  <div className="chat-assessment-grid">
+                    <span>
+                      <Stethoscope size={16} />
+                      <small>Chuyên khoa gợi ý</small>
+                      <b>{assessment.specialty}</b>
+                    </span>
+                    <span>
+                      <MapPin size={16} />
+                      <small>Cơ sở phù hợp</small>
+                      <b>{assessment.clinic}</b>
+                    </span>
+                    <span>
+                      <CalendarDays size={16} />
+                      <small>Lý do</small>
+                      <b>{assessment.reason}</b>
+                    </span>
+                    <span>
+                      <AlertTriangle size={16} />
+                      <small>Hướng xử trí</small>
+                      <b>{assessment.meta.action}</b>
+                    </span>
+                  </div>
+                  <div className="chat-assessment-actions">
+                    <Button onClick={transferToDoctor}><Stethoscope size={17} /> Tư vấn bác sĩ</Button>
+                    <Button variant="outline" onClick={goToBooking}><CalendarDays size={17} /> Đặt lịch khám</Button>
                   </div>
                 </div>
-                <div className="chat-transfer-action">
-                  <span><Stethoscope size={17} /> Bác sĩ MedConsult đang sẵn sàng</span>
-                  <Button className="chat-transfer-cta" onClick={transferToDoctor}><Stethoscope size={18} /> Chuyển sang bác sĩ ngay <ArrowRight size={17} /></Button>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
             {attachment && <div className="chat-attachment">Đã chọn ảnh: {attachment}</div>}
             <div className="chat-input-guide">
               <LockKeyhole size={15} />
