@@ -329,17 +329,85 @@ export function AdminSchedule({ showModal = false }) {
 }
 
 function ScheduleTable({ appointments, onAction, onStatus, onView, openActions }) {
-  return <section className="admin-schedule-table-wrap"><table><thead><tr><th>Thời gian</th><th>Bệnh nhân</th><th>Bác sĩ</th><th>Chuyên khoa</th><th>Cơ sở / Phòng</th><th>Loại khám</th><th>Trạng thái</th><th>Thanh toán</th><th>Thao tác</th></tr></thead><tbody>{appointments.map((item) => <tr key={item.id}>
-    <td><b>{item.time}</b><small>{item.endTime}</small></td>
-    <td><div className="admin-schedule-person"><span>{item.initials}</span><div><b>{item.patient}</b><small>{item.id}</small></div></div></td>
-    <td><div className="admin-schedule-doctor"><span>{item.doctorInitials}</span><b>{item.doctor}</b></div></td>
-    <td><span className="admin-schedule-spec">{item.spec}</span></td>
-    <td><b>{item.clinic}</b><small>{item.room}</small></td>
-    <td><span className={`admin-schedule-type ${typeClass(item.type)}`}>{item.type}</span></td>
-    <td><span className={`admin-schedule-status ${statusClass(item.status)}`}>{item.status}</span></td>
-    <td><span className="admin-schedule-payment">{item.payment}</span></td>
-    <td className="admin-schedule-action-cell"><button aria-label={`Mở thao tác ${item.id}`} className="admin-schedule-more" onClick={() => onAction(openActions === item.id ? null : item.id)} type="button"><MoreHorizontal size={18} /></button>{openActions === item.id && <div className="admin-schedule-action-menu"><button onClick={() => onView(item)} type="button"><Eye size={15} /> Xem chi tiết</button>{item.status === 'Chờ xác nhận' && <button onClick={() => onStatus(item, 'Đã xác nhận')} type="button"><BadgeCheck size={15} /> Xác nhận</button>}<button className="is-danger" onClick={() => onStatus(item, 'Đã hủy')} type="button"><XCircle size={15} /> Hủy lịch</button></div>}</td>
-  </tr>)}</tbody></table></section>
+  return (
+    <section className="admin-doctor-table-wrap admin-schedule-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Thời gian</th>
+            <th>Bệnh nhân</th>
+            <th>Bác sĩ</th>
+            <th>Chuyên khoa</th>
+            <th>Cơ sở / Phòng</th>
+            <th>Loại khám</th>
+            <th>Trạng thái</th>
+            <th>Thanh toán</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          {appointments.map((item) => (
+            <tr key={item.id}>
+              <td>
+                <div className="admin-doctor-table-name">{item.time}</div>
+                <div className="admin-doctor-table-sub-text">{item.endTime}</div>
+              </td>
+              <td>
+                <div className="admin-doctor-table-name">{item.patient}</div>
+                <div className="admin-doctor-table-sub-text">{item.id}</div>
+              </td>
+              <td>
+                <div className="admin-doctor-table-name">{item.doctor}</div>
+              </td>
+              <td>
+                <span className="admin-doctor-table-spec">{item.spec}</span>
+              </td>
+              <td>
+                <div className="admin-doctor-table-main-text">{item.clinic}</div>
+                <div className="admin-doctor-table-sub-text">{item.room}</div>
+              </td>
+              <td>
+                <span className="admin-doctor-table-spec">{item.type}</span>
+              </td>
+              <td>
+                <span className={`admin-schedule-status ${statusClass(item.status)}`}>
+                  {item.status}
+                </span>
+              </td>
+              <td>
+                <span className="admin-doctor-table-spec">{item.payment}</span>
+              </td>
+              <td className="admin-schedule-action-cell">
+                <button
+                  aria-label={`Mở thao tác ${item.id}`}
+                  className="admin-schedule-more"
+                  onClick={() => onAction(openActions === item.id ? null : item.id)}
+                  type="button"
+                >
+                  <MoreHorizontal size={18} />
+                </button>
+                {openActions === item.id && (
+                  <div className="admin-schedule-action-menu">
+                    <button onClick={() => onView(item)} type="button">
+                      <Eye size={15} /> Xem chi tiết
+                    </button>
+                    {item.status === 'Chờ xác nhận' && (
+                      <button onClick={() => onStatus(item, 'Đã xác nhận')} type="button">
+                        <BadgeCheck size={15} /> Xác nhận
+                      </button>
+                    )}
+                    <button className="is-danger" onClick={() => onStatus(item, 'Đã hủy')} type="button">
+                      <XCircle size={15} /> Hủy lịch
+                    </button>
+                  </div>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  )
 }
 
 function DayTimeline({ appointments, onView }) {

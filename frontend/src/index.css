@@ -569,6 +569,7 @@ textarea.input {
   align-items: center;
   gap: 18px;
   overflow: hidden;
+  padding: 16px 20px;
 }
 
 .stat-icon {
@@ -602,6 +603,16 @@ textarea.input {
 .tone-amber {
   background: #fff7ed;
   color: #f59e0b;
+}
+
+.tone-green {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.tone-red {
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
 .data-table {
@@ -1625,7 +1636,7 @@ textarea.input {
   gap: 10px;
 }
 
-.chat-assessment-head > span {
+.chat-assessment-head>span {
   display: grid;
   height: 38px;
   width: 38px;
@@ -1635,12 +1646,12 @@ textarea.input {
   color: #0f766e;
 }
 
-.chat-assessment.is-urgent .chat-assessment-head > span {
+.chat-assessment.is-urgent .chat-assessment-head>span {
   background: #fff1f1;
   color: #dc2626;
 }
 
-.chat-assessment.is-watch .chat-assessment-head > span {
+.chat-assessment.is-watch .chat-assessment-head>span {
   background: #fff7d6;
   color: #d97706;
 }
@@ -1660,7 +1671,7 @@ textarea.input {
   font-weight: 900;
 }
 
-.chat-assessment > p {
+.chat-assessment>p {
   color: #64748b;
   font-size: 13px;
   line-height: 1.6;
@@ -5417,6 +5428,11 @@ textarea.input {
 .admin-schedule-payment {
   background: #f8fafc;
   color: #64748b;
+}
+
+.admin-schedule-status {
+  padding: 6px 9px;
+  font-size: 13px;
 }
 
 .admin-schedule-status.is-chờ-xác-nhận {
@@ -12983,6 +12999,14 @@ button {
   color: #d97706;
 }
 
+.admin-clinic-kpi.is-green .admin-clinic-kpi-icon {
+  color: #16a34a;
+}
+
+.admin-clinic-kpi.is-red .admin-clinic-kpi-icon {
+  color: #dc2626;
+}
+
 .admin-clinic-kpi-watermark {
   position: absolute;
   right: -12px;
@@ -14246,7 +14270,7 @@ button {
 .admin-schedule-kpi,
 .quality-kpi {
   box-sizing: border-box;
-  height: 142px;
+  height: auto;
   min-height: 142px;
   border: 1px solid #e2e8f0;
   border-radius: 18px;
@@ -14368,6 +14392,13 @@ button {
   font-size: 13.5px;
 }
 
+.stat-card p {
+  height: 34px;
+  overflow: hidden;
+  line-height: 1.3;
+  margin: 0;
+}
+
 .quality-sparkline {
   height: 30px;
   width: 72px;
@@ -14462,7 +14493,7 @@ button {
   .admin-clinic-kpi,
   .admin-schedule-kpi,
   .quality-kpi {
-    height: 136px;
+    height: auto;
     min-height: 136px;
     padding: 13px 15px;
   }
@@ -14501,6 +14532,16 @@ button {
   background: #f5f3ff;
 }
 
+.stat-card.stat-tone-green {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.stat-card.stat-tone-red {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
 .admin-clinic-kpi.is-teal,
 .admin-schedule-kpi.is-teal,
 .quality-kpi.is-teal {
@@ -14525,6 +14566,16 @@ button {
 .quality-kpi.is-amber {
   border-color: #fde68a;
   background: #fffbeb;
+}
+
+.admin-clinic-kpi.is-green {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.admin-clinic-kpi.is-red {
+  border-color: #fecaca;
+  background: #fef2f2;
 }
 
 .admin-schedule-kpi.is-red {
@@ -15465,18 +15516,71 @@ button {
   text-transform: uppercase;
 }
 
-.service-price-history header p { margin-top: 3px; color: #94a3b8; font-size: 13px; }
-.service-price-panel-head em { color: #94a3b8; font-size: 13px; font-style: normal; font-weight: 600; }
-.service-price-table-wrap { overflow-x: auto; }
-.service-price-table-wrap table { min-width: 1306px; width: 100%; border-collapse: collapse; table-layout: fixed; }
-.service-price-col-code { width: 118px; }
-.service-price-col-name { width: 360px; }
-.service-price-col-spec { width: 150px; }
-.service-price-col-duration { width: 126px; }
-.service-price-col-price { width: 160px; }
-.service-price-col-status { width: 142px; }
-.service-price-col-actions { width: 250px; }
-.service-price-table-wrap th { border-top: 1px solid #eef2f7; border-bottom: 1px solid #e2e8f0; background: #f8fafc; padding: 12px 14px; color: #64748b; font-size: 12px; font-weight: 700; letter-spacing: .035em; text-align: left; text-transform: uppercase; }
+.service-price-history header p {
+  margin-top: 3px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.service-price-panel-head em {
+  color: #94a3b8;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.service-price-table-wrap {
+  overflow-x: auto;
+}
+
+.service-price-table-wrap table {
+  min-width: 1306px;
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.service-price-col-code {
+  width: 118px;
+}
+
+.service-price-col-name {
+  width: 360px;
+}
+
+.service-price-col-spec {
+  width: 150px;
+}
+
+.service-price-col-duration {
+  width: 126px;
+}
+
+.service-price-col-price {
+  width: 160px;
+}
+
+.service-price-col-status {
+  width: 142px;
+}
+
+.service-price-col-actions {
+  width: 250px;
+}
+
+.service-price-table-wrap th {
+  border-top: 1px solid #eef2f7;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  padding: 12px 14px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .035em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
 .service-price-table-wrap th,
 .service-price-table-wrap td {
   white-space: nowrap;
@@ -15723,27 +15827,137 @@ button {
   padding: 13px 0;
 }
 
-.service-price-preview .is-warning { color: #dc2626; }
-.service-price-row-actions { display: flex; justify-content: flex-end; gap: 6px; opacity: .78; transition: 150ms ease; }
-.service-price-row-actions.is-editing { opacity: 1; }
-.service-price-table-wrap tr:hover .service-price-row-actions { opacity: 1; }
-.service-price-row-actions button { display: inline-flex; height: 34px; cursor: pointer; align-items: center; justify-content: center; gap: 5px; border: 1px solid #e2e8f0; border-radius: 9px; background: #fff; padding: 0 10px; color: #64748b; font-size: 13px; font-weight: 700; white-space: nowrap; transition: 150ms ease; }
-.service-price-row-actions .service-price-action-icon { width: 34px; padding: 0; }
+.service-price-preview .is-warning {
+  color: #dc2626;
+}
+
+.service-price-row-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  opacity: .78;
+  transition: 150ms ease;
+}
+
+.service-price-row-actions.is-editing {
+  opacity: 1;
+}
+
+.service-price-table-wrap tr:hover .service-price-row-actions {
+  opacity: 1;
+}
+
+.service-price-row-actions button {
+  display: inline-flex;
+  height: 34px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #fff;
+  padding: 0 10px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: 150ms ease;
+}
+
+.service-price-row-actions .service-price-action-icon {
+  width: 34px;
+  padding: 0;
+}
+
 .service-price-row-actions button:hover,
-.service-price-row-actions button.is-active { border-color: #99f6e4; background: #ecfdf5; color: #0f766e; transform: translateY(-1px); }
-.service-price-row-actions .service-price-action-edit { border-color: #99f6e4; color: #0f766e; }
-.service-price-row-actions .service-price-action-save { border-color: #0f766e; background: #0f766e; color: #fff; box-shadow: 0 8px 16px rgb(15 118 110 / .18); }
-.service-price-row-actions .service-price-action-save:hover { background: #115e59; color: #fff; }
-.service-price-row-actions .service-price-action-cancel { border-color: #cbd5e1; color: #475569; }
-.service-price-row-actions .service-price-action-cancel:hover { border-color: #94a3b8; background: #f8fafc; color: #334155; }
-.service-price-row-actions button:disabled { cursor: not-allowed; opacity: .42; box-shadow: none; transform: none; }
-.service-price-row-actions .service-price-action-save:disabled { border-color: #cbd5e1; background: #e2e8f0; color: #64748b; }
-.service-price-history { align-self: start; overflow: hidden; background: #fff; box-shadow: 0 4px 12px rgb(15 23 42 / .035); }
-.service-price-history header { justify-content: space-between; gap: 7px; border-bottom: 1px solid #e2e8f0; padding: 14px; }
-.service-price-history header > div { gap: 7px; }.service-price-history header svg { color: #0f766e; }
-.service-price-history header button { min-height: 32px; padding: 0 9px; font-size: 12px; }
-.service-price-history > div { display: grid; gap: 0; padding: 0 13px; }
-.service-price-history article { border-bottom: 1px solid #eef2f7; padding: 13px 0; }
+.service-price-row-actions button.is-active {
+  border-color: #99f6e4;
+  background: #ecfdf5;
+  color: #0f766e;
+  transform: translateY(-1px);
+}
+
+.service-price-row-actions .service-price-action-edit {
+  border-color: #99f6e4;
+  color: #0f766e;
+}
+
+.service-price-row-actions .service-price-action-save {
+  border-color: #0f766e;
+  background: #0f766e;
+  color: #fff;
+  box-shadow: 0 8px 16px rgb(15 118 110 / .18);
+}
+
+.service-price-row-actions .service-price-action-save:hover {
+  background: #115e59;
+  color: #fff;
+}
+
+.service-price-row-actions .service-price-action-cancel {
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.service-price-row-actions .service-price-action-cancel:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+  color: #334155;
+}
+
+.service-price-row-actions button:disabled {
+  cursor: not-allowed;
+  opacity: .42;
+  box-shadow: none;
+  transform: none;
+}
+
+.service-price-row-actions .service-price-action-save:disabled {
+  border-color: #cbd5e1;
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+.service-price-history {
+  align-self: start;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 4px 12px rgb(15 23 42 / .035);
+}
+
+.service-price-history header {
+  justify-content: space-between;
+  gap: 7px;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 14px;
+}
+
+.service-price-history header>div {
+  gap: 7px;
+}
+
+.service-price-history header svg {
+  color: #0f766e;
+}
+
+.service-price-history header button {
+  min-height: 32px;
+  padding: 0 9px;
+  font-size: 12px;
+}
+
+.service-price-history>div {
+  display: grid;
+  gap: 0;
+  padding: 0 13px;
+}
+
+.service-price-history article {
+  border-bottom: 1px solid #eef2f7;
+  padding: 13px 0;
+}
+
 .service-price-history time,
 .service-price-drawer-history time {
   display: block;
@@ -16298,18 +16512,23 @@ button {
 .shell-admin .admin-doctor-card h3 {
   font-size: 19.5px !important;
 }
+
 .shell-admin .admin-doctor-card-spec {
   font-size: 15.5px !important;
 }
+
 .shell-admin .admin-doctor-card-clinic {
   font-size: 14.5px !important;
 }
+
 .shell-admin .admin-doctor-card-metrics b {
   font-size: 15.5px !important;
 }
+
 .shell-admin .admin-doctor-card-metrics small {
   font-size: 13px !important;
 }
+
 .shell-admin .admin-doctor-skill-list span {
   font-size: 13.5px !important;
 }
@@ -17981,5 +18200,38 @@ button {
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
+  }
+}
+
+/* Drawer Backdrop and Content styling with blur and animations */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(15, 23, 42, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.drawer-content {
+  background: #fff;
+  width: 100%;
+  max-width: 520px;
+  height: 100%;
+  box-shadow: -10px 0 30px rgba(15, 23, 42, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: drawerSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes drawerSlideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
   }
 }
