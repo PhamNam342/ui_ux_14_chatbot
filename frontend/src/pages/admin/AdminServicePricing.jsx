@@ -1,9 +1,8 @@
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   AlertTriangle,
   CheckCircle2,
   Download,
-  Eye,
   FileSpreadsheet,
   Filter,
   History,
@@ -89,7 +88,6 @@ export function AdminServicePricing() {
   const [addForm, setAddForm] = useState(emptyService)
   const [selectedService, setSelectedService] = useState(null)
   const [filterOpen, setFilterOpen] = useState(false)
-  const filterRef = useRef(null)
 
   const notify = (message) => {
     setToast(message)
@@ -107,7 +105,6 @@ export function AdminServicePricing() {
   const clinicServices = services.filter((item) => item.clinic === clinic)
   const clinicProfile = clinicProfiles[clinic]
   const averagePrice = clinicServices.length ? Math.round(clinicServices.reduce((sum, item) => sum + item.price, 0) / clinicServices.length) : 0
-  const latestUpdate = clinicServices.find((item) => item.updated === 'Vừa xong')?.updated ?? clinicServices[0]?.updated ?? 'Chưa có dữ liệu'
   const activeServiceCount = clinicServices.filter((item) => item.status === 'Đang áp dụng').length
   const pausedServiceCount = clinicServices.filter((item) => item.status === 'Tạm ngưng').length
 
@@ -125,11 +122,6 @@ export function AdminServicePricing() {
     setClinic(nextClinic)
     setEditing(null)
     setDraftPrices({})
-  }
-
-  const openFacilityFilter = () => {
-    setFilterOpen(true)
-    filterRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   const addHistory = (item, oldPrice, newPrice, reason) => {
@@ -152,6 +144,16 @@ export function AdminServicePricing() {
     addHistory(item, item.price, value, 'Cập nhật trực tiếp trong bảng giá')
     setEditing(null)
     notify('Cập nhật giá thành công')
+  }
+
+  const cancelInlinePrice = (item) => {
+    const key = makeKey(item)
+    setDraftPrices((current) => {
+      const next = { ...current }
+      delete next[key]
+      return next
+    })
+    setEditing(null)
   }
 
   const toggleService = (item) => {
@@ -250,7 +252,7 @@ export function AdminServicePricing() {
           </footer> */}
         </section>
 
-        <section className={`service-price-toolbar ${filterOpen ? 'is-open' : ''}`} ref={filterRef}>
+        <section className={`service-price-toolbar ${filterOpen ? 'is-open' : ''}`}>
           <header><div><Filter size={18} /><b>Bộ lọc bảng giá</b></div><button onClick={() => setFilterOpen((value) => !value)} type="button"><Filter size={16} /> Bộ lọc</button></header>
           <div className="service-price-filter-grid">
             <label className="service-price-facility-filter"><span>Cơ sở y tế</span><select value={clinic} onChange={(event) => changeClinic(event.target.value)}>{clinics.map((item) => <option key={item}>{item}</option>)}</select></label>
@@ -264,7 +266,7 @@ export function AdminServicePricing() {
         <section className="service-price-layout">
           <div className="service-price-table-panel">
             <header className="service-price-panel-head"><div><span><FileSpreadsheet size={18} /></span><div><h2>{visibleServices.length} dịch vụ tại {clinic}</h2><p>Bảng giá đang lọc theo cơ sở y tế đã chọn.</p></div></div><em>Giá mới chỉ hiển thị khi bấm Sửa giá</em></header>
-            {visibleServices.length ? <ServiceTable draftPrices={draftPrices} editing={editing} nextPrice={nextPrice} onDraft={setDraftPrices} onEdit={setEditing} onHistory={setSelectedService} onSave={saveInlinePrice} onToggle={toggleService} services={visibleServices} /> : <EmptyState onAdd={() => setAdding(true)} />}
+            {visibleServices.length ? <ServiceTable draftPrices={draftPrices} editing={editing} nextPrice={nextPrice} onCancel={cancelInlinePrice} onDraft={setDraftPrices} onEdit={setEditing} onHistory={setSelectedService} onSave={saveInlinePrice} onToggle={toggleService} services={visibleServices} /> : <EmptyState onAdd={() => setAdding(true)} />}
           </div>
           <PriceHistory history={historyItems.filter((item) => item.clinic === clinic).slice(0, 3)} onAll={() => notify('Đã hiển thị lịch sử mới nhất của cơ sở')} />
         </section>
@@ -278,7 +280,7 @@ export function AdminServicePricing() {
   )
 }
 
-function ServiceTable({ services, draftPrices, editing, nextPrice, onDraft, onEdit, onHistory, onSave, onToggle }) {
+function ServiceTable({ services, draftPrices, editing, nextPrice, onCancel, onDraft, onEdit, onHistory, onSave, onToggle }) {
   return <div className="service-price-table-wrap"><table><colgroup><col className="service-price-col-code" /><col className="service-price-col-name" /><col className="service-price-col-spec" /><col className="service-price-col-duration" /><col className="service-price-col-price" /><col className="service-price-col-status" /><col className="service-price-col-actions" /></colgroup><thead><tr><th>Mã dịch vụ</th><th>Tên dịch vụ</th><th>Chuyên khoa</th><th>Thời lượng</th><th>Giá hiện tại</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>{services.map((item) => {
     const key = `${item.clinic}-${item.id}`
     const value = nextPrice(item)
@@ -292,7 +294,17 @@ function ServiceTable({ services, draftPrices, editing, nextPrice, onDraft, onEd
       <td><small className="service-price-duration">{item.duration}</small></td>
       <td className="service-price-money"><b>{currency(item.price)}</b>{isEditing && <div className="service-price-edit"><input aria-label={`Giá mới ${item.name}`} min="1" onChange={(event) => onDraft((current) => ({ ...current, [key]: event.target.value }))} type="number" value={draftPrices[key] ?? item.price} />{changed && <small className={Math.abs(delta) > 20 ? 'is-warning' : ''}>{Math.abs(delta) > 20 && <AlertTriangle size={12} />}{delta > 0 ? '+' : ''}{delta.toFixed(1)}%</small>}</div>}</td>
       <td><span className={`service-price-status ${statusClass(item.status)}`}>{item.status}</span></td>
-      <td><div className="service-price-row-actions"><button className={isEditing ? 'is-active' : ''} onClick={() => onEdit(key)} title="Sửa giá" type="button"><Pencil size={15} /></button>{isEditing && <button disabled={!changed} onClick={() => onSave(item)} title="Lưu giá" type="button"><Save size={15} /></button>}<button onClick={() => onToggle(item)} title={item.status === 'Tạm ngưng' ? 'Kích hoạt' : 'Tạm ngưng'} type="button"><PauseCircle size={15} /></button><button onClick={() => onHistory(item)} title="Xem lịch sử" type="button"><History size={15} /></button></div></td>
+      <td>
+        <div className={`service-price-row-actions ${isEditing ? 'is-editing' : ''}`}>
+          {!isEditing && <button className="service-price-action-edit" onClick={() => onEdit(key)} title="Sửa giá" type="button"><Pencil size={15} /> Sửa giá</button>}
+          {isEditing && <>
+            <button className="service-price-action-save" disabled={!changed} onClick={() => onSave(item)} title={changed ? 'Lưu giá mới' : 'Nhập giá mới để lưu'} type="button"><Save size={15} /> Lưu giá</button>
+            <button className="service-price-action-cancel" onClick={() => onCancel(item)} title="Hủy sửa giá" type="button"><X size={15} /> Hủy</button>
+          </>}
+          <button className="service-price-action-icon" onClick={() => onToggle(item)} title={item.status === 'Tạm ngưng' ? 'Kích hoạt' : 'Tạm ngưng'} type="button"><PauseCircle size={15} /></button>
+          <button className="service-price-action-icon" onClick={() => onHistory(item)} title="Xem lịch sử" type="button"><History size={15} /></button>
+        </div>
+      </td>
     </tr>
   })}</tbody></table></div>
 }

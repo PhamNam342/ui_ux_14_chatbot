@@ -176,7 +176,7 @@ export function DoctorDashboard() {
 
                       <div className="flex items-center gap-2.5 border-t border-slate-100 pt-3 sm:border-0 sm:pt-0 shrink-0">
                         <Link 
-                          to={`/doctor/patients/${item.code}`} 
+                          to={`/doctor/patients?patient=${encodeURIComponent(item.patient)}&case=${encodeURIComponent(item.code)}`}
                           className="flex-1 text-center mini-btn hover:bg-slate-100 sm:flex-initial"
                         >
                           Xem hồ sơ
