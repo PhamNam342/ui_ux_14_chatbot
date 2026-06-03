@@ -1,5 +1,5 @@
 import { AppShell, Badge, Card, PageHeader, StatCard, TopBar } from '../../components/ui.jsx'
-import { CalendarDays, CheckCircle2, BellPlus, Heart, Weight, TrendingUp } from 'lucide-react'
+import { CalendarDays, CheckCircle2, BellPlus, Heart, Weight, TrendingUp, Activity, ClipboardList } from 'lucide-react'
 
 const upcoming = [
   { date: '22/05/2026', time: '09:00', clinic: 'Phòng khám Đa khoa Tâm An', doctor: 'BS. Nguyễn Văn Minh', type: 'Khám trực tiếp' },
@@ -48,7 +48,10 @@ export function PatientDashboard() {
         {/* Health Metrics Section */}
         <div className="mt-7 grid gap-6 lg:grid-cols-2">
           <Card>
-            <h2 className="section-title">Chi số sức khỏe</h2>
+            <h2 className="section-title flex items-center gap-2">
+              <Activity size={18} className="text-teal-600" />
+              Chỉ số sức khỏe
+            </h2>
             <div className="mt-5 space-y-6">
               {/* Heart Rate */}
               <div className="border-b pb-5 last:border-b-0">
@@ -103,7 +106,10 @@ export function PatientDashboard() {
           </Card>
 
           <Card>
-            <h2 className="section-title">Thông tin y tế</h2>
+            <h2 className="section-title flex items-center gap-2">
+              <ClipboardList size={18} className="text-teal-600" />
+              Thông tin y tế
+            </h2>
             <div className="mt-5 space-y-4">
               <div className="rounded-lg bg-slate-50 p-4">
                 <div className="text-sm font-semibold text-gray-900 mb-2">Lịch sử bệnh</div>
@@ -129,7 +135,10 @@ export function PatientDashboard() {
 
         <div className="mt-7 grid gap-7 lg:grid-cols-[1.12fr_0.88fr]">
           <Card className="light-teal-card">
-            <h2 className="section-title">Ca khám lịch hẹn</h2>
+            <h2 className="section-title flex items-center gap-2">
+              <CalendarDays size={18} className="text-teal-600" />
+              Ca khám lịch hẹn
+            </h2>
             <div className="mt-5 space-y-4">
               {upcoming.map((item) => (
                 <div className="admin-calendar-event" key={`${item.date}-${item.time}`}>
@@ -142,17 +151,26 @@ export function PatientDashboard() {
           </Card>
 
           <Card>
-            <h2 className="section-title">Nhắc nhở điều trị</h2>
+            <h2 className="section-title flex items-center gap-2">
+              <BellPlus size={18} className="text-teal-600" />
+              Nhắc nhở điều trị
+            </h2>
             <div className="mt-5 space-y-3">
               {['Uống Paracetamol sau bữa sáng và tối.', 'Đo nhiệt độ mỗi 6 giờ trong 2 ngày tới.', 'Tái khám nếu còn sốt trên 38°C sau 48 giờ.'].map((item) => (
-                <div className="rounded-lg bg-teal-50 p-4 text-sm font-semibold text-slate-700" key={item}>{item}</div>
+                <div className="rounded-lg bg-teal-50 p-4 text-sm font-semibold text-slate-700 flex items-start gap-3" key={item}>
+                  <CheckCircle2 size={16} className="text-teal-600 mt-0.5 shrink-0" />
+                  <span>{item}</span>
+                </div>
               ))}
             </div>
           </Card>
         </div>
 
         <Card className="mt-7">
-          <h2 className="section-title">Các ca đã khám xong</h2>
+          <h2 className="section-title flex items-center gap-2">
+            <CheckCircle2 size={18} className="text-teal-600" />
+            Các ca đã khám xong
+          </h2>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             {finished.map((item) => (
               <div key={`${item.date}-${item.title}`} className="rounded-xl border border-slate-200 bg-slate-50 p-5">

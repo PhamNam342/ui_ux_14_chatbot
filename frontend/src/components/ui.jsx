@@ -52,8 +52,47 @@ export function Logo() {
   )
 }
 
+export function LogoutConfirmModal({ isOpen, onClose, onConfirm }) {
+  if (!isOpen) return null
+  return (
+    <div className="modal-backdrop backdrop-blur-xs transition-opacity duration-150 animate-in fade-in" style={{ zIndex: 100 }}>
+      <div 
+        className="modal bg-white rounded-2xl shadow-xl border border-slate-100 p-7 max-w-sm w-full text-center flex flex-col items-center gap-5 transform scale-100 transition-transform duration-150 animate-in zoom-in-95"
+        style={{ animationDuration: '200ms' }}
+      >
+        <div className="h-14 w-14 rounded-full bg-rose-50 border border-rose-100 text-rose-500 flex items-center justify-center">
+          <LogOut size={24} strokeWidth={2.5} />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-xl font-extrabold text-slate-900">Xác nhận đăng xuất?</h2>
+          <p className="text-sm text-slate-500 leading-relaxed">
+            Bạn có chắc chắn muốn đăng xuất khỏi phiên làm việc hiện tại không?
+          </p>
+        </div>
+        <div className="flex gap-3 w-full mt-2">
+          <button 
+            type="button"
+            className="flex-1 min-h-11 border border-slate-200 hover:border-slate-300 active:bg-slate-50 text-slate-700 font-bold rounded-xl transition duration-150 cursor-pointer"
+            onClick={onClose}
+          >
+            Hủy
+          </button>
+          <button 
+            type="button"
+            className="flex-1 min-h-11 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-bold rounded-xl shadow-md shadow-rose-600/10 hover:shadow-lg hover:shadow-rose-600/15 transition duration-150 cursor-pointer"
+            onClick={onConfirm}
+          >
+            Đăng xuất
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function Sidebar({ items, legacy = false, collapsed = false, onToggle, showLogout = true }) {
   const navigate = useNavigate()
+  const [showConfirm, setShowConfirm] = useState(false)
 
   return (
     <aside className={clsx('sidebar', legacy && 'sidebar-legacy', collapsed && 'sidebar-collapsed')}>
@@ -77,11 +116,12 @@ export function Sidebar({ items, legacy = false, collapsed = false, onToggle, sh
         ))}
       </nav>
       {showLogout && (
-        <button className="sidebar-logout" onClick={() => navigate('/')} title="Đăng xuất">
+        <button className="sidebar-logout" onClick={() => setShowConfirm(true)} title="Đăng xuất">
           <LogOut size={18} />
           {!collapsed && <span>Đăng xuất</span>}
         </button>
       )}
+      <LogoutConfirmModal isOpen={showConfirm} onClose={() => setShowConfirm(false)} onConfirm={() => { setShowConfirm(false); navigate('/'); }} />
     </aside>
   )
 }
@@ -112,6 +152,7 @@ export function TopBar({ legacy = false }) {
   const [open, setOpen] = useState(false)
   const [notifyOpen, setNotifyOpen] = useState(false)
   const [toast, setToast] = useState('')
+  const [showConfirm, setShowConfirm] = useState(false)
   const [notifications, setNotifications] = useState([
     { id: 'NT-01', title: 'Lịch tư vấn mới đã được xác nhận', detail: 'Bác sĩ sẽ tiếp nhận cuộc gọi lúc 14:00 hôm nay.', time: '5 phút trước', unread: true, icon: <Video size={16} /> },
     { id: 'NT-02', title: 'Hồ sơ bệnh án vừa được cập nhật', detail: 'Kết quả khám gần nhất đã được bổ sung vào hồ sơ.', time: '45 phút trước', unread: true, icon: <NotebookPen size={16} /> },
@@ -216,13 +257,14 @@ export function TopBar({ legacy = false }) {
             </div>
           )}
           <div className="profile-menu-logout">
-            <button onClick={logout}><LogOut size={17} /> Đăng xuất</button>
+            <button onClick={() => { setOpen(false); setShowConfirm(true); }}><LogOut size={17} /> Đăng xuất</button>
           </div>
         </div>
       )}
       </div>
       {toast && <div className="toast toast-red"><CheckCircle2 size={18} /> {toast}</div>}
       </div>
+      <LogoutConfirmModal isOpen={showConfirm} onClose={() => setShowConfirm(false)} onConfirm={() => { setShowConfirm(false); logout(); }} />
     </header>
   )
 }
@@ -231,10 +273,10 @@ export function AppShell({ role, children, legacy = false }) {
   const [collapsed, setCollapsed] = useState(false)
   const items = {
     admin: [
-      { to: '/admin', label: 'Quản lý các phòng khám', icon: <Hospital size={18} />, end: true },
+      { to: '/admin', label: 'Quản lý phòng khám', icon: <Hospital size={18} />, end: true },
       { to: '/admin/doctors', label: 'Quản lí bác sĩ', icon: <Users size={18} /> },
       { to: '/admin/schedule', label: 'Quản lí ca khám', icon: <CalendarDays size={18} /> },
-      { to: '/admin/service-pricing', label: 'Bảng giá theo cơ sở', icon: <ReceiptText size={18} /> },
+      { to: '/admin/service-pricing', label: 'Bảng giá dịch vụ', icon: <ReceiptText size={18} /> },
       { to: '/admin/revenue', label: 'Báo cáo doanh thu', icon: <BarChart3 size={18} /> },
       { to: '/admin/quality', label: 'Báo cáo ca khám', icon: <FileBarChart size={18} /> },
     ],
@@ -275,9 +317,9 @@ export function PageHeader({ eyebrow, title, subtitle, action }) {
   return (
     <div className="page-header mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div>
-        {eyebrow && <span className="page-header-eyebrow">{eyebrow}</span>}
-        <h1>{title}</h1>
-        {subtitle && <p className="mt-2 text-base text-slate-500">{subtitle}</p>}
+        {eyebrow && <span className="page-header-eyebrow mb-3.5">{eyebrow}</span>}
+        <h1 className="mt-0">{title}</h1>
+        {subtitle && <p className="mt-3 text-base text-slate-500">{subtitle}</p>}
       </div>
       {action}
     </div>

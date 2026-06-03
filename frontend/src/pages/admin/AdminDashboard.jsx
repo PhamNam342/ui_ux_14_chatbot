@@ -212,7 +212,9 @@ export function AdminDashboard() {
           <div className="admin-clinic-head-actions">
             <Button variant="outline" onClick={() => notify('Đã xuất danh sách bác sĩ')}><Download size={17} /> Xuất danh sách</Button>
             <Button disabled={syncing} variant="outline" onClick={syncDoctors}><RefreshCw className={syncing ? 'is-spinning' : ''} size={17} /> {syncing ? 'Đang đồng bộ' : 'Đồng bộ dữ liệu'}</Button>
-            <Button onClick={openAddDoctor}><Plus size={18} /> Thêm bác sĩ mới</Button>
+            <button className="admin-primary-btn" onClick={openAddDoctor} type="button">
+              <Plus size={18} /> Thêm bác sĩ mới
+            </button>
           </div>
         </section>
 
@@ -235,28 +237,40 @@ export function AdminDashboard() {
           </article>
         </section>
 
-        <section className={`admin-doctor-toolbar ${filtersOpen ? 'is-open' : ''}`}>
-          <div className="admin-doctor-toolbar-head">
-            <label className="admin-doctor-search">
-              <Search size={19} />
-              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm theo tên, số CCCD, số điện thoại..." />
-            </label>
-            <button className="admin-doctor-filter-toggle" type="button" onClick={() => setFiltersOpen((value) => !value)}><Filter size={18} /> Bộ lọc</button>
+        <section className={`admin-clinic-toolbar ${filtersOpen ? 'is-open' : ''}`}>
+          <div className="admin-clinic-toolbar-head">
+            <button className="admin-mobile-filter-toggle" onClick={() => setFiltersOpen((open) => !open)} type="button">
+              <Filter size={17} /> {filtersOpen ? 'Thu gọn' : 'Mở bộ lọc'}
+            </button>
           </div>
-          <div className="admin-doctor-filter-row">
-            <select aria-label="Lọc chuyên khoa" value={specialty} onChange={(event) => setSpecialty(event.target.value)}>
-              {adminSpecialties.map((item) => <option key={item}>{item}</option>)}
-            </select>
-            <select aria-label="Lọc phòng khám" value={clinic} onChange={(event) => setClinic(event.target.value)}>
-              {adminClinics.map((item) => <option key={item}>{item}</option>)}
-            </select>
-            <select aria-label="Lọc trạng thái" value={status} onChange={(event) => setStatus(event.target.value)}>
-              {adminStatuses.map((item) => <option key={item}>{item}</option>)}
-            </select>
-            <select aria-label="Sắp xếp bác sĩ" value={sort} onChange={(event) => setSort(event.target.value)}>
-              {['Mới cập nhật', 'Tên A-Z', 'Nhiều lịch khám nhất', 'Đánh giá cao nhất'].map((item) => <option key={item}>{item}</option>)}
-            </select>
-            <button className="admin-doctor-reset" type="button" onClick={resetFilters}><X size={16} /> Reset bộ lọc</button>
+          <div className="admin-clinic-toolbar-grid">
+            <label className="admin-filter-control admin-filter-search">
+              <div>
+                <Search size={18} />
+                <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm theo tên, số CCCD, số điện thoại..." />
+              </div>
+            </label>
+            <label className="admin-filter-control">
+              <select value={specialty} onChange={(event) => setSpecialty(event.target.value)} aria-label="Lọc chuyên khoa">
+                {adminSpecialties.map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </label>
+            <label className="admin-filter-control">
+              <select value={clinic} onChange={(event) => setClinic(event.target.value)} aria-label="Lọc phòng khám">
+                {adminClinics.map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </label>
+            <label className="admin-filter-control">
+              <select value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Lọc trạng thái">
+                {adminStatuses.map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </label>
+            <label className="admin-filter-control">
+              <select value={sort} onChange={(event) => setSort(event.target.value)} aria-label="Sắp xếp bác sĩ">
+                {['Mới cập nhật', 'Tên A-Z', 'Nhiều lịch khám nhất', 'Đánh giá cao nhất'].map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </label>
+            <button className="admin-reset-filter-btn" onClick={resetFilters} type="button">Reset bộ lọc</button>
           </div>
         </section>
 
@@ -269,25 +283,34 @@ export function AdminDashboard() {
         </section>
 
         {filteredDoctors.length === 0 ? (
-          <section className="admin-doctor-empty"><Stethoscope size={42} /><h3>Không tìm thấy bác sĩ</h3><p>Thử điều chỉnh bộ lọc hoặc thêm hồ sơ bác sĩ mới.</p><Button onClick={openAddDoctor}><Plus size={18} /> Thêm bác sĩ mới</Button></section>
+          <section className="admin-doctor-empty">
+            <Stethoscope size={42} />
+            <h3>Không tìm thấy bác sĩ</h3>
+            <p>Thử điều chỉnh bộ lọc hoặc thêm hồ sơ bác sĩ mới.</p>
+            <button className="admin-primary-btn" onClick={openAddDoctor} type="button">
+              <Plus size={18} /> Thêm bác sĩ mới
+            </button>
+          </section>
         ) : view === 'table' ? (
           <section className="admin-doctor-table-wrap">
             <table>
-              <thead><tr><th>Bác sĩ</th><th>Chuyên khoa</th><th>Phòng khám</th><th>Lịch hôm nay</th><th>Đánh giá</th><th>Trạng thái</th><th>Cập nhật</th><th>Thao tác</th></tr></thead>
+              <thead><tr><th>Bác sĩ</th><th>Chuyên khoa</th><th>Thông tin liên hệ</th><th>Phòng khám</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
               <tbody>{filteredDoctors.map((doctor) => (
                 <tr key={doctor.id}>
-                  <td><div className="admin-doctor-person"><span className={`admin-doctor-avatar is-${doctor.color}`}>{doctor.initials}</span><span><b>BS. {doctor.name}</b><small>{doctor.email}<br />{doctor.phone}</small></span></div></td>
-                  <td><span className="admin-doctor-spec">{doctor.spec}</span></td>
-                  <td><b>{doctor.clinic}</b><small>{doctor.clinicRoom}</small></td>
-                  <td><b>{doctor.today} ca</b><small>Lịch đã xác nhận</small></td>
-                  <td><span className="admin-doctor-rating"><Star size={15} /> {doctor.rating}</span><small>{doctor.reviews} đánh giá</small></td>
+                  <td><span className="admin-doctor-table-name">BS. {doctor.name}</span></td>
+                  <td><span className="admin-doctor-table-spec">{doctor.spec}</span></td>
+                  <td>
+                    <div className="admin-doctor-table-main-text">{doctor.email}</div>
+                    <div className="admin-doctor-table-sub-text">{doctor.phone}</div>
+                  </td>
+                  <td>
+                    <div className="admin-doctor-table-main-text">{doctor.clinic}</div>
+                    <div className="admin-doctor-table-sub-text">{doctor.clinicRoom}</div>
+                  </td>
                   <td><span className={`admin-doctor-status ${statusClass(doctor.status)}`}>{doctor.status}</span></td>
-                  <td><small>{doctor.updated}</small></td>
                   <td><div className="admin-doctor-row-actions">
                     <Link data-tooltip="Xem hồ sơ chi tiết" aria-label={`Xem chi tiết ${doctor.name}`} to={`/admin/doctors/${doctor.id}`}><Eye size={17} /></Link>
-                    <button data-tooltip="Chỉnh sửa hồ sơ" aria-label={`Chỉnh sửa ${doctor.name}`} type="button" onClick={() => openEditDoctor(doctor)}><Edit3 size={17} /></button>
                     <button data-tooltip="Xem lịch khám chi tiết" aria-label={`Phân lịch ${doctor.name}`} type="button" onClick={() => navigate(`/admin/doctors/${doctor.id}/schedule`)}><CalendarCheck2 size={17} /></button>
-                    <button data-tooltip={doctor.status === 'Tạm ngưng' ? 'Kích hoạt tài khoản' : 'Tạm ngưng hoạt động'} aria-label={`${doctor.status === 'Tạm ngưng' ? 'Kích hoạt' : 'Tạm ngưng'} ${doctor.name}`} type="button" onClick={() => toggleSuspend(doctor)}><PauseCircle size={17} /></button>
                   </div></td>
                 </tr>
               ))}</tbody>

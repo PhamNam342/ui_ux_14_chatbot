@@ -250,14 +250,37 @@ export function AdminServicePricing() {
           </footer> */}
         </section>
 
-        <section className={`service-price-toolbar ${filterOpen ? 'is-open' : ''}`} ref={filterRef}>
-          <header><div><Filter size={18} /><b>Bộ lọc bảng giá</b></div><button onClick={() => setFilterOpen((value) => !value)} type="button"><Filter size={16} /> Bộ lọc</button></header>
-          <div className="service-price-filter-grid">
-            <label className="service-price-facility-filter"><span>Cơ sở y tế</span><select value={clinic} onChange={(event) => changeClinic(event.target.value)}>{clinics.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label><span>Chuyên khoa</span><select value={specialty} onChange={(event) => setSpecialty(event.target.value)}>{specialties.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label><span>Trạng thái</span><select value={status} onChange={(event) => setStatus(event.target.value)}>{statuses.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label className="service-price-search"><span>Tìm kiếm dịch vụ</span><div><Search size={16} /><input onChange={(event) => setQuery(event.target.value)} placeholder="Tên dịch vụ / mã dịch vụ" value={query} /></div></label>
-            <footer><button onClick={() => notify(`Đang hiển thị ${visibleServices.length} dịch vụ phù hợp`)} type="button"><Filter size={15} /> Áp dụng</button><button onClick={resetFilters} type="button"><RotateCcw size={15} /> Bỏ lọc</button></footer>
+        <section className={`admin-clinic-toolbar ${filterOpen ? 'is-open' : ''}`} ref={filterRef}>
+          <div className="admin-clinic-toolbar-head">
+            <button className="admin-mobile-filter-toggle" onClick={() => setFilterOpen((value) => !value)} type="button">
+              <Filter size={17} /> {filterOpen ? 'Thu gọn' : 'Mở bộ lọc'}
+            </button>
+          </div>
+          <div className="admin-service-toolbar-grid">
+            <label className="admin-filter-control">
+              <select value={clinic} onChange={(event) => changeClinic(event.target.value)} aria-label="Cơ sở y tế">
+                {clinics.map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </label>
+            <label className="admin-filter-control">
+              <select value={specialty} onChange={(event) => setSpecialty(event.target.value)} aria-label="Chuyên khoa">
+                {specialties.map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </label>
+            <label className="admin-filter-control">
+              <select value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Trạng thái">
+                {statuses.map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </label>
+            <label className="admin-filter-control admin-filter-search">
+              <div>
+                <Search size={18} />
+                <input onChange={(event) => setQuery(event.target.value)} placeholder="Tên dịch vụ / mã dịch vụ" value={query} />
+              </div>
+            </label>
+            <button className="admin-reset-filter-btn" onClick={resetFilters} type="button">
+              <RotateCcw size={15} /> Reset bộ lọc
+            </button>
           </div>
         </section>
 

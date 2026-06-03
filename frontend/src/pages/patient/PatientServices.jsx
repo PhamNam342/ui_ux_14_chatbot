@@ -276,16 +276,20 @@ export function PatientServices() {
           <div className="service-section-head"><div><small>Danh mục dịch vụ</small><h2>Tất cả dịch vụ y tế</h2></div><span className="service-result-count">{filteredServices.length} dịch vụ phù hợp</span></div>
 
           <Card className="service-filter-panel" style={{ marginBottom: '22px' }}>
-            <label className="service-search">
-              <Search size={20} />
-              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm dịch vụ khám, xét nghiệm hoặc gói chăm sóc..." />
-            </label>
-            <div className="service-category-chips">
-              {categories.map(({ label, icon }) => <button key={label} className={category === label ? 'active' : ''} onClick={() => setCategory(label)}>{icon} {label}</button>)}
+            <div className="service-filter-top-row">
+              <label className="service-search">
+                <Search size={20} />
+                <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm dịch vụ khám, xét nghiệm hoặc gói chăm sóc..." />
+              </label>
+              <div className="service-select-group">
+                <select value={type} onChange={(event) => setType(event.target.value)}>{serviceTypes.map((item) => <option key={item}>{item}</option>)}</select>
+                <select value={priceRange} onChange={(event) => setPriceRange(event.target.value)}>{priceRanges.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select>
+              </div>
             </div>
-            <div className="service-filter-row">
-              <select value={type} onChange={(event) => setType(event.target.value)}>{serviceTypes.map((item) => <option key={item}>{item}</option>)}</select>
-              <select value={priceRange} onChange={(event) => setPriceRange(event.target.value)}>{priceRanges.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select>
+            <div className="service-filter-bottom-row">
+              <div className="service-category-chips">
+                {categories.map(({ label, icon }) => <button key={label} className={category === label ? 'active' : ''} onClick={() => setCategory(label)}>{icon} {label}</button>)}
+              </div>
               <label className="insurance-toggle"><input type="checkbox" checked={insuranceOnly} onChange={(event) => setInsuranceOnly(event.target.checked)} /><span /> Chỉ dịch vụ hỗ trợ BHYT</label>
             </div>
           </Card>

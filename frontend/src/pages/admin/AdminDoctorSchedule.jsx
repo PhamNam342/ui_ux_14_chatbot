@@ -86,9 +86,9 @@ export function AdminDoctorSchedule() {
             <strong style={{ fontSize: '24px', fontWeight: '950', color: '#1d4ed8' }}>{appointments.filter(item => item.status === 'Đã xác nhận' || item.status === 'Đang khám' || item.status === 'Hoàn thành').length} ca</strong>
           </article>
           <article className="admin-schedule-kpi is-violet" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '20px' }}>
-            <span className="admin-clinic-kpi-icon" style={{ display: 'inline-flex', height: '42px', width: '42px', placeItems: 'center', borderRadius: '12px', background: '#faf5ff', color: '#7e22ce', justifyContent: 'center' }}><Star size={20} /></span>
+            <span className="admin-clinic-kpi-icon" style={{ display: 'inline-flex', height: '42px', width: '42px', placeItems: 'center', borderRadius: '12px', background: '#fef9c3', color: '#f59e0b', justifyContent: 'center' }}><Star size={20} /></span>
             <p style={{ margin: '10px 0 5px', fontSize: '13px', color: '#64748b' }}>Đánh giá trung bình</p>
-            <strong style={{ fontSize: '24px', fontWeight: '950', color: '#7e22ce' }}>{doctor.rating} ★</strong>
+            <strong style={{ fontSize: '24px', fontWeight: '950', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '6px' }}>{doctor.rating} <Star size={20} style={{ color: '#f59e0b', fill: '#f59e0b' }} /></strong>
           </article>
         </section>
 
@@ -110,7 +110,7 @@ export function AdminDoctorSchedule() {
           </section>
         ) : (
           <section className="admin-schedule-table-wrap" style={{ overflowX: 'auto', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '16px' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13.5px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px', color: '#475569' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
                   <th style={{ padding: '14px 18px', fontWeight: '800' }}>Thời gian</th>
@@ -126,11 +126,11 @@ export function AdminDoctorSchedule() {
                 {filteredAppointments.map((item) => (
                   <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                     <td style={{ padding: '14px 18px' }}><b style={{ color: '#0f766e' }}>{item.time}</b><br /><small style={{ color: '#64748b' }}>{formatDate(item.date)}</small></td>
-                    <td style={{ padding: '14px 18px' }}><div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ display: 'flex', width: '32px', height: '32px', borderRadius: '50%', background: '#f1f5f9', fontWeight: '800', color: '#475569', justifyContent: 'center', alignItems: 'center', fontSize: '12px' }}>{item.initials}</span><div><b>{item.patient}</b><br /><small style={{ color: '#64748b' }}>{item.id}</small></div></div></td>
-                    <td style={{ padding: '14px 18px' }}><b>{item.clinic}</b><br /><small style={{ color: '#64748b' }}>{item.room}</small></td>
+                    <td style={{ padding: '14px 18px' }}><div><b style={{ color: '#1e293b', fontWeight: 600 }}>{item.patient}</b><br /><small style={{ color: '#94a3b8' }}>{item.id}</small></div></td>
+                    <td style={{ padding: '14px 18px' }}><b style={{ color: '#1e293b', fontWeight: 600 }}>{item.clinic}</b><br /><small style={{ color: '#94a3b8' }}>{item.room}</small></td>
                     <td style={{ padding: '14px 18px' }}><span style={{ padding: '4px 10px', borderRadius: '999px', fontSize: '11px', fontWeight: '800', background: item.type === 'Tư vấn online' ? '#e0f2fe' : '#f0fdf4', color: item.type === 'Tư vấn online' ? '#0369a1' : '#15803d' }}>{item.type}</span></td>
                     <td style={{ padding: '14px 18px' }}><span className={`admin-schedule-status ${statusClass(item.status)}`}>{item.status}</span></td>
-                    <td style={{ padding: '14px 18px' }}><span style={{ fontWeight: '800', color: '#475569' }}>{item.payment}</span></td>
+                    <td style={{ padding: '14px 18px', color: '#475569', fontWeight: 400 }}>{item.payment}</td>
                     <td style={{ padding: '14px 18px', color: '#64748b' }}>{item.reason}</td>
                   </tr>
                 ))}

@@ -71,6 +71,14 @@ export function AdminDoctorDetail() {
   const [showPassword, setShowPassword] = useState(false)
   const [deleteText, setDeleteText] = useState('')
   const [confirmSuspendOpen, setConfirmSuspendOpen] = useState(false)
+  const [dutyOpen, setDutyOpen] = useState(false)
+  const [dutyForm, setDutyForm] = useState({
+    date: '2026-06-03',
+    shift: 'Ca sáng 08:00 - 12:00',
+    clinic: doctor.clinic,
+    room: doctor.clinicRoom,
+    slots: 8
+  })
 
   const notify = (message) => {
     setToast(message)
@@ -129,10 +137,8 @@ export function AdminDoctorDetail() {
             <p>Cập nhật thông tin cá nhân, chuyên môn, lịch làm việc và quyền truy cập.</p>
           </div>
           <div className="admin-clinic-head-actions">
-            <Button variant="outline" onClick={() => setPasswordOpen(true)}><KeyRound size={17} /> Đặt lại mật khẩu</Button>
-            <Button variant="outline" className="admin-doctor-suspend-button" onClick={() => setConfirmSuspendOpen(true)}><ShieldAlert size={17} /> {doctor.status === 'Tạm ngưng' ? 'Kích hoạt tài khoản' : 'Tạm ngưng tài khoản'}</Button>
             <Button className="admin-doctor-delete-button" onClick={() => setDeleteOpen(true)}><Trash2 size={17} /> Xóa bác sĩ</Button>
-            <Button onClick={() => notify('Đã lưu thay đổi hồ sơ bác sĩ')}><Save size={17} /> Lưu thay đổi</Button>
+            <Button className="admin-primary-btn" onClick={() => notify('Đã lưu thay đổi hồ sơ bác sĩ')}><Save size={17} /> Lưu thay đổi</Button>
           </div>
         </section>
 
@@ -197,7 +203,10 @@ export function AdminDoctorDetail() {
                 <label><span>Trạng thái nhận lịch</span><select><option>Đang nhận lịch</option><option>Chỉ nhận tái khám</option><option>Tạm khóa lịch</option></select></label>
               </div>
               <div className="admin-doctor-week-grid">{['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((day, index) => <article className={index === 6 ? 'is-off' : ''} key={day}><b>{day}</b><span>{index === 6 ? 'Nghỉ' : 'Ca sáng'}</span><span>{index > 4 ? 'Ca chiều' : 'Ca tối'}</span></article>)}</div>
-              <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+              <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <Button variant="outline" onClick={() => setDutyOpen(true)}>
+                  <BriefcaseMedical size={17} /> Phân công lịch trực
+                </Button>
                 <Button variant="outline" onClick={() => navigate(`/admin/doctors/${doctor.id}/schedule`)}>
                   <CalendarDays size={17} /> Xem lịch khám chi tiết
                 </Button>
@@ -222,7 +231,7 @@ export function AdminDoctorDetail() {
                 <article><Clock3 size={20} /><span><small>Lần đăng nhập gần nhất</small><b>30/05/2026 · 20:42</b></span></article>
               </div>
               <div className="admin-doctor-security-actions"><Button onClick={() => setPasswordOpen(true)}><KeyRound size={17} /> Đổi mật khẩu</Button><Button variant="outline" onClick={() => setConfirmSuspendOpen(true)}><ShieldAlert size={17} /> Thay đổi trạng thái</Button></div>
-              <h4 className="admin-doctor-log-title">Nhật ký hoạt động</h4>
+              <h4 className="admin-doctor-log-title"><strong>Nhật ký hoạt động</strong></h4>
               <div className="admin-doctor-activity-log">{activityLog.map(([title, meta]) => <article key={title}><i /><div><b>{title}</b><small>{meta}</small></div></article>)}</div>
             </section>}
           </section>
@@ -265,6 +274,25 @@ export function AdminDoctorDetail() {
               <Button onClick={handleConfirmSuspend}>Xác nhận</Button>
             </div>
           </div>
+        </div>
+      )}
+
+      {dutyOpen && (
+        <div className="modal-backdrop" onMouseDown={() => setDutyOpen(false)}>
+          <form className="modal admin-doctor-password-modal" onSubmit={(e) => { e.preventDefault(); setDutyOpen(false); notify('Đã phân công lịch trực cho bác sĩ BS. ' + doctor.name) }} onMouseDown={(event) => event.stopPropagation()} style={{ background: '#fff', borderRadius: '16px', padding: '24px', maxWidth: '450px' }}>
+            <div className="modal-head"><div><span className="admin-clinic-eyebrow"><Stethoscope size={14} /> PHÂN CÔNG NHÂN SỰ</span><h2>Phân công lịch trực</h2><p>Thiết lập ca trực và tự động mở slot nhận lịch khám cho BS. {doctor.name}.</p></div><button type="button" onClick={() => setDutyOpen(false)}>×</button></div>
+            <div className="admin-doctor-form-grid" style={{ gridTemplateColumns: '1fr', gap: '12px', marginTop: '16px' }}>
+              <label><span>Cơ sở</span><select value={dutyForm.clinic} onChange={(e) => setDutyForm({ ...dutyForm, clinic: e.target.value })}>{adminClinics.slice(1).map((item) => <option key={item}>{item}</option>)}</select></label>
+              <label><span>Phòng khám cụ thể</span><input value={dutyForm.room} onChange={(e) => setDutyForm({ ...dutyForm, room: e.target.value })} /></label>
+              <label><span>Ngày trực</span><input type="date" value={dutyForm.date} onChange={(e) => setDutyForm({ ...dutyForm, date: e.target.value })} /></label>
+              <label><span>Ca trực</span><select value={dutyForm.shift} onChange={(e) => setDutyForm({ ...dutyForm, shift: e.target.value })}><option>Ca sáng 08:00 - 12:00</option><option>Ca chiều 13:30 - 17:30</option><option>Ca tối 18:00 - 21:00</option></select></label>
+              <label><span>Số lượng slot nhận khám</span><input type="number" min="1" value={dutyForm.slots} onChange={(e) => setDutyForm({ ...dutyForm, slots: e.target.value })} /></label>
+            </div>
+            <div className="modal-actions" style={{ marginTop: '20px' }}>
+              <Button variant="outline" type="button" onClick={() => setDutyOpen(false)}>Hủy</Button>
+              <Button type="submit"><Check size={17} /> Lưu lịch trực</Button>
+            </div>
+          </form>
         </div>
       )}
 

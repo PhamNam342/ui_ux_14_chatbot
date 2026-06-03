@@ -9,7 +9,6 @@ import {
   Download,
   Edit3,
   Filter,
-  History,
   Mail,
   MapPin,
   PauseCircle,
@@ -551,18 +550,15 @@ export function AdminClinics() {
 
             <section className={`admin-clinic-toolbar ${filtersOpen ? 'is-open' : ''}`}>
               <div className="admin-clinic-toolbar-head">
-                <div><SlidersHorizontal size={20} /><strong>Bộ lọc phòng khám</strong></div>
                 <button className="admin-mobile-filter-toggle" onClick={() => setFiltersOpen((open) => !open)} type="button">
                   <Filter size={17} /> {filtersOpen ? 'Thu gọn' : 'Mở bộ lọc'}
                 </button>
               </div>
               <div className="admin-clinic-toolbar-grid">
                 <label className="admin-filter-control admin-filter-search">
-                  <span>Tìm kiếm</span>
                   <div><Search size={18} /><input onChange={(event) => setQuery(event.target.value)} placeholder="Tên hoặc địa chỉ phòng khám" value={query} /></div>
                 </label>
                 <label className="admin-filter-control">
-                  <span>Trạng thái</span>
                   <select onChange={(event) => setStatus(event.target.value)} value={status}>
                     <option>Tất cả trạng thái</option>
                     <option>Đang hoạt động</option>
@@ -571,7 +567,6 @@ export function AdminClinics() {
                   </select>
                 </label>
                 <label className="admin-filter-control">
-                  <span>Chuyên khoa</span>
                   <select onChange={(event) => setSpecialty(event.target.value)} value={specialty}>
                     <option>Tất cả chuyên khoa</option>
                     <option>Nội tổng quát</option>
@@ -582,7 +577,6 @@ export function AdminClinics() {
                   </select>
                 </label>
                 <label className="admin-filter-control">
-                  <span>Khu vực</span>
                   <select onChange={(event) => setDistrict(event.target.value)} value={district}>
                     <option>Tất cả khu vực</option>
                     <option>Quận 1</option>
@@ -591,7 +585,6 @@ export function AdminClinics() {
                   </select>
                 </label>
                 <label className="admin-filter-control">
-                  <span>Sắp xếp</span>
                   <select onChange={(event) => setSort(event.target.value)} value={sort}>
                     <option>Mới cập nhật</option>
                     <option>Đánh giá cao nhất</option>
@@ -613,15 +606,10 @@ export function AdminClinics() {
                     </div>
                     <div className="admin-clinic-card-body">
                       <div className="admin-clinic-card-title">
-                        <div>
-                          <h2>{clinic.name}</h2>
-                          <p><MapPin size={15} /> {clinic.address}</p>
-                        </div>
+                        <h2>{clinic.name}</h2>
                         <span><Star fill="currentColor" size={16} /> {clinic.rating} <small>({clinic.reviews.toLocaleString('vi-VN')})</small></span>
                       </div>
-                      <div className="admin-clinic-location-line">
-                        <strong>{clinic.district}</strong><span>·</span><span>Cách bạn {clinic.distance}</span>
-                      </div>
+                      <p className="admin-clinic-card-address"><MapPin size={15} /> <span>{clinic.address}</span></p>
                       <div className="admin-clinic-mini-stats">
                         <div><Users size={17} /><strong>{clinic.doctors}</strong><span>Bác sĩ</span></div>
                         <div><BedDouble size={17} /><strong>{clinic.rooms}</strong><span>Phòng</span></div>
@@ -632,7 +620,6 @@ export function AdminClinics() {
                       </div>
                       <div className="admin-clinic-operations">
                         <p><Clock3 size={16} /><span>Giờ mở cửa</span><strong>{clinic.openHours}</strong></p>
-                        <p><History size={16} /><span>Cập nhật</span><strong>{clinic.updated}</strong></p>
                         <div>
                           <p><Activity size={16} /><span>Tỷ lệ lấp đầy phòng</span><strong>{clinic.occupancy}%</strong></p>
                           <i><b style={{ width: `${clinic.occupancy}%` }} /></i>

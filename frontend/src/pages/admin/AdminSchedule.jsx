@@ -234,24 +234,60 @@ export function AdminSchedule({ showModal = false }) {
           {kpis.map(([label, value, trend, Icon, tone]) => <article className={`admin-schedule-kpi is-${tone}`} key={label}><span>{createElement(Icon, { size: 21 })}</span><p>{label}</p><strong>{value}</strong><small>{trend}</small></article>)}
         </section>
 
-        <section className={`admin-schedule-toolbar ${filtersOpen ? 'is-open' : ''}`}>
-          <div className="admin-schedule-toolbar-head">
-            <div><Filter size={19} /><b>Bộ lọc lịch khám</b></div>
-            <button type="button" onClick={() => setFiltersOpen((value) => !value)}><Filter size={16} /> Bộ lọc</button>
+        <section className={`admin-clinic-toolbar ${filtersOpen ? 'is-open' : ''}`}>
+          <div className="admin-clinic-toolbar-head">
+            <button className="admin-mobile-filter-toggle" onClick={() => setFiltersOpen((open) => !open)} type="button">
+              <Filter size={17} /> {filtersOpen ? 'Thu gọn' : 'Mở bộ lọc'}
+            </button>
           </div>
-          <div className="admin-schedule-filter-grid">
-            <label><span>Chọn ngày</span><input type="date" value={date} onChange={(event) => setDate(event.target.value)} /></label>
-            <label><span>Cơ sở</span><select value={clinic} onChange={(event) => setClinic(event.target.value)}>{clinics.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label><span>Chuyên khoa</span><select value={spec} onChange={(event) => setSpec(event.target.value)}>{specialties.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label><span>Bác sĩ</span><select value={doctor} onChange={(event) => setDoctor(event.target.value)}>{selectDoctorsList.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label><span>Trạng thái</span><select value={status} onChange={(event) => setStatus(event.target.value)}>{statuses.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label className="admin-schedule-search"><span>Tìm kiếm</span><div><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Bệnh nhân / mã lịch khám" /></div></label>
+          <div className="admin-schedule-toolbar-grid">
+            <div className="admin-schedule-filters-row">
+              <label className="admin-filter-control">
+                <input type="date" value={date} onChange={(event) => setDate(event.target.value)} aria-label="Chọn ngày" />
+              </label>
+              <label className="admin-filter-control">
+                <select value={clinic} onChange={(event) => setClinic(event.target.value)} aria-label="Cơ sở">
+                  {clinics.map((item) => <option key={item}>{item}</option>)}
+                </select>
+              </label>
+              <label className="admin-filter-control">
+                <select value={spec} onChange={(event) => setSpec(event.target.value)} aria-label="Chuyên khoa">
+                  {specialties.map((item) => <option key={item}>{item}</option>)}
+                </select>
+              </label>
+              <label className="admin-filter-control">
+                <select value={doctor} onChange={(event) => setDoctor(event.target.value)} aria-label="Bác sĩ">
+                  {selectDoctorsList.map((item) => <option key={item}>{item}</option>)}
+                </select>
+              </label>
+              <label className="admin-filter-control">
+                <select value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Trạng thái">
+                  {statuses.map((item) => <option key={item}>{item}</option>)}
+                </select>
+              </label>
+            </div>
+            <div className="admin-schedule-actions-row">
+              <label className="admin-filter-control admin-filter-search">
+                <div>
+                  <Search size={18} />
+                  <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Bệnh nhân / mã lịch khám" />
+                </div>
+              </label>
+              <button className="admin-reset-filter-btn" type="button" onClick={resetFilters}>
+                <RotateCcw size={15} /> Reset bộ lọc
+              </button>
+              <button className="admin-reset-filter-btn" type="button" onClick={() => setAdvancedOpen((value) => !value)}>
+                <Filter size={15} /> Lọc nâng cao
+              </button>
+            </div>
           </div>
-          <div className="admin-schedule-filter-actions">
-            <button type="button" onClick={resetFilters}><RotateCcw size={15} /> Reset bộ lọc</button>
-            <button type="button" onClick={() => setAdvancedOpen((value) => !value)}><Filter size={15} /> Lọc nâng cao</button>
-          </div>
-          {advancedOpen && <div className="admin-schedule-advanced"><span><input type="checkbox" /> Chỉ hiển thị ca chưa thanh toán</span><span><input type="checkbox" /> Ca cần điều phối phòng</span><span><input type="checkbox" /> Bác sĩ sắp đầy lịch</span></div>}
+          {advancedOpen && (
+            <div className="admin-schedule-advanced mt-4 pt-4 border-t border-slate-100 flex flex-wrap gap-5" style={{ fontSize: '13.5px', color: '#475569' }}>
+              <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" className="rounded border-slate-300" /> Chỉ hiển thị ca chưa thanh toán</label>
+              <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" className="rounded border-slate-300" /> Ca cần điều phối phòng</label>
+              <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" className="rounded border-slate-300" /> Bác sĩ sắp đầy lịch</label>
+            </div>
+          )}
         </section>
 
         <section className="admin-schedule-view-bar">

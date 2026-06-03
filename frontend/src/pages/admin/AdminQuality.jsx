@@ -186,13 +186,26 @@ export function AdminQuality() {
 
         {notice && <div className="quality-toast"><CheckCircle2 size={17} /> {notice}</div>}
 
-        <section className="quality-filter-card">
-          <div className="quality-filter-head"><div><Activity size={18} /><span>Bộ lọc báo cáo</span></div><small>Cập nhật gần nhất: Hôm nay, 10:45</small></div>
-          <div className="quality-filter-grid">
-            <label><span>Cơ sở y tế</span><select value={clinic} onChange={(event) => setClinic(event.target.value)}>{clinics.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label><span>Chuyên khoa</span><select value={specialty} onChange={(event) => setSpecialty(event.target.value)}>{specialties.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label><span>Khoảng thời gian</span><select value={range} onChange={(event) => setRange(event.target.value)}>{Object.keys(trendRanges).map((item) => <option key={item}>{item} gần đây</option>)}</select></label>
-            <button className="quality-refresh-btn" disabled={refreshing} onClick={refreshData} type="button"><RefreshCw className={refreshing ? 'is-spinning' : ''} size={16} /> {refreshing ? 'Đang làm mới' : 'Làm mới dữ liệu'}</button>
+        <section className="admin-clinic-toolbar">
+          <div className="admin-quality-toolbar-grid">
+            <label className="admin-filter-control">
+              <select value={clinic} onChange={(event) => setClinic(event.target.value)} aria-label="Cơ sở y tế">
+                {clinics.map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </label>
+            <label className="admin-filter-control">
+              <select value={specialty} onChange={(event) => setSpecialty(event.target.value)} aria-label="Chuyên khoa">
+                {specialties.map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </label>
+            <label className="admin-filter-control">
+              <select value={range} onChange={(event) => setRange(event.target.value)} aria-label="Khoảng thời gian">
+                {Object.keys(trendRanges).map((item) => <option key={item}>{item} gần đây</option>)}
+              </select>
+            </label>
+            <button className="admin-reset-filter-btn" disabled={refreshing} onClick={refreshData} type="button">
+              <RefreshCw className={refreshing ? 'is-spinning' : ''} size={16} /> {refreshing ? 'Đang làm mới' : 'Làm mới dữ liệu'}
+            </button>
           </div>
         </section>
 
