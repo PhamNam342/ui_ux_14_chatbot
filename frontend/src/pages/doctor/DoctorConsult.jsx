@@ -399,7 +399,7 @@ export function DoctorConsult() {
                               }`}
                             >
                               <Video size={15} />
-                              {isVideoCall ? 'Trở lại Chat' : 'Bắt đầu gọi video'}
+                              {isVideoCall ? 'Trở lại Chat' : ''}
                             </button>
                           )}
                           <button
@@ -412,7 +412,7 @@ export function DoctorConsult() {
                             }`}
                           >
                             <ClipboardCheck size={15} />
-                            {isEndingConsult ? 'Xem hội thoại' : 'Kết thúc & Kê đơn'}
+                            {isEndingConsult ? 'Xem hội thoại' : ''}
                           </button>
                         </>
                       ) : (
