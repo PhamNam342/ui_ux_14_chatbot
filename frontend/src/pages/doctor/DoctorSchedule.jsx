@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Calendar, Clock, MapPin, Check, X, CalendarClock, ChevronLeft, ChevronRight, Stethoscope, Info, CalendarOff } from 'lucide-react'
 import { AppShell, Badge, Card, TopBar, Button, PageHeader } from '../../components/ui.jsx'
@@ -6,8 +6,8 @@ import { getStoredSchedule, saveStoredSchedule, getStoredCases } from '../../dat
 
 export function DoctorSchedule() {
   const navigate = useNavigate()
-  const [schedule, setSchedule] = useState([])
-  const [casesList, setCasesList] = useState([])
+  const [schedule, setSchedule] = useState(() => getStoredSchedule())
+  const [casesList, setCasesList] = useState(() => getStoredCases())
   const [viewTab, setViewTab] = useState('month') // 'day', 'week', 'month'
   
   // Date states
@@ -27,9 +27,6 @@ export function DoctorSchedule() {
 
   // Load schedule data
   useEffect(() => {
-    setSchedule(getStoredSchedule())
-    setCasesList(getStoredCases())
-
     const handleStorage = () => {
       setSchedule(getStoredSchedule())
       setCasesList(getStoredCases())
@@ -71,7 +68,7 @@ export function DoctorSchedule() {
   }
 
   // Week range helper (Monday - Sunday)
-  const getWeekRange = (date) => {
+  const getWeekRange = useCallback((date) => {
     const current = new Date(date)
     const day = current.getDay()
     const distanceToMonday = day === 0 ? -6 : 1 - day
@@ -80,15 +77,15 @@ export function DoctorSchedule() {
     const sunday = new Date(monday)
     sunday.setDate(monday.getDate() + 6)
     return { monday, sunday }
-  }
+  }, [])
 
   // Parse DD/MM string to Date object
-  const parseScheduleDate = (dateStr) => {
+  const parseScheduleDate = useCallback((dateStr) => {
     if (!dateStr) return new Date()
     const [d, m] = dateStr.split('/').map(Number)
     const year = currentDate.getFullYear()
     return new Date(year, m - 1, d)
-  }
+  }, [currentDate])
 
   // Format Date object to YYYY-MM-DD
   const getYYYYMMDD = (date) => {
@@ -125,7 +122,7 @@ export function DoctorSchedule() {
       itemDate.setHours(0, 0, 0, 0)
       return itemDate >= start && itemDate <= end
     })
-  }, [schedule, currentDate])
+  }, [schedule, currentDate, getWeekRange, parseScheduleDate])
 
   // Quick Action functions
   const handleConfirmSchedule = (id) => {
@@ -572,10 +569,10 @@ export function DoctorSchedule() {
         )}
 
         {viewTab === 'day' && (
-          <div className="space-y-4 max-w-4xl">
+          <div className="space-y-4">
             {/* Day navigator */}
-            <div className="flex items-center justify-between mb-4 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <button 
                   onClick={handlePrevDay}
                   className="h-11 w-11 flex items-center justify-center rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer text-slate-700 transition-colors"
@@ -584,7 +581,7 @@ export function DoctorSchedule() {
                 </button>
                 <div 
                   onClick={openDatePicker}
-                  className="relative h-11 px-5 flex items-center justify-center rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer text-slate-800 transition-colors font-bold text-sm sm:text-base"
+                  className="relative h-11 min-w-[260px] px-5 flex items-center justify-center rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer text-slate-800 transition-colors font-bold text-sm sm:text-base"
                 >
                   {currentDate.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                   {renderDatePicker()}

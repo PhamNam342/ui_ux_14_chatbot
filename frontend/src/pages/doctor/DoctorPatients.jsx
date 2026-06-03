@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Search, Users, User, Phone, HeartPulse, AlertTriangle,
   ClipboardList, MessageSquare, Calendar, ChevronRight,
@@ -30,20 +30,18 @@ function Avatar({ initials, level, size = 'md' }) {
 // ─── main component ──────────────────────────────────────────────────────────
 export function DoctorPatients() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const requestedPatient = searchParams.get('patient') || ''
 
-  const [cases, setCases] = useState([])
-  const [histories, setHistories] = useState([])
-  const [searchQuery, setSearchQuery] = useState('')
+  const [cases, setCases] = useState(() => getStoredCases() || [])
+  const [histories, setHistories] = useState(() => getStoredHistories() || [])
+  const [searchQuery, setSearchQuery] = useState(requestedPatient)
   const [sortBy, setSortBy] = useState('name') // 'name' | 'visits' | 'level'
   const [filterLevel, setFilterLevel] = useState('Tất cả')
-  const [selectedPatient, setSelectedPatient] = useState(null)
+  const [selectedPatient, setSelectedPatient] = useState(requestedPatient || null)
   const [detailTab, setDetailTab] = useState('info')
 
   useEffect(() => {
-    const c = getStoredCases() || []
-    const h = getStoredHistories() || []
-    setCases(c)
-    setHistories(h)
     const handleStorage = () => {
       setCases(getStoredCases() || [])
       setHistories(getStoredHistories() || [])
@@ -122,6 +120,13 @@ export function DoctorPatients() {
     ? histories.filter(h => h.patient === selPatient.name)
     : []
 
+  const resetFilters = () => {
+    setSearchQuery('')
+    setFilterLevel('Tất cả')
+    setSortBy('name')
+    setSelectedPatient(null)
+  }
+
   return (
     <AppShell role="doctor">
       <TopBar />
@@ -181,23 +186,18 @@ export function DoctorPatients() {
           </label>
 
           {/* Level filter */}
-          <div className="flex items-center gap-1.5">
+          <label className="flex items-center gap-1.5">
             <SlidersHorizontal size={14} className="text-slate-400" />
             <span className="text-slate-500 font-semibold" style={{ fontSize: '12px' }}>Mức độ:</span>
-            {['Tất cả', 'Cao', 'Trung bình', 'Thấp'].map(lv => (
-              <button
-                key={lv}
-                onClick={() => setFilterLevel(lv)}
-                className={`border transition-all cursor-pointer font-semibold ${filterLevel === lv
-                    ? 'bg-teal-600 text-white border-teal-600'
-                    : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-teal-300'
-                  }`}
-                style={{ fontSize: '12px', padding: '5px 12px', borderRadius: '6px' }}
-              >
-                {lv}
-              </button>
-            ))}
-          </div>
+            <select
+              value={filterLevel}
+              onChange={e => setFilterLevel(e.target.value)}
+              className="border border-slate-200 bg-white text-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-400"
+              style={{ fontSize: '12px', padding: '5px 12px', borderRadius: '6px', minWidth: '132px' }}
+            >
+              {['Tất cả', 'Cao', 'Trung bình', 'Thấp'].map(lv => <option key={lv} value={lv}>{lv}</option>)}
+            </select>
+          </label>
 
           {/* Sort */}
           <div className="flex items-center gap-1.5 ml-auto">
@@ -214,6 +214,16 @@ export function DoctorPatients() {
               <option value="level">Mức độ ưu tiên</option>
             </select>
           </div>
+
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="inline-flex items-center gap-1.5 border border-slate-200 bg-slate-50 text-slate-600 font-semibold hover:border-teal-300 hover:bg-teal-50 hover:text-teal-700 transition-all cursor-pointer"
+            style={{ fontSize: '12px', padding: '6px 12px', borderRadius: '6px' }}
+          >
+            <X size={13} />
+            Reset
+          </button>
         </div>
 
         {/* ── Patient grid ── */}
