@@ -81,7 +81,7 @@ export function PatientBooking() {
   const [previewClinic, setPreviewClinic] = useState(null)
   const [galleryIndex, setGalleryIndex] = useState(0)
   const [reviewSort, setReviewSort] = useState('Mới nhất')
-  const [showAllReviews, setShowAllReviews] = useState(false)
+  const [showConfirmPopup, setShowConfirmPopup] = useState(false)
   const [activeHighlight, setActiveHighlight] = useState('')
 
   const selectedClinic = clinics.find((clinic) => clinic.id === clinicId)
@@ -156,11 +156,6 @@ export function PatientBooking() {
     setConfirmationDetails(null)
     setConfirmed('')
     scrollToSection(step4Ref, 'schedule')
-  }
-
-  function openConfirmation() {
-    if (!formComplete) return
-    scrollToSection(step5Ref, 'confirm')
   }
 
   function confirmBooking() {
@@ -369,7 +364,7 @@ export function PatientBooking() {
                 ) : <p className="booking-helper">Hãy chọn bác sĩ để xem các lịch khám còn trống.</p>}
               </Card>
 
-              <Card ref={step5Ref} className={`booking-section-card booking-confirm-section ${!bookingDetails ? 'is-locked' : ''} ${activeHighlight === 'confirm' ? 'is-highlighted' : ''}`}>
+              <Card ref={step5Ref} className={`booking-section-card booking-confirm-section ${!bookingDetails ? 'is-locked' : ''} ${activeHighlight === 'confirm' ? 'is-highlighted' : ''} ${bookingDetails ? 'is-ready-to-confirm' : ''}`}>
                 <div className="booking-section-head">
                   <span>5</span>
                   <div><h2>Xác nhận đặt lịch</h2><p>Kiểm tra lại thông tin trước khi gửi yêu cầu đặt lịch khám.</p></div>
@@ -383,7 +378,7 @@ export function PatientBooking() {
                       <div><small>Chi phí ước tính</small><b><Wallet size={16} /> {bookingDetails.price.toLocaleString('vi-VN')} đ</b><span>Chi phí thực tế có thể thay đổi theo chỉ định khám.</span></div>
                     </div>
                     <div className="mt-7 flex justify-end">
-                      <Button onClick={confirmBooking}>Xác nhận đặt lịch</Button>
+                      <Button className="btn-confirm-booking-highlight" onClick={() => setShowConfirmPopup(true)}>Xác nhận đặt lịch</Button>
                     </div>
                   </>
                 ) : <p className="booking-helper">Hãy chọn đầy đủ cơ sở, chuyên khoa, bác sĩ, ngày và giờ khám để xác nhận.</p>}
@@ -402,8 +397,7 @@ export function PatientBooking() {
                   <div><Clock3 size={16} /><span><small>Giờ khám</small><b>{selectedSlot || 'Chưa chọn'}</b></span></div>
                   <div><Wallet size={16} /><span><small>Phí khám ước tính</small><b>{selectedDoctor ? `${price.toLocaleString('vi-VN')} đ` : 'Chưa có'}</b></span></div>
                 </div>
-                <Button className="booking-summary-submit" disabled={!formComplete} onClick={openConfirmation}>Tiếp tục</Button>
-                {!formComplete && <small className="booking-summary-note">Vui lòng hoàn tất đầy đủ các bước để tiếp tục.</small>}
+
               </Card>
             </aside>
           </div>
@@ -424,6 +418,63 @@ export function PatientBooking() {
               <div className="facility-section"><div className="facility-review-head"><h3>Bình luận gần đây</h3><select value={reviewSort} onChange={(event) => setReviewSort(event.target.value)}><option>Mới nhất</option><option>Đánh giá cao nhất</option></select></div><div className="facility-review-list">{sortedReviews.slice(0, showAllReviews ? sortedReviews.length : 2).map((review) => <article key={review.name}><span>{review.name.split(' ').slice(-2).map((word) => word[0]).join('')}</span><div><b>{review.name}<small>{review.date}</small></b><em>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</em><p>{review.text}</p></div></article>)}</div><button className="facility-more" onClick={() => setShowAllReviews((value) => !value)}>{showAllReviews ? 'Thu gọn bình luận' : 'Xem thêm bình luận'}</button></div>
             </div>
             <div className="facility-dialog-actions"><Button variant="outline" onClick={() => window.open('https://maps.google.com', '_blank')}><Navigation size={16} /> Xem chỉ đường</Button><Button variant="outline" onClick={() => window.location.href = 'tel:02839306688'}><Phone size={16} /> Gọi điện</Button><Button variant="outline" onClick={() => { selectClinic(previewClinic.id); setPreviewClinic(null) }}>Chọn cơ sở</Button><Button onClick={() => { selectClinic(previewClinic.id); setPreviewClinic(null) }}><CalendarDays size={16} /> Đặt lịch khám</Button></div>
+          </Card>
+        </div>
+      )}
+
+      {showConfirmPopup && bookingDetails && (
+        <div className="modal-backdrop" onClick={() => setShowConfirmPopup(false)}>
+          <Card className="modal booking-confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="booking-confirm-modal-header">
+              <CheckCircle2 size={32} className="text-teal-600" />
+              <div>
+                <h2>Xác nhận yêu cầu đặt lịch</h2>
+                <p>Vui lòng kiểm tra kỹ thông tin y tế dưới đây trước khi hoàn tất đặt lịch.</p>
+              </div>
+            </div>
+            
+            <div className="booking-confirm-modal-body">
+              <div className="booking-confirm-modal-info">
+                <div className="info-row">
+                  <span className="info-label">Cơ sở khám</span>
+                  <span className="info-value">{bookingDetails.clinic.name}</span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Bác sĩ</span>
+                  <span className="info-value">{bookingDetails.doctor.doctor} ({bookingDetails.specialty})</span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Thời gian khám</span>
+                  <span className="info-value font-bold text-teal-800">
+                    {bookingDetails.slot} ngày {formatDate(bookingDetails.date)}
+                  </span>
+                </div>
+                <div className="info-row border-t pt-3">
+                  <span className="info-label font-bold text-slate-700">Phí khám ước tính</span>
+                  <span className="info-value text-lg font-black text-teal-600">
+                    {bookingDetails.price.toLocaleString('vi-VN')} đ
+                  </span>
+                </div>
+              </div>
+              
+              <div className="booking-confirm-modal-note">
+                <p>
+                  * <strong>Lưu ý quan trọng:</strong> Chi phí trên là dự kiến tại cơ sở. Chi phí thực tế có thể thay đổi tùy thuộc vào chỉ định chuyên môn bổ sung của bác sĩ trong quá trình khám trực tiếp.
+                </p>
+              </div>
+            </div>
+
+            <div className="booking-confirm-modal-footer">
+              <Button variant="ghost" onClick={() => setShowConfirmPopup(false)}>
+                Quay lại
+              </Button>
+              <Button className="btn-confirm-final" onClick={() => {
+                setShowConfirmPopup(false);
+                confirmBooking();
+              }}>
+                Đồng ý & Đặt lịch
+              </Button>
+            </div>
           </Card>
         </div>
       )}

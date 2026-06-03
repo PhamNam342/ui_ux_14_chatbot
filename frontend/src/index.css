@@ -6305,3 +6305,144 @@ button { cursor: pointer; }
   .consult-call-controls { gap: 7px; }
   .consult-call-controls button { height: 62px; min-width: 62px; border-radius: 15px; }
 }
+
+/* Patient Booking optimization and confirmation modal styles */
+.booking-confirm-section.is-ready-to-confirm {
+  border: 2px solid #0f766e;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%);
+  box-shadow: 0 16px 36px rgba(15, 118, 110, 0.12);
+  transform: translateY(-2px);
+  transition: all 0.25s ease-out;
+}
+
+.btn-confirm-booking-highlight {
+  background: linear-gradient(135deg, #14b8a6, #0f766e) !important;
+  color: #ffffff !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  padding: 12px 30px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.3) !important;
+  border: none !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn-confirm-booking-highlight:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(15, 118, 110, 0.45) !important;
+  filter: brightness(1.05);
+}
+
+.btn-confirm-booking-highlight:active {
+  transform: translateY(0) scale(1);
+}
+
+.booking-confirm-modal {
+  width: min(540px, 100%) !important;
+  padding: 24px !important;
+  border-radius: 20px !important;
+  border: 1px solid #dce8e7 !important;
+  background: #ffffff !important;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.2) !important;
+  animation: modalFadeIn 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.booking-confirm-modal-header {
+  display: flex;
+  align-items: start;
+  gap: 16px;
+  border-bottom: 1px solid #eef6f5;
+  padding-bottom: 16px;
+}
+
+.booking-confirm-modal-header h2 {
+  font-size: 20px;
+  font-weight: 900;
+  color: #134e4a;
+  margin: 0;
+}
+
+.booking-confirm-modal-header p {
+  font-size: 13px;
+  color: #64748b;
+  margin: 5px 0 0;
+  line-height: 1.45;
+}
+
+.booking-confirm-modal-body {
+  padding: 20px 0;
+}
+
+.booking-confirm-modal-info {
+  display: grid;
+  gap: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 18px;
+  border-radius: 14px;
+}
+
+.booking-confirm-modal-info .info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.booking-confirm-modal-info .info-label {
+  color: #64748b;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.booking-confirm-modal-info .info-value {
+  color: #1e293b;
+  font-weight: 700;
+  text-align: right;
+}
+
+.booking-confirm-modal-note {
+  margin-top: 14px;
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.booking-confirm-modal-note p {
+  margin: 0;
+}
+
+.booking-confirm-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid #eef6f5;
+  padding-top: 16px;
+}
+
+.booking-confirm-modal-footer .btn-confirm-final {
+  background: linear-gradient(135deg, #0d9488, #0f766e) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25) !important;
+  border: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.booking-confirm-modal-footer .btn-confirm-final:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 118, 110, 0.35) !important;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
