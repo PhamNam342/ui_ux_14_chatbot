@@ -118,9 +118,10 @@ export function AdminQuality() {
   }
 
   function markHelpful(review) {
-    if (review.isHelpful) return
-    setReviewItems((items) => items.map((item) => item.id === review.id ? { ...item, helpful: item.helpful + 1, isHelpful: true } : item))
-    showNotice('Đã đánh dấu phản hồi là hữu ích')
+    setReviewItems((items) => items.map((item) => item.id === review.id
+      ? { ...item, helpful: Math.max(0, item.helpful + (item.isHelpful ? -1 : 1)), isHelpful: !item.isHelpful }
+      : item))
+    showNotice(review.isHelpful ? 'Đã thu hồi đánh dấu hữu ích' : 'Đã đánh dấu phản hồi là hữu ích')
   }
 
   function openReply(review) {

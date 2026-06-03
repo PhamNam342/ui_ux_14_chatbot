@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Baby, Brain, Building2, CalendarDays, ChevronDown, Clock, HeartPulse, Lock, MapPin, Menu, MessageCircle, MessageCircleHeart, Microscope, Phone, Shield, Star, Stethoscope, Syringe, X } from 'lucide-react'
+import { ArrowRight, Baby, Brain, Building2, CalendarDays, CheckCircle2, ChevronDown, Clock, HeartPulse, Lock, MapPin, Menu, MessageCircle, MessageCircleHeart, Microscope, Phone, Shield, Star, Stethoscope, Syringe, X } from 'lucide-react'
 import { Logo } from '../components/ui.jsx'
+import { LandingHealthChat } from '../components/LandingHealthChat.jsx'
 import heroImage from '../assets/medical-ai-hero.png'
 import doctorMinh from '../assets/doctor_minh.png'
 import doctorHoa from '../assets/doctor_hoa.png'
@@ -70,6 +71,8 @@ export function RoleSelect() {
   const [scrolled, setScrolled] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [openFaq, setOpenFaq] = useState(0)
+  const [bookingSelection, setBookingSelection] = useState({ specialty: '', clinic: '' })
+  const [toast, setToast] = useState('')
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 12)
@@ -97,6 +100,23 @@ export function RoleSelect() {
   function scrollToSection(id) {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     setDrawerOpen(false)
+  }
+
+  function showToast(message) {
+    setToast(message)
+    window.setTimeout(() => setToast(''), 3200)
+  }
+
+  function handleBookAppointment(recommendation) {
+    setBookingSelection({ specialty: recommendation.specialty, clinic: recommendation.clinic })
+    scrollToSection('booking')
+    showToast('Đã chuyển bạn tới bước đặt lịch khám.')
+  }
+
+  function handleViewClinic(recommendation) {
+    setBookingSelection((current) => ({ ...current, clinic: recommendation?.clinic || current.clinic }))
+    scrollToSection('clinics')
+    showToast(recommendation?.clinic ? `Đang hiển thị ${recommendation.clinic}.` : 'Đang hiển thị các cơ sở y tế gần bạn.')
   }
 
   return (
@@ -291,6 +311,37 @@ export function RoleSelect() {
           </div>
         </section>
 
+        <section id="booking" className="landing-anchor landing-quick-booking mt-20">
+          <div>
+            <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-teal-700">Đặt lịch nhanh</p>
+            <h2 className="mt-2 text-3xl font-black text-slate-950">Chọn lịch khám phù hợp với bạn</h2>
+            <p className="mt-3 max-w-xl text-base leading-7 text-slate-600">Thông tin gợi ý từ trợ lý AI sẽ được điền sẵn. Bạn có thể điều chỉnh trước khi tiếp tục.</p>
+          </div>
+          <div className="landing-booking-form">
+            <label>
+              <span>Chuyên khoa</span>
+              <select value={bookingSelection.specialty} onChange={(event) => setBookingSelection((current) => ({ ...current, specialty: event.target.value }))}>
+                <option value="">Chọn chuyên khoa</option>
+                <option>Tim mạch</option>
+                <option>Thần kinh</option>
+                <option>Nội tổng quát</option>
+                <option>Tai Mũi Họng</option>
+                <option>Nhi khoa</option>
+              </select>
+            </label>
+            <label>
+              <span>Cơ sở / Phòng khám</span>
+              <select value={bookingSelection.clinic} onChange={(event) => setBookingSelection((current) => ({ ...current, clinic: event.target.value }))}>
+                <option value="">Chọn cơ sở phù hợp</option>
+                {clinics.map(([name]) => <option key={name}>{name}</option>)}
+              </select>
+            </label>
+            <Link className={bookingSelection.specialty && bookingSelection.clinic ? '' : 'is-disabled'} to="/login/patient">
+              <CalendarDays size={17} /> Tiếp tục đặt lịch <ArrowRight size={16} />
+            </Link>
+          </div>
+        </section>
+
         <section className="mt-20">
           <div className="max-w-3xl">
             <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-teal-700">Quy trình tư vấn</p>
@@ -448,6 +499,8 @@ export function RoleSelect() {
           </div>
         </div>
       </footer>
+      <LandingHealthChat onBookAppointment={handleBookAppointment} onViewClinic={handleViewClinic} />
+      {toast && <div className="landing-chat-toast"><CheckCircle2 size={18} /> {toast}</div>}
     </main>
   )
 }

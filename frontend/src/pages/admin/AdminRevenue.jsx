@@ -18,14 +18,14 @@ const growthData = {
 
 const analyticsLabels = {
   Tuần: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5'],
-  Tháng: ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6'],
+  Tháng: ['T1/2025', 'T2/2025', 'T3/2025', 'T4/2025', 'T5/2025', 'T6/2025'],
   Quý: ['Q1', 'Q2', 'Q3', 'Q4'],
   Năm: ['2021', '2022', '2023', '2024', '2025'],
 }
 
 const analyticsTooltipLabels = {
   Tuần: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5'],
-  Tháng: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6'],
+  Tháng: ['Tháng 1/2025', 'Tháng 2/2025', 'Tháng 3/2025', 'Tháng 4/2025', 'Tháng 5/2025', 'Tháng 6/2025'],
   Quý: ['Quý 1', 'Quý 2', 'Quý 3', 'Quý 4'],
   Năm: ['Năm 2021', 'Năm 2022', 'Năm 2023', 'Năm 2024', 'Năm 2025'],
 }
@@ -105,7 +105,7 @@ export function AdminRevenue() {
         <PageHeader
           title="Báo cáo doanh thu"
           subtitle="Phân tích hiệu quả kinh doanh và số liệu thống kê chi tiết"
-          action={<div className="flex gap-3"><Button variant="ghost" onClick={() => notify('Đã mở bộ lọc kỳ báo cáo')}><CalendarDays size={16} /> Tháng 10, 2023</Button><Button disabled={isExporting} variant="dark" onClick={exportReport}><Download size={16} /> {isExporting ? 'Đang xuất' : 'Xuất báo cáo'}</Button></div>}
+          action={<div className="flex gap-3"><Button variant="ghost" onClick={() => notify('Đã mở bộ lọc kỳ báo cáo')}><CalendarDays size={16} /> Tháng 6, 2025</Button><Button disabled={isExporting} variant="dark" onClick={exportReport}><Download size={16} /> {isExporting ? 'Đang xuất' : 'Xuất báo cáo'}</Button></div>}
         />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard label="Tổng doanh thu" value="1.284 tỷ" delta="+12.5%" icon={<TrendingUp size={20} />} />
@@ -153,11 +153,15 @@ function RevenueOverviewAnalytics({ clinic, onClinicChange }) {
   const tooltipLabels = analyticsTooltipLabels[period]
   const growthTooltipLabels = analyticsTooltipLabels[growthRange]
   const max = Math.ceil(Math.max(...values) / 500) * 500
+  const revenueChartHeight = 210
+  const growthChartTop = 42
+  const growthChartBottom = 210
+  const growthChartHeight = growthChartBottom - growthChartTop
   const revenueTicks = [1, .75, .5, .25, 0].map((ratio) => ({ ratio, value: max * ratio }))
   const growthTicks = [10, 8, 6, 4, 2]
-  const growthCoords = growth.map((value, index) => ({ x: 45 + index * (280 / (growth.length - 1)), y: 170 - (value / 10) * 110, value }))
+  const growthCoords = growth.map((value, index) => ({ x: 45 + index * (280 / (growth.length - 1)), y: growthChartBottom - (value / 10) * growthChartHeight, value }))
   const growthPath = growthCoords.map((point, index) => `${index ? 'L' : 'M'} ${point.x} ${point.y}`).join(' ')
-  const growthArea = `${growthPath} L ${growthCoords.at(-1).x} 170 L ${growthCoords[0].x} 170 Z`
+  const growthArea = `${growthPath} L ${growthCoords.at(-1).x} ${growthChartBottom} L ${growthCoords[0].x} ${growthChartBottom} Z`
   const formatRevenue = (value) => value >= 1000 ? `${(value / 1000).toFixed(3)} tỷ VNĐ` : `${value} triệu VNĐ`
   const formatAxisRevenue = (value) => value >= 1000 ? `${value / 1000}tỷ` : `${value}tr`
   const periodName = period.toLowerCase()
@@ -173,12 +177,12 @@ function RevenueOverviewAnalytics({ clinic, onClinicChange }) {
         <div className="revenue-overview-summary"><div><small>TỔNG DOANH THU</small><strong>1.284 tỷ VNĐ</strong></div><em>↑ 12.5% <small>so với tháng trước</small></em></div>
         <div className="revenue-overview-segmented">{Object.keys(timeRevenue).map((item) => <button className={period === item ? 'is-active' : ''} key={item} onClick={() => { setActiveIndex(null); setPeriod(item) }} type="button">{item}</button>)}</div>
         <div className="revenue-bar-chart">
-          <div className="revenue-y-axis">{revenueTicks.map((tick) => <small key={tick.ratio} style={{ bottom: `${tick.ratio * 150}px` }}>{formatAxisRevenue(tick.value)}</small>)}</div>
+          <div className="revenue-y-axis">{revenueTicks.map((tick) => <small key={tick.ratio} style={{ bottom: `${tick.ratio * revenueChartHeight}px` }}>{formatAxisRevenue(tick.value)}</small>)}</div>
           <div className="revenue-bar-plot">
-            <div className="revenue-grid-lines">{revenueTicks.map((tick) => <i key={tick.ratio} style={{ bottom: `${tick.ratio * 150}px` }} />)}</div>
+            <div className="revenue-grid-lines">{revenueTicks.map((tick) => <i key={tick.ratio} style={{ bottom: `${tick.ratio * revenueChartHeight}px` }} />)}</div>
             <div className="revenue-overview-bars" style={{ gridTemplateColumns: `repeat(${values.length}, minmax(38px, 1fr))` }}>
               {values.map((value, index) => <button className={`revenue-overview-bar ${activeIndex === null || activeIndex === index ? 'is-active' : 'is-muted'}`} key={`${period}-${labels[index]}-${index}`} onMouseEnter={() => setActiveIndex(index)} onMouseLeave={() => setActiveIndex(null)} type="button">
-                <strong>{formatAxisRevenue(value)}</strong><span><i style={{ height: `${Math.max((value / max) * 150, 20)}px` }} /></span><small>{labels[index]}</small>
+                <strong>{formatAxisRevenue(value)}</strong><span><i style={{ height: `${Math.max((value / max) * revenueChartHeight, 20)}px` }} /></span><small>{labels[index]}</small>
                 <em><b>{tooltipLabels[index]}</b><small>Doanh thu: {formatRevenue(value)}</small><small>Tăng: {revenueTrends[period][index]}%</small></em>
               </button>)}
             </div>
@@ -190,9 +194,9 @@ function RevenueOverviewAnalytics({ clinic, onClinicChange }) {
         <div className="revenue-overview-summary"><div><small>TĂNG TRƯỞNG HIỆN TẠI</small><strong>↑ 8.2%</strong></div><em>Ổn định <small>so với kỳ trước</small></em></div>
         <div className="revenue-overview-segmented">{Object.keys(growthData).map((item) => <button className={growthRange === item ? 'is-active' : ''} key={item} onClick={() => { setActiveIndex(null); setGrowthRange(item) }} type="button">{item}</button>)}</div>
         <div className="revenue-growth-chart">
-          <svg viewBox="0 0 360 210" role="img" aria-label="Biểu đồ xu hướng tăng trưởng">
+          <svg viewBox="0 0 360 250" role="img" aria-label="Biểu đồ xu hướng tăng trưởng">
             {growthTicks.map((value) => {
-              const y = 170 - (value / 10) * 110
+              const y = growthChartBottom - (value / 10) * growthChartHeight
               return <g className="revenue-growth-grid" key={value}><line stroke="#e2e8f0" x1="45" x2="335" y1={y} y2={y} /><text x="37" y={y + 3} textAnchor="end">{value}%</text></g>
             })}
             <path d={growthArea} fill="#14b8a622" />
@@ -202,7 +206,7 @@ function RevenueOverviewAnalytics({ clinic, onClinicChange }) {
               <circle cx={point.x} cy={point.y} fill="#fff" r={activeIndex === index ? '7' : '5'} stroke="#0f766e" strokeWidth="3" />
               <text className="revenue-growth-value" textAnchor="middle" x={point.x} y={point.y - 13}>{point.value}%</text>
             </g>)}
-            {growthLabels.map((label, index) => <text className="revenue-growth-label" key={label} textAnchor="middle" x={growthCoords[index].x} y="195">{label}</text>)}
+            {growthLabels.map((label, index) => <text className="revenue-growth-label" key={label} textAnchor="middle" x={growthCoords[index].x} y="236">{label}</text>)}
           </svg>
         </div>
       </Card>

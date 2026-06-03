@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowLeft, CalendarDays, CalendarHeart, Eye, EyeOff, Loader2, Lock, Phone, UserRound } from 'lucide-react'
+import { ArrowLeft, CalendarDays, CalendarHeart, Eye, EyeOff, Loader2, Lock, MapPin, Phone, UserRound } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Logo } from '../components/ui.jsx'
 import heroImage from '../assets/medical-ai-hero.png'
@@ -9,6 +9,7 @@ export function PatientRegister() {
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
   const [dob, setDob] = useState('')
+  const [address, setAddress] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -35,8 +36,8 @@ export function PatientRegister() {
     e.preventDefault()
     setError('')
 
-    if (!phone.trim() || !fullName.trim() || !dob || !password.trim()) {
-      setError('Vui lòng điền đầy đủ số điện thoại, tên, ngày sinh và mật khẩu.')
+    if (!phone.trim() || !fullName.trim() || !dob || !address.trim() || !password.trim()) {
+      setError('Vui lòng điền đầy đủ số điện thoại, tên, ngày sinh, địa chỉ và mật khẩu.')
       return
     }
 
@@ -144,6 +145,25 @@ export function PatientRegister() {
                   className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-4 transition-all bg-white focus:border-teal-500 focus:ring-teal-500/10 disabled:opacity-50"
                   value={dob}
                   onChange={(e) => setDob(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                Địa chỉ
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <MapPin size={18} />
+                </div>
+                <input
+                  type="text"
+                  disabled={loading}
+                  className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-4 transition-all bg-white focus:border-teal-500 focus:ring-teal-500/10 disabled:opacity-50"
+                  placeholder="VD: 123 Đường ABC, Quận 1, TP.HCM"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
                 />
               </div>
             </div>

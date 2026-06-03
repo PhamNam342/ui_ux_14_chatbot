@@ -67,6 +67,7 @@ export function PatientBooking() {
   const step2Ref = useRef(null)
   const step3Ref = useRef(null)
   const step4Ref = useRef(null)
+  const step5Ref = useRef(null)
   const slotsRef = useRef(null)
   const summaryRef = useRef(null)
   const [clinicId, setClinicId] = useState(null)
@@ -81,6 +82,7 @@ export function PatientBooking() {
   const [galleryIndex, setGalleryIndex] = useState(0)
   const [reviewSort, setReviewSort] = useState('Mới nhất')
   const [showAllReviews, setShowAllReviews] = useState(false)
+  const [activeHighlight, setActiveHighlight] = useState('')
 
   const selectedClinic = clinics.find((clinic) => clinic.id === clinicId)
   const clinicDoctors = useMemo(
@@ -96,17 +98,35 @@ export function PatientBooking() {
   const price = doctorPrice(selectedDoctor)
   const formComplete = Boolean(selectedClinic && specialty && selectedDoctor && selectedDate && selectedSlot)
   const sortedReviews = [...facilityReviews].sort((a, b) => reviewSort === 'Đánh giá cao nhất' ? b.rating - a.rating : b.date.split('/').reverse().join('').localeCompare(a.date.split('/').reverse().join('')))
-  const currentStep = confirmationDetails
+  const bookingDetails = formComplete
+    ? {
+        clinic: selectedClinic,
+        doctor: selectedDoctor,
+        specialty,
+        date: selectedDate,
+        slot: selectedSlot,
+        price,
+      }
+    : null
+  const currentStep = selectedSlot
     ? 5
-    : selectedSlot
-      ? 5
-      : selectedDoctor
-        ? 4
-        : specialty
-          ? 3
-          : selectedClinic
-            ? 2
-            : 1
+    : selectedDoctor
+      ? 4
+      : specialty
+        ? 3
+        : selectedClinic
+          ? 2
+          : 1
+
+  function scrollToSection(ref, highlightKey) {
+    window.setTimeout(() => {
+      ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      setActiveHighlight(highlightKey)
+      window.setTimeout(() => {
+        setActiveHighlight((current) => current === highlightKey ? '' : current)
+      }, 900)
+    }, 120)
+  }
 
   function selectClinic(id) {
     setClinicId(id)
@@ -114,9 +134,9 @@ export function PatientBooking() {
     setSelectedDoctor(null)
     setSelectedDate('')
     setSelectedSlot('')
-    setTimeout(() => {
-      step2Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }, 120)
+    setConfirmationDetails(null)
+    setConfirmed('')
+    scrollToSection(step2Ref, 'specialty')
   }
 
   function selectSpecialty(nextSpecialty) {
@@ -124,44 +144,37 @@ export function PatientBooking() {
     setSelectedDoctor(null)
     setSelectedDate('')
     setSelectedSlot('')
-    setTimeout(() => {
-      step3Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }, 120)
+    setConfirmationDetails(null)
+    setConfirmed('')
+    scrollToSection(step3Ref, 'doctor')
   }
 
   function selectDoctor(doctor) {
     setSelectedDoctor(doctor)
     setSelectedDate('')
     setSelectedSlot('')
-    setTimeout(() => {
-      step4Ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }, 120)
+    setConfirmationDetails(null)
+    setConfirmed('')
+    scrollToSection(step4Ref, 'schedule')
   }
 
   function openConfirmation() {
     if (!formComplete) return
-    setConfirmationDetails({
-      clinic: selectedClinic,
-      doctor: selectedDoctor,
-      specialty,
-      date: selectedDate,
-      slot: selectedSlot,
-      price,
-    })
+    scrollToSection(step5Ref, 'confirm')
   }
 
   function confirmBooking() {
-    if (!confirmationDetails) return
+    if (!bookingDetails) return
     const newAppointment = {
-      id: `appt-${Date.now()}`,
-      date: confirmationDetails.date,
-      time: confirmationDetails.slot,
-      clinicId: confirmationDetails.clinic.id,
-      clinicName: confirmationDetails.clinic.name,
-      doctorName: confirmationDetails.doctor.doctor,
-      spec: confirmationDetails.specialty,
+      id: `appt-${bookingDetails.date}-${bookingDetails.slot}-${bookingDetails.doctor.id}`,
+      date: bookingDetails.date,
+      time: bookingDetails.slot,
+      clinicId: bookingDetails.clinic.id,
+      clinicName: bookingDetails.clinic.name,
+      doctorName: bookingDetails.doctor.doctor,
+      spec: bookingDetails.specialty,
       type: 'Khám trực tiếp',
-      price: confirmationDetails.price,
+      price: bookingDetails.price,
     }
 
     try {
@@ -173,7 +186,8 @@ export function PatientBooking() {
       // localStorage may be unavailable in restricted browser environments.
     }
 
-    setConfirmed(`Đã xác nhận lịch với ${confirmationDetails.doctor.doctor} lúc ${confirmationDetails.slot}.`)
+    setConfirmationDetails(bookingDetails)
+    setConfirmed(`Đã xác nhận lịch với ${bookingDetails.doctor.doctor} lúc ${bookingDetails.slot}.`)
     window.localStorage.setItem('medconsult-patient-toast', 'Đặt lịch khám thành công!')
     setToast('Đặt lịch thành công')
     window.setTimeout(() => navigate('/patient/appointments'), 1200)
@@ -191,9 +205,11 @@ export function PatientBooking() {
         <div className="booking-progress booking-progress-five" aria-label="Tiến trình đặt lịch">
           {bookingSteps.map((label, index) => {
             const step = index + 1
+            const completed = currentStep > step
+            const current = currentStep === step
             return (
-              <div key={label} className={`booking-progress-step ${currentStep >= step ? 'active' : ''}`}>
-                <span>{currentStep > step ? <Check size={16} /> : step}</span>
+              <div key={label} className={`booking-progress-step ${completed ? 'completed' : ''} ${current ? 'current' : ''}`}>
+                <span>{completed ? <Check size={16} /> : step}</span>
                 <b>{label}</b>
               </div>
             )
@@ -281,7 +297,7 @@ export function PatientBooking() {
                 </div>
               </Card>
 
-              <Card ref={step2Ref} className={`booking-section-card ${!selectedClinic ? 'is-locked' : ''}`}>
+              <Card ref={step2Ref} className={`booking-section-card ${!selectedClinic ? 'is-locked' : ''} ${activeHighlight === 'specialty' ? 'is-highlighted' : ''}`}>
                 <div className="booking-section-head">
                   <span>2</span>
                   <div><h2>Chọn chuyên khoa</h2><p>Danh sách được cập nhật theo cơ sở khám bạn đã chọn.</p></div>
@@ -293,7 +309,7 @@ export function PatientBooking() {
                 ) : <p className="booking-helper">Hãy chọn bệnh viện hoặc phòng khám để tiếp tục.</p>}
               </Card>
 
-              <Card ref={step3Ref} className={`booking-section-card ${!specialty ? 'is-locked' : ''}`}>
+              <Card ref={step3Ref} className={`booking-section-card ${!specialty ? 'is-locked' : ''} ${activeHighlight === 'doctor' ? 'is-highlighted' : ''}`}>
                 <div className="booking-section-head">
                   <span>3</span>
                   <div><h2>Chọn bác sĩ</h2><p>Xem kinh nghiệm, đánh giá và tình trạng lịch khám của bác sĩ.</p></div>
@@ -310,7 +326,7 @@ export function PatientBooking() {
                 ) : <p className="booking-helper">Hãy chọn chuyên khoa để xem bác sĩ phù hợp.</p>}
               </Card>
 
-              <Card ref={step4Ref} className={`booking-section-card ${!selectedDoctor ? 'is-locked' : ''}`}>
+              <Card ref={step4Ref} className={`booking-section-card ${!selectedDoctor ? 'is-locked' : ''} ${activeHighlight === 'schedule' ? 'is-highlighted' : ''}`}>
                 <div className="booking-section-head">
                   <span>4</span>
                   <div><h2>Chọn lịch khám</h2><p>Chọn ngày trước, sau đó chọn khung giờ còn trống.</p></div>
@@ -324,14 +340,14 @@ export function PatientBooking() {
                         return <button type="button" key={iso} className={selectedDate === iso ? 'active' : ''} onClick={() => {
                           setSelectedDate(iso);
                           setSelectedSlot('');
-                          setTimeout(() => {
-                            slotsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                          }, 120)
+                          setConfirmationDetails(null);
+                          setConfirmed('');
+                          scrollToSection(slotsRef, 'slots')
                         }}><small>{date.toLocaleDateString('vi-VN', { weekday: 'short' })}</small><b>{date.getDate()}</b><span>Tháng {date.getMonth() + 1}</span></button>
                       })}
                     </div>
                     {selectedDate && (
-                      <div ref={slotsRef} className="booking-slot-area">
+                      <div ref={slotsRef} className={`booking-slot-area ${activeHighlight === 'slots' ? 'is-highlighted' : ''}`}>
                         <h3 className="booking-subtitle"><Clock3 size={16} /> Chọn khung giờ khám</h3>
                         {slotGroups.map((group) => (
                           <div key={group.label} className="booking-slot-group">
@@ -340,9 +356,9 @@ export function PatientBooking() {
                               const available = selectedDoctor.slots.includes(slot)
                               return <button type="button" key={slot} disabled={!available} className={selectedSlot === slot ? 'active' : ''} onClick={() => {
                                 setSelectedSlot(slot)
-                                setTimeout(() => {
-                                  summaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                                }, 120)
+                                setConfirmationDetails(null)
+                                setConfirmed('')
+                                scrollToSection(step5Ref, 'confirm')
                               }}>{slot}</button>
                             })}</div>
                           </div>
@@ -351,6 +367,26 @@ export function PatientBooking() {
                     )}
                   </>
                 ) : <p className="booking-helper">Hãy chọn bác sĩ để xem các lịch khám còn trống.</p>}
+              </Card>
+
+              <Card ref={step5Ref} className={`booking-section-card booking-confirm-section ${!bookingDetails ? 'is-locked' : ''} ${activeHighlight === 'confirm' ? 'is-highlighted' : ''}`}>
+                <div className="booking-section-head">
+                  <span>5</span>
+                  <div><h2>Xác nhận đặt lịch</h2><p>Kiểm tra lại thông tin trước khi gửi yêu cầu đặt lịch khám.</p></div>
+                </div>
+                {bookingDetails ? (
+                  <>
+                    <div className="booking-confirm-grid">
+                      <div><small>Bệnh viện / phòng khám</small><b><Building2 size={16} /> {bookingDetails.clinic.name}</b><span>{bookingDetails.clinic.address}</span></div>
+                      <div><small>Bác sĩ</small><b><UserRound size={16} /> {bookingDetails.doctor.doctor}</b><span>{bookingDetails.specialty} · {bookingDetails.doctor.exp} kinh nghiệm</span></div>
+                      <div><small>Thời gian khám</small><b><Clock3 size={16} /> {bookingDetails.slot}</b><span>{formatDate(bookingDetails.date)}</span></div>
+                      <div><small>Chi phí ước tính</small><b><Wallet size={16} /> {bookingDetails.price.toLocaleString('vi-VN')} đ</b><span>Chi phí thực tế có thể thay đổi theo chỉ định khám.</span></div>
+                    </div>
+                    <div className="mt-7 flex justify-end">
+                      <Button onClick={confirmBooking}>Xác nhận đặt lịch</Button>
+                    </div>
+                  </>
+                ) : <p className="booking-helper">Hãy chọn đầy đủ cơ sở, chuyên khoa, bác sĩ, ngày và giờ khám để xác nhận.</p>}
               </Card>
             </div>
 

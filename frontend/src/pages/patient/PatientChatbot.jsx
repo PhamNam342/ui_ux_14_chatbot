@@ -106,9 +106,14 @@ export function PatientChatbot() {
           <Card className="chatbot-shell p-0">
             <div className="chatbot-head">
               <span className="chatbot-avatar"><Bot size={21} /></span>
-              <div><b>Trợ lý MedConsult</b><small><i /> Đang hoạt động · Miễn phí</small></div>
+              <div>
+                <b>Trợ lý MedConsult</b>
+                <div className="chatbot-head-meta">
+                  <small><i /> Đang hoạt động · Miễn phí</small>
+                  <span className="chatbot-disclaimer">Không thay thế bác sĩ · Cấp cứu: gọi 115</span>
+                </div>
+              </div>
             </div>
-            <div className="chat-warning">Chatbot hỗ trợ khảo sát ban đầu, không thay thế bác sĩ. Cấp cứu: gọi 115.</div>
             <div className="chat-body consult-chat-body" ref={chatBodyRef}>
               {messages.map((message, index) => (
                 <div key={`${message.text}-${index}`} className={`message ${message.from === 'user' ? 'mine' : 'with-suggestions'}`}>
@@ -178,8 +183,10 @@ export function PatientChatbot() {
               </div>
             )}
             {attachment && <div className="chat-attachment">Đã chọn ảnh: {attachment}</div>}
-            <div className="chat-privacy"><LockKeyhole size={15} /> Lưu ý: thông tin được mã hóa và chỉ chuyển cho bác sĩ khi bạn đồng ý.</div>
-            <div className="chat-input-note">Gợi ý: mô tả triệu chứng, vị trí đau và thời gian bắt đầu để nhận hướng dẫn phù hợp hơn.</div>
+            <div className="chat-input-guide">
+              <LockKeyhole size={15} />
+              <span><b>Lưu ý:</b> thông tin được mã hóa và chỉ chuyển cho bác sĩ khi bạn đồng ý. <i>·</i> <b>Gợi ý:</b> mô tả triệu chứng, vị trí đau và thời gian bắt đầu.</span>
+            </div>
             <div className="chat-input">
               <label className="mini-btn cursor-pointer" title="Gửi ảnh">
                 <ImagePlus size={18} />
