@@ -242,14 +242,16 @@ export function PatientChatbot() {
   }
 
   function goToBooking() {
+    let bookingSuggestion = null
     if (assessment) {
-      localStorage.setItem('medconsult-booking-suggestion', JSON.stringify({
+      bookingSuggestion = {
         specialty: assessment.specialty,
         clinic: assessment.clinic,
         reason: assessment.title,
-      }))
+      }
+      localStorage.setItem('medconsult-booking-suggestion', JSON.stringify(bookingSuggestion))
     }
-    navigate('/patient/booking')
+    navigate('/patient/booking', { state: { bookingSuggestion } })
   }
 
   return (

@@ -151,6 +151,42 @@ function booking() {
   return shell('Đặt lịch khám', body, 'Patient - Booking')
 }
 
+function bookingPrefill() {
+  let body = pageHeader('Luồng từ chatbot', 'Đặt lịch khám tự điền', 'Cơ sở và chuyên khoa được điền sẵn từ đánh giá sơ bộ, bệnh nhân chỉ chọn bác sĩ và thời gian.')
+  const steps = ['1  Bệnh viện', '2  Chuyên khoa', '3  Bác sĩ', '4  Lịch khám', '5  Xác nhận']
+  body += steps.map((label, index) => `${circle(322 + index * 244, 220, 16, { fill: index < 2 ? '#94a3b8' : index === 2 ? '#ffffff' : '#ffffff', stroke: '#94a3b8' })}${text(346 + index * 244, 225, label, { size: 12, weight: index <= 2 ? 700 : 400 })}${index < 4 ? line(438 + index * 244, 220, 538 + index * 244, 220, { stroke: index < 2 ? '#94a3b8' : '#cbd5e1' }) : ''}`).join('')
+  body += `${rect(276, 254, 1124, 72, { r: 10, fill: '#f1f5f9', stroke: '#94a3b8' })}${circle(314, 290, 18, { fill: '#e2e8f0' })}${text(344, 282, 'Đã tự điền theo đánh giá sơ bộ', { size: 15, weight: 700 })}${text(344, 306, 'Cơ sở: Phòng khám Đa khoa Tâm An · Chuyên khoa: Nội tổng quát · Lý do: Sốt / Ớn lạnh', { size: 12, fill: '#64748b' })}`
+
+  body += card(276, 352, 356, 204, '1. Cơ sở đã chọn')
+  body += `${rect(294, 396, 320, 112, { r: 8, fill: '#e2e8f0', stroke: '#94a3b8' })}${circle(324, 432, 18, { fill: '#ffffff' })}${text(354, 426, 'Phòng khám Đa khoa Tâm An', { size: 13, weight: 700 })}${text(354, 448, '12 Võ Văn Tần, Quận 3 · 1.2 km', { size: 11, fill: '#64748b' })}${pill(502, 466, 'Đã chọn', { w: 90 })}`
+  body += card(660, 352, 356, 204, '2. Chuyên khoa đã chọn')
+  body += `${pill(684, 402, 'Nội tổng quát', { w: 132, fill: '#e2e8f0', stroke: '#94a3b8' })}${pill(828, 402, 'Tiêu hóa', { w: 94 })}${pill(934, 402, 'Hô hấp', { w: 78 })}${text(684, 468, 'Danh sách chuyên khoa được lọc theo cơ sở khám.', { size: 12, fill: '#64748b' })}`
+  body += card(1044, 352, 356, 204, 'Tóm tắt')
+  body += `${text(1062, 402, 'Cơ sở khám', { size: 11, fill: '#64748b' })}${text(1062, 424, 'Phòng khám Đa khoa Tâm An', { size: 13, weight: 700 })}${text(1062, 468, 'Chuyên khoa', { size: 11, fill: '#64748b' })}${text(1062, 490, 'Nội tổng quát', { size: 13, weight: 700 })}`
+
+  body += card(276, 584, 544, 330, '3. Chọn bác sĩ')
+  const doctors = [
+    ['BS. Nguyễn Văn Minh', 'Nội tổng quát · 12 năm kinh nghiệm', '4.9 · Đang nhận lịch'],
+    ['BS. Vũ Thanh Lam', 'Tiêu hóa · 9 năm kinh nghiệm', '4.8 · Đang nhận lịch'],
+    ['BS. Đỗ Gia Huy', 'Hô hấp · 8 năm kinh nghiệm', '4.7 · Đang nhận lịch'],
+  ]
+  body += doctors.map(([name, meta, rating], index) => {
+    const y = 634 + index * 82
+    return `${rect(294, y, 508, 66, { r: 8, fill: index === 0 ? '#e2e8f0' : '#f8fafc', stroke: index === 0 ? '#94a3b8' : '#e2e8f0' })}${circle(324, y + 33, 18, { fill: '#ffffff' })}${text(354, y + 26, name, { size: 13, weight: 700 })}${text(354, y + 46, meta, { size: 11, fill: '#64748b' })}${text(676, y + 38, rating, { size: 11, fill: '#64748b' })}`
+  }).join('')
+
+  body += card(848, 584, 552, 330, '4. Chọn ngày và giờ khám')
+  ;['Hôm nay', 'Ngày mai', 'Thứ 7', 'CN'].forEach((label, index) => {
+    body += `${rect(872 + index * 122, 634, 104, 76, { r: 8, fill: index === 1 ? '#e2e8f0' : '#ffffff', stroke: index === 1 ? '#94a3b8' : '#cbd5e1' })}${text(924 + index * 122, 664, label, { size: 11, weight: 700, anchor: 'middle' })}${text(924 + index * 122, 690, String(4 + index), { size: 22, weight: 700, anchor: 'middle' })}`
+  })
+  body += `${text(872, 754, 'Khung giờ còn trống', { size: 13, weight: 700 })}`
+  ;['09:00', '10:30', '15:00'].forEach((label, index) => {
+    body += pill(872 + index * 112, 778, label, { w: 92, h: 32, fill: index === 0 ? '#e2e8f0' : '#ffffff', stroke: index === 0 ? '#94a3b8' : '#cbd5e1' })
+  })
+  body += `${button(1228, 852, 132, 'Xác nhận')}`
+  return shell('Đặt lịch khám', body, 'Patient - Booking Prefill')
+}
+
 function services() {
   let body = `${rect(276, 104, 1124, 132, { r: 12, fill: '#f1f5f9', stroke: '#cbd5e1' })}${text(304, 136, 'MINH BẠCH CHI PHÍ, AN TÂM CHĂM SÓC', { size: 10, weight: 700 })}${text(304, 178, 'Bảng giá dịch vụ', { size: 28, weight: 700 })}${text(304, 208, 'Tra cứu nhanh chi phí khám, xét nghiệm và gói chăm sóc sức khỏe.', { size: 13, fill: '#64748b' })}`
   body += stat(276, 260, 'Tổng số dịch vụ', '08', 'Danh mục hiện có') + stat(660, 260, 'Số chuyên khoa', '04', 'Đang hỗ trợ') + stat(1044, 260, 'Dịch vụ hỗ trợ BHYT', '05', 'Có thể áp dụng')
@@ -269,6 +305,7 @@ const files = {
   '09-billing.svg': billing(),
   '10-history.svg': history(),
   '11-settings.svg': settings(),
+  '12-booking-prefill.svg': bookingPrefill(),
 }
 
 for (const [filename, svg] of Object.entries(files)) {
