@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertTriangle, Bot, CalendarDays, ImagePlus, LockKeyhole, MapPin, Mic, MicOff, Send, Stethoscope, Volume2 } from 'lucide-react'
+import { AlertTriangle, Bot, CalendarDays, ImagePlus, LockKeyhole, MapPin, Mic, MicOff, Send, Stethoscope, Volume2, Clock, ShieldCheck, Video } from 'lucide-react'
 import { AppShell, Button, Card, TopBar } from '../../components/ui.jsx'
 
 const symptoms = ['Sốt / Ớn lạnh', 'Đau đầu / Chóng mặt', 'Ho / Sổ mũi', 'Đau bụng', 'Đau ngực / Khó thở', 'Mệt mỏi', 'Tê yếu tay chân', 'Da nổi mẩn / ngứa', 'Vấn đề khác']
@@ -49,6 +49,7 @@ const initialMessages = [
 export function PatientChatbot() {
   const navigate = useNavigate()
   const [messages, setMessages] = useState(initialMessages)
+  const [showPriceModal, setShowPriceModal] = useState(false)
   const [input, setInput] = useState('')
   const [attachment, setAttachment] = useState('')
   const [listening, setListening] = useState(false)
@@ -237,8 +238,32 @@ export function PatientChatbot() {
   }
 
   function transferToDoctor() {
+    setShowPriceModal(true)
+  }
+
+  function confirmTransfer() {
+    setShowPriceModal(false)
     localStorage.setItem('medconsult-doctor-request', 'active')
     navigate('/patient/consult')
+  }
+
+  const getSpecialtyAndPrice = () => {
+    const spec = assessment?.specialty || pendingAssessment?.specialty || 'Nội tổng quát'
+    const prices = {
+      'Tim mạch': '350.000đ',
+      'Thần kinh': '300.000đ',
+      'Nhi khoa': '220.000đ',
+      'Tiêu hóa': '250.000đ',
+      'Tai Mũi Họng': '220.000đ',
+      'Hô hấp': '250.000đ',
+      'Cơ xương khớp': '280.000đ',
+      'Da liễu': '240.000đ',
+      'Nội tổng quát': '200.000đ',
+    }
+    return {
+      specialty: spec,
+      price: prices[spec] || '200.000đ'
+    }
   }
 
   function goToBooking() {
@@ -364,6 +389,53 @@ export function PatientChatbot() {
           </Card>
         </div>
       </div>
+
+      {showPriceModal && (
+        <div className="modal-backdrop" style={{ zIndex: 160 }} onClick={() => setShowPriceModal(false)}>
+          <Card className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px', padding: '24px', borderRadius: '16px', background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}>
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px', marginBottom: '16px' }}>
+              <div style={{ display: 'grid', height: '48px', width: '48px', placeItems: 'center', borderRadius: '50%', background: '#f0fdfa', color: '#0d9488' }}>
+                <Stethoscope size={22} />
+              </div>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#0f172a', margin: 0 }}>Báo giá Tư vấn Bác sĩ</h2>
+                <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0' }}>Tư vấn trực tuyến 1-1 bảo mật</p>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', fontSize: '14px', color: '#334155' }}>
+              <div style={{ borderRadius: '12px', background: '#f8fafc', padding: '16px', border: '1px solid #f1f5f9' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ color: '#64748b', fontWeight: '600' }}>Chuyên khoa:</span>
+                  <span style={{ fontWeight: '800', color: '#0f172a' }}>{getSpecialtyAndPrice().specialty}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#64748b', fontWeight: '600' }}>Phí tư vấn từ xa:</span>
+                  <span style={{ fontSize: '18px', fontWeight: '900', color: '#0f766e' }}>{getSpecialtyAndPrice().price}</span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px', color: '#64748b' }}>
+                <p style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}><Clock size={14} style={{ color: '#94a3b8' }} /> Bác sĩ phản hồi trong vòng ~5 phút</p>
+                <p style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}><Video size={14} style={{ color: '#94a3b8' }} /> Cuộc gọi Video & Chat trực tuyến (20-30 phút)</p>
+                <p style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}><ShieldCheck size={14} style={{ color: '#94a3b8' }} /> Hồ sơ tư vấn được bảo mật & mã hóa y tế</p>
+              </div>
+
+              <div style={{ borderRadius: '8px', background: '#fffbeb', border: '1px solid #fef3c7', padding: '12px', fontSize: '12px', color: '#b45309', lineHeight: '1.5' }}>
+                <strong>Lưu ý:</strong> Bằng cách nhấn "Chấp nhận", bạn đồng ý chuyển tiếp thông tin triệu chứng hiện tại để kết nối với bác sĩ tư vấn của hệ thống.
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+              <Button variant="outline" style={{ flex: 1, minHeight: '40px', justifyContent: 'center' }} onClick={() => setShowPriceModal(false)}>Hủy bỏ</Button>
+              <Button style={{ flex: 1, minHeight: '40px', justifyContent: 'center' }} onClick={confirmTransfer}>Chấp nhận & Tiếp tục</Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </AppShell>
   )
 }
