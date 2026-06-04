@@ -20,6 +20,7 @@ circles, and lines remain editable after import.
 9. Billing
 10. Visit history
 11. Account settings
+12. Booking from chatbot assessment with prefilled clinic and specialty
 
 Run `node wireframe/patient/generate-wireframes.mjs` from the repository root to rebuild
 the SVG files after editing the generator.

@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Building2,
   ChevronLeft,
@@ -62,16 +62,77 @@ const facilityReviews = [
   { name: 'Phạm Minh Đức', date: '09/05/2026', rating: 4, text: 'Đặt lịch thuận tiện, bác sĩ giải thích dễ hiểu cho người lớn tuổi.' },
 ]
 
+function normalizeText(value = '') {
+  return value.trim().toLocaleLowerCase('vi-VN')
+}
+
+function readStoredBookingSuggestion() {
+  try {
+    const raw = window.localStorage.getItem('medconsult-booking-suggestion')
+    window.localStorage.removeItem('medconsult-booking-suggestion')
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+function resolveBookingSuggestion(suggestion) {
+  if (!suggestion?.clinic && !suggestion?.specialty) return null
+
+  const suggestedClinicName = normalizeText(suggestion.clinic)
+  const suggestedSpecialty = normalizeText(suggestion.specialty)
+  const clinicByName = clinics.find((clinic) => normalizeText(clinic.name) === suggestedClinicName)
+  const doctorsAtSuggestedClinic = doctorAvailability.filter((doctor) => doctor.clinicId === clinicByName?.id)
+  const matchedDoctorAtSuggestedClinic = doctorsAtSuggestedClinic.find((doctor) => normalizeText(doctor.spec) === suggestedSpecialty)
+
+  if (clinicByName && matchedDoctorAtSuggestedClinic) {
+    return {
+      clinicId: clinicByName.id,
+      clinicName: clinicByName.name,
+      specialty: matchedDoctorAtSuggestedClinic.spec,
+      reason: suggestion.reason,
+    }
+  }
+
+  const matchedDoctor = doctorAvailability.find((doctor) => normalizeText(doctor.spec) === suggestedSpecialty)
+  const matchedClinic = clinics.find((clinic) => clinic.id === matchedDoctor?.clinicId)
+
+  if (matchedDoctor && matchedClinic) {
+    return {
+      clinicId: matchedClinic.id,
+      clinicName: matchedClinic.name,
+      specialty: matchedDoctor.spec,
+      reason: suggestion.reason,
+    }
+  }
+
+  if (clinicByName) {
+    return {
+      clinicId: clinicByName.id,
+      clinicName: clinicByName.name,
+      specialty: '',
+      reason: suggestion.reason,
+    }
+  }
+
+  return null
+}
+
 export function PatientBooking() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const initialPrefill = useMemo(
+    () => resolveBookingSuggestion(location.state?.bookingSuggestion || readStoredBookingSuggestion()),
+    [location.state],
+  )
   const step2Ref = useRef(null)
   const step3Ref = useRef(null)
   const step4Ref = useRef(null)
   const step5Ref = useRef(null)
   const slotsRef = useRef(null)
   const summaryRef = useRef(null)
-  const [clinicId, setClinicId] = useState(null)
-  const [specialty, setSpecialty] = useState('')
+  const [clinicId, setClinicId] = useState(initialPrefill?.clinicId ?? null)
+  const [specialty, setSpecialty] = useState(initialPrefill?.specialty ?? '')
   const [selectedDoctor, setSelectedDoctor] = useState(null)
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedSlot, setSelectedSlot] = useState('')
@@ -84,6 +145,7 @@ export function PatientBooking() {
   const [showConfirmPopup, setShowConfirmPopup] = useState(false)
   const [activeHighlight, setActiveHighlight] = useState('')
   const [showAllReviews, setShowAllReviews] = useState(false)
+  const [prefillNotice, setPrefillNotice] = useState(initialPrefill)
 
   const selectedClinic = clinics.find((clinic) => clinic.id === clinicId)
   const clinicDoctors = useMemo(
@@ -130,6 +192,7 @@ export function PatientBooking() {
   }
 
   function selectClinic(id) {
+    setPrefillNotice(null)
     setClinicId(id)
     setSpecialty('')
     setSelectedDoctor(null)
@@ -141,6 +204,7 @@ export function PatientBooking() {
   }
 
   function selectSpecialty(nextSpecialty) {
+    setPrefillNotice(null)
     setSpecialty(nextSpecialty)
     setSelectedDoctor(null)
     setSelectedDate('')
@@ -211,6 +275,20 @@ export function PatientBooking() {
             )
           })}
         </div>
+
+        {prefillNotice && (
+          <Card className="booking-prefill-notice">
+            <span><CheckCircle2 size={20} /></span>
+            <div>
+              <b>Đã tự điền theo đánh giá sơ bộ</b>
+              <p>
+                Cơ sở: <strong>{prefillNotice.clinicName}</strong>
+                {prefillNotice.specialty && <> · Chuyên khoa: <strong>{prefillNotice.specialty}</strong></>}
+                {prefillNotice.reason && <> · Lý do: {prefillNotice.reason}</>}
+              </p>
+            </div>
+          </Card>
+        )}
 
         {confirmationDetails ? (
           <Card className="booking-confirm-card">

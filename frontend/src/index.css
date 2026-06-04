@@ -7672,6 +7672,45 @@ table tbody td {
   font-size: 13px;
 }
 
+.booking-prefill-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 16px 0;
+  border-color: #b7ebdf;
+  background: #f0fdfa;
+  color: #315b57;
+}
+
+.booking-prefill-notice>span {
+  display: grid;
+  height: 38px;
+  width: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.booking-prefill-notice b {
+  display: block;
+  color: #163d3a;
+  font-size: 14px;
+}
+
+.booking-prefill-notice p {
+  margin-top: 4px;
+  color: #5f7774;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.booking-prefill-notice strong {
+  color: #0f766e;
+  font-weight: 700;
+}
+
 .specialty-chip-list {
   display: flex;
   flex-wrap: wrap;
