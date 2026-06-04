@@ -1,8 +1,8 @@
 import { useMemo, useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { CalendarDays, Clock, CheckCircle2, Video, MessageSquare, AlertCircle, ArrowRight, UserRound, Stethoscope, Bell, ChevronRight, ClipboardList, Info } from 'lucide-react'
+import { CalendarDays, Clock, CheckCircle2, Video, MessageSquare, AlertCircle, ArrowRight, UserRound, Stethoscope, Bell, ChevronRight, ClipboardList, Info, User, Phone, AlertTriangle, Calendar, X, Pill, FileText, ShieldAlert, HeartPulse } from 'lucide-react'
 import { AppShell, Avatar, Badge, Button, Card, TopBar, StatCard } from '../../components/ui.jsx'
-import { getStoredCases, getStoredSchedule, getStoredNotifications, saveStoredNotifications, startConsultation } from '../../data/doctorStore.js'
+import { getStoredCases, getStoredSchedule, getStoredNotifications, saveStoredNotifications, startConsultation, getStoredHistories } from '../../data/doctorStore.js'
 
 export function DoctorDashboard() {
   const navigate = useNavigate()
@@ -10,22 +10,63 @@ export function DoctorDashboard() {
   const [scheduleList, setScheduleList] = useState([])
   const [notifications, setNotifications] = useState([])
   const [selectedAppointment, setSelectedAppointment] = useState(null)
+  const [historiesList, setHistoriesList] = useState([])
+  const [selectedPatientName, setSelectedPatientName] = useState(null)
+  const [detailTab, setDetailTab] = useState('info')
 
   // Load data on mount
   useEffect(() => {
     setCasesList(getStoredCases())
     setScheduleList(getStoredSchedule())
     setNotifications(getStoredNotifications())
+    setHistoriesList(getStoredHistories())
 
     // Listen to changes in localStorage
     const handleStorageChange = () => {
       setCasesList(getStoredCases())
       setScheduleList(getStoredSchedule())
       setNotifications(getStoredNotifications())
+      setHistoriesList(getStoredHistories())
     }
     window.addEventListener('storage', handleStorageChange)
     return () => window.removeEventListener('storage', handleStorageChange)
   }, [])
+
+  // Deduplicate patients from cases
+  const patients = useMemo(() => {
+    const map = new Map()
+    casesList.forEach(c => {
+      if (!map.has(c.patient)) {
+        const patientHistories = historiesList.filter(h => h.patient === c.patient)
+        const lastHistory = patientHistories[0]
+        map.set(c.patient, {
+          name: c.patient,
+          initials: c.initials,
+          age: c.age,
+          gender: c.gender,
+          phone: c.phone,
+          allergies: c.allergies,
+          currentMeds: c.currentMeds,
+          specialNotes: c.specialNotes,
+          level: c.level,
+          code: c.code,
+          totalVisits: patientHistories.length + (c.status !== 'Hoàn tất' ? 1 : 0),
+          lastVisit: lastHistory?.date || c.time?.split(' ')[0] || '—',
+          lastDiagnosis: lastHistory?.diagnosis || '—',
+          activeCase: c.status !== 'Hoàn tất' ? c : null,
+          histories: patientHistories,
+        })
+      }
+    })
+    return Array.from(map.values())
+  }, [casesList, historiesList])
+
+  const selPatient = selectedPatientName
+    ? patients.find(p => p.name === selectedPatientName)
+    : null
+  const selHistories = selPatient
+    ? historiesList.filter(h => h.patient === selPatient.name)
+    : []
 
   // Filter cases that are pending (status: 'Mới' or 'Đang chờ tư vấn')
   const pendingCases = useMemo(() => {
@@ -175,12 +216,12 @@ export function DoctorDashboard() {
                       </div>
 
                       <div className="flex items-center gap-2.5 border-t border-slate-100 pt-3 sm:border-0 sm:pt-0 shrink-0">
-                        <Link 
-                          to={`/doctor/patients?patient=${encodeURIComponent(item.patient)}&case=${encodeURIComponent(item.code)}`}
-                          className="flex-1 text-center mini-btn hover:bg-slate-100 sm:flex-initial"
+                        <button 
+                          onClick={() => { setSelectedPatientName(item.patient); setDetailTab('info') }}
+                          className="flex-1 text-center mini-btn hover:bg-slate-100 sm:flex-initial cursor-pointer"
                         >
                           Xem hồ sơ
-                        </Link>
+                        </button>
                         <button 
                           onClick={() => handleStartConsult(item.code)} 
                           className="flex-1 text-center mini-btn teal cursor-pointer sm:flex-initial"
@@ -351,6 +392,270 @@ export function DoctorDashboard() {
               )}
             </div>
           </Card>
+        </div>
+      )}
+      {/* ── Detail panel (slide-in overlay) ── */}
+      {selPatient && (
+        <div className="fixed inset-0 z-40 flex justify-end pointer-events-none">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/20 backdrop-blur-[2px] pointer-events-auto"
+            onClick={() => setSelectedPatientName(null)}
+          />
+
+          {/* Panel */}
+          <div className="relative w-full max-w-[480px] bg-white shadow-2xl pointer-events-auto flex flex-col h-full overflow-hidden">
+
+            {/* Panel header */}
+            <div className="p-5 border-b border-slate-100 bg-gradient-to-br from-teal-600 to-teal-700 text-white">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-white font-extrabold text-xl">
+                    {selPatient.initials}
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-extrabold">{selPatient.name}</h2>
+                    <p className="text-teal-100 text-sm mt-0.5">{selPatient.gender} • {selPatient.age} tuổi</p>
+                    <span className={`inline-block mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full ${selPatient.level === 'Cao' ? 'bg-rose-500/80 text-white' :
+                        selPatient.level === 'Trung bình' ? 'bg-amber-400/80 text-white' :
+                          'bg-teal-500/60 text-white'
+                      }`}>
+                      Mức độ: {selPatient.level}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedPatientName(null)}
+                  className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Quick actions */}
+              <div className="flex gap-2 mt-4">
+                {selPatient.activeCase && (
+                  <button
+                    onClick={() => {
+                      setSelectedPatientName(null)
+                      navigate(`/doctor/consult/chat/${selPatient.activeCase.code}`)
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-teal-700 text-xs font-bold hover:bg-teal-50 transition-colors cursor-pointer"
+                  >
+                    <Video size={13} />
+                    Vào phòng tư vấn
+                  </button>
+                )}
+                <button
+                  onClick={() => setDetailTab('history')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 text-white text-xs font-bold hover:bg-white/20 transition-colors cursor-pointer"
+                >
+                  <FileText size={13} />
+                  Lịch sử khám bệnh
+                </button>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex border-b border-slate-100 bg-slate-50/50">
+              {[
+                { id: 'info', label: 'Thông tin', icon: <User size={14} /> },
+                { id: 'history', label: 'Lịch sử khám', icon: <ClipboardList size={14} /> },
+                { id: 'consults', label: 'Tư vấn', icon: <MessageSquare size={14} /> },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setDetailTab(tab.id)}
+                  className={`flex items-center gap-1.5 px-3 py-2.5 text-[10px] font-bold border-b-2 transition-all cursor-pointer ${detailTab === tab.id
+                      ? 'border-teal-600 text-teal-700 bg-white'
+                      : 'border-transparent text-slate-500 hover:text-slate-700'
+                    }`}
+                >
+                  {tab.icon}
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Panel body */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+
+              {/* ── TAB: Thông tin cá nhân ── */}
+              {detailTab === 'info' && (
+                <>
+                  {/* Contact */}
+                  <section className="bg-slate-50 rounded-xl p-4 space-y-2.5">
+                    <h4 className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Liên hệ</h4>
+                    <div className="flex items-center gap-2 text-sm text-slate-700">
+                      <Phone size={14} className="text-teal-500 shrink-0" />
+                      {selPatient.phone}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-slate-700">
+                      <FileText size={14} className="text-teal-500 shrink-0" />
+                      Mã ca: {selPatient.code}
+                    </div>
+                  </section>
+
+                  {/* Allergies */}
+                  {selPatient.allergies && (
+                    <section className="bg-rose-50 border border-rose-100 rounded-xl p-4">
+                      <h4 className="flex items-center gap-1.5 text-[11px] font-extrabold text-rose-700 uppercase tracking-wider mb-2">
+                        <ShieldAlert size={13} />
+                        Dị ứng
+                      </h4>
+                      <p className="text-sm text-rose-700">{selPatient.allergies}</p>
+                    </section>
+                  )}
+
+                  {/* Current meds */}
+                  {selPatient.currentMeds && (
+                    <section className="bg-amber-50 border border-amber-100 rounded-xl p-4">
+                      <h4 className="flex items-center gap-1.5 text-[11px] font-extrabold text-amber-700 uppercase tracking-wider mb-2">
+                        <Pill size={13} />
+                        Thuốc đang sử dụng
+                      </h4>
+                      <p className="text-sm text-amber-800">{selPatient.currentMeds}</p>
+                    </section>
+                  )}
+
+                  {/* Special notes */}
+                  {selPatient.specialNotes && (
+                    <section className="bg-sky-50 border border-sky-100 rounded-xl p-4">
+                      <h4 className="flex items-center gap-1.5 text-[11px] font-extrabold text-sky-700 uppercase tracking-wider mb-2">
+                        <AlertTriangle size={13} />
+                        Ghi chú đặc biệt
+                      </h4>
+                      <p className="text-sm text-sky-800">{selPatient.specialNotes}</p>
+                    </section>
+                  )}
+
+                  {/* Active case */}
+                  {selPatient.activeCase && (
+                    <section className="bg-teal-50 border border-teal-200 rounded-xl p-4">
+                      <h4 className="flex items-center gap-1.5 text-[11px] font-extrabold text-teal-700 uppercase tracking-wider mb-2">
+                        <HeartPulse size={13} />
+                        Ca tư vấn đang mở
+                      </h4>
+                      <p className="text-sm text-teal-800 font-semibold">{selPatient.activeCase.symptoms}</p>
+                      <p className="text-xs text-teal-600 mt-1">Trạng thái: {selPatient.activeCase.status}</p>
+                    </section>
+                  )}
+                </>
+              )}
+
+              {/* ── TAB: Lịch sử khám ── */}
+              {detailTab === 'history' && (
+                <>
+                  {selHistories.length > 0 ? selHistories.map(h => (
+                    <div key={h.id} className="border border-slate-200 rounded-xl overflow-hidden">
+                      <div className="bg-slate-50 px-4 py-2.5 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Calendar size={13} className="text-teal-600" />
+                          <span className="text-xs font-bold text-slate-700">{h.date}</span>
+                          {h.time && <span className="text-xs text-slate-400">• {h.time}</span>}
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${h.rating >= 5 ? 'bg-teal-100 text-teal-700' : 'bg-amber-100 text-amber-700'
+                          }`}>
+                          ★ {h.rating}/5
+                        </span>
+                      </div>
+                      <div className="p-4 space-y-2">
+                        <div>
+                          <span className="text-[10px] text-slate-400 font-bold uppercase">Chẩn đoán</span>
+                          <p className="text-sm font-bold text-slate-800 mt-0.5">{h.diagnosis}</p>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-slate-400 font-bold uppercase">Triệu chứng</span>
+                          <p className="text-xs text-slate-600 mt-0.5">{h.symptoms}</p>
+                        </div>
+                        {h.note && (
+                          <div>
+                            <span className="text-[10px] text-slate-400 font-bold uppercase">Ghi chú bác sĩ</span>
+                            <p className="text-xs text-slate-600 mt-0.5">{h.note}</p>
+                          </div>
+                        )}
+                        <div>
+                          <span className="text-[10px] text-slate-400 font-bold uppercase">Hướng xử lý</span>
+                          <p className="text-xs font-semibold text-teal-700 mt-0.5">{h.actionPath}</p>
+                        </div>
+                        {h.prescription?.length > 0 && (
+                          <div>
+                            <span className="text-[10px] text-slate-400 font-bold uppercase">Đơn thuốc</span>
+                            <ul className="mt-1 space-y-1">
+                              {h.prescription.map((rx, i) => (
+                                <li key={i} className="text-xs text-slate-700 flex gap-1.5">
+                                  <Pill size={11} className="text-violet-500 shrink-0 mt-0.5" />
+                                  <span><b>{rx.name}</b> — {rx.dose}{rx.note ? ` (${rx.note})` : ''}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {h.reExamDate && (
+                          <div className="flex items-center gap-1.5 text-xs text-teal-700 bg-teal-50 rounded-lg px-3 py-1.5">
+                            <Clock size={11} />
+                            Tái khám: {h.reExamDate}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )) : (
+                    <div className="py-16 text-center text-slate-400">
+                      <ClipboardList size={36} className="mx-auto text-slate-200 mb-3" />
+                      <p className="text-sm">Chưa có lịch sử khám nào được ghi nhận</p>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* ── TAB: Tư vấn ── */}
+              {detailTab === 'consults' && (
+                <>
+                  {casesList.filter(c => c.patient === selPatient.name).map(c => (
+                    <div key={c.code} className="border border-slate-200 rounded-xl overflow-hidden">
+                      <div className="bg-slate-50 px-4 py-2.5 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <MessageSquare size={13} className="text-teal-600" />
+                          <span className="text-xs font-bold text-slate-700">{c.time}</span>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${c.status === 'Hoàn tất' ? 'bg-teal-100 text-teal-700' :
+                            c.status === 'Đang tư vấn' ? 'bg-sky-100 text-sky-700' :
+                              'bg-amber-100 text-amber-700'
+                          }`}>
+                          {c.status}
+                        </span>
+                      </div>
+                      <div className="p-4 space-y-2">
+                        <div className="text-sm text-slate-700">
+                          <span className="text-[10px] text-slate-400 font-bold uppercase block">Triệu chứng</span>
+                          {c.symptoms}
+                        </div>
+                        <div className="text-xs text-slate-500">Mã ca: {c.code}</div>
+                        {c.status !== 'Hoàn tất' && (
+                          <button
+                            onClick={() => {
+                              setSelectedPatientName(null)
+                              navigate(`/doctor/consult/chat/${c.code}`)
+                            }}
+                            className="mt-1 flex items-center gap-1.5 text-xs text-teal-700 font-bold hover:underline cursor-pointer bg-transparent border-0 p-0"
+                          >
+                            <Video size={12} />
+                            Vào phòng tư vấn
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {casesList.filter(c => c.patient === selPatient.name).length === 0 && (
+                    <div className="py-16 text-center text-slate-400">
+                      <MessageSquare size={36} className="mx-auto text-slate-200 mb-3" />
+                      <p className="text-sm">Không có ca tư vấn nào</p>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </AppShell>
